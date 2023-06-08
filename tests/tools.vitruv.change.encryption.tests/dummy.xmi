@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="ASCII"?>
+<root:InsertRootEObject xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:families="edu.kit.ipd.sdq.metamodels.families" xmlns:root="http://vitruv.tools/metamodels/change/atomic/root/1.0" uri="file:/C:/Users/Klavi/git/Vitruvius-Change-Encryption/tests/tools.vitruv.change.encryption.tests/member.xmi" resource="org.eclipse.emf.ecore.xmi.impl.XMIResourceImpl@6e35bc3d uri='file:/C:/Users/Klavi/git/Vitruvius-Change-Encryption/tests/tools.vitruv.change.encryption.tests/member.xmi'">
+  <newValue xsi:type="families:Member" href="member.xmi#/"/>
+</root:InsertRootEObject>

@@ -87,11 +87,15 @@ public class EncryptionScheme {
 		                Resource.Factory.Registry.DEFAULT_EXTENSION, new XMIResourceFactoryImpl());
 	        Resource resource = resourceSet.createResource(URI.createFileURI(new File("").getAbsolutePath() + "/dummy.xmi"));
 			resource.getContents().addAll(changes);
-			ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-			resource.save(outputStream,Collections.EMPTY_MAP);
+			
+			
+			resource.save(Collections.EMPTY_MAP);
+			FileInputStream fileInputStream= new FileInputStream(new File("").getAbsolutePath() + "/dummy.xmi");
+			ByteArrayInputStream outputStream = new ByteArrayInputStream(fileInputStream.readAllBytes());
 			resource.delete(null);
 			out.close();
-			byte[] encryptedData = cipher.doFinal(outputStream.toByteArray());
+			byte[] encryptedData = cipher.doFinal(outputStream.readAllBytes());
+			System.out.println(encryptedData);
 			FileOutputStream fileOutputStream = new FileOutputStream("encrypted_changes.xmi");
 			fileOutputStream.write(encryptedData);
 			fileOutputStream.close();
@@ -127,9 +131,10 @@ public class EncryptionScheme {
 	 */
 	public List<EChange> decryptDeltaChangesTogether(Map<?,?> decryptionMap, File encryptedChanges) throws IOException, ClassNotFoundException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException{
 		FileInputStream fileInputStream = new FileInputStream(encryptedChanges);
+		ByteArrayInputStream inputStream=new ByteArrayInputStream(fileInputStream.readAllBytes());
 		
-        byte[] encryptedData = fileInputStream.readAllBytes();
-        
+        byte[] encryptedData = inputStream.readAllBytes();
+        System.out.println(encryptedData);
         fileInputStream.close();
 
 		
@@ -138,19 +143,20 @@ public class EncryptionScheme {
 		Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
 		cipher.init(Cipher.DECRYPT_MODE, secretKey,new IvParameterSpec(new byte[16]));
 		byte[] decryptedData = cipher.doFinal(encryptedData);
-		ByteArrayInputStream inputStream = new ByteArrayInputStream(decryptedData);
+		ByteArrayInputStream decryptedStream=new ByteArrayInputStream(decryptedData);
 		
-        ResourceSet resourceSet = new ResourceSetImpl();
-        resourceSet.getResourceFactoryRegistry().getExtensionToFactoryMap().put(Resource.Factory.Registry.DEFAULT_EXTENSION, new XMIResourceFactoryImpl());
         
         
         
         fileInputStream.close();
         // Create a resource and load the decrypted data
+        ResourceSet resourceSet = new ResourceSetImpl();
+        resourceSet.getResourceFactoryRegistry().getExtensionToFactoryMap().put(
+                Resource.Factory.Registry.DEFAULT_EXTENSION, new XMIResourceFactoryImpl());
         Resource resource = resourceSet.createResource(URI.createFileURI(new File("").getAbsolutePath() + "/dummy.xmi"));
         
         
-        resource.load(inputStream, null);
+        resource.load(decryptedStream, null);
         System.out.println(resource.getContents());
         inputStream.close();
         

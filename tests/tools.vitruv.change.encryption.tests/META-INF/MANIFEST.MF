@@ -11,8 +11,7 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.emf.ecore.xmi;visibility:=reexport,
  org.eclipse.emf,
  edu.kit.ipd.sdq.metamodels.families;visibility:=reexport,
- tools.vitruv.change.changederivation;bundle-version="3.0.1",
- org.junit.jupiter.api;bundle-version="5.7.0",
  tools.vitruv.change.atomic,
- tools.vitruv.change.encryption
+ tools.vitruv.change.encryption,
+ org.junit.jupiter.api;bundle-version="5.7.0"
 
