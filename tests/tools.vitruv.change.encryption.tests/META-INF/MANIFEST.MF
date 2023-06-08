@@ -1,0 +1,18 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Vitruv Change Encryption Tests
+Bundle-SymbolicName: tools.vitruv.change.encryption.tests;singleton:=true
+Automatic-Module-Name: tools.vitruv.change.encryption.tests
+Bundle-Version: 3.0.1.qualifier
+Bundle-Vendor: vitruv.tools
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Export-Package: tools.vitruv.change.encryption.tests
+Require-Bundle: org.eclipse.core.runtime,
+ org.eclipse.emf.ecore.xmi;visibility:=reexport,
+ org.eclipse.emf,
+ edu.kit.ipd.sdq.metamodels.families;visibility:=reexport,
+ tools.vitruv.change.changederivation;bundle-version="3.0.1",
+ org.junit.jupiter.api;bundle-version="5.7.0",
+ tools.vitruv.change.atomic,
+ tools.vitruv.change.encryption
+

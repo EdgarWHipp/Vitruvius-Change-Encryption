@@ -1,0 +1,23 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Vitruv Change Encryption
+Bundle-SymbolicName: tools.vitruv.change.encryption
+Automatic-Module-Name: tools.vitruv.change.encryption
+Bundle-Version: 3.0.1.qualifier
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Require-Bundle: org.apache.log4j,
+ org.eclipse.xtend.lib,
+ org.eclipse.emf.ecore.change,
+ tools.vitruv.change.atomic;visibility:=reexport,
+ tools.vitruv.change.interaction.model;visibility:=reexport,
+ edu.kit.ipd.sdq.activextendannotations,
+ edu.kit.ipd.sdq.commons.util.java,
+ edu.kit.ipd.sdq.commons.util.emf,
+ edu.kit.ipd.sdq.metamodels.families,
+ org.eclipse.emf.ecore.xmi,
+ org.tmatesoft.sqljet;bundle-version="1.1.13",
+ org.apache.xml.resolver;bundle-version="1.2.0",
+ junit-jupiter-api
+Export-Package: tools.vitruv.change.encryption,
+ tools.vitruv.change.serialization
+Bundle-Vendor: vitruv.tools

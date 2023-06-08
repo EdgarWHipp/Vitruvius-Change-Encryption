@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-17">
+		<attributes>
+			<attribute name="module" value="true"/>
+		</attributes>
+		<accessrules>
+			<accessrule kind="accessible" pattern="*"/>
+		</accessrules>
+	</classpathentry>
+	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins">
+		<accessrules>
+			<accessrule kind="accessible" pattern="*"/>
+		</accessrules>
+	</classpathentry>
+	<classpathentry kind="lib" path="C:/Users/Klavi/git/Vitruv-Change/bundles/tools.vitruv.change.encryption/jackson/jackson-annotations-2.15.1(1).jar" sourcepath="C:/Users/Klavi/git/Vitruv-Change/bundles/tools.vitruv.change.encryption/jackson/jackson-annotations-2.15.1.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/C:/Users/Klavi/git/Vitruv-Change/bundles/tools.vitruv.change.encryption/jackson/jackson-annotations-2.15.1-javadoc(1).jar!/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="C:/Users/Klavi/git/Vitruv-Change/bundles/tools.vitruv.change.encryption/jackson/jackson-core-2.15.1(1).jar" sourcepath="C:/Users/Klavi/git/Vitruv-Change/bundles/tools.vitruv.change.encryption/jackson/jackson-core-2.15.1.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/C:/Users/Klavi/git/Vitruv-Change/bundles/tools.vitruv.change.encryption/jackson/jackson-core-2.15.1-javadoc(1).jar!/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="C:/Users/Klavi/git/Vitruv-Change/bundles/tools.vitruv.change.encryption/jackson/jackson-databind-2.15.1(1).jar" sourcepath="C:/Users/Klavi/git/Vitruv-Change/bundles/tools.vitruv.change.encryption/jackson/jackson-databind-2.15.1(1).jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/C:/Users/Klavi/git/Vitruv-Change/bundles/tools.vitruv.change.encryption/jackson/jackson-databind-2.15.1-javadoc(1).jar!/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="C:/Users/Klavi/Downloads/javax.json-api-1.0.jar" sourcepath="C:/Users/Klavi/Downloads/javax.json-api-1.0.jar"/>
+	<classpathentry kind="output" path="target/classes"/>
+</classpath>
