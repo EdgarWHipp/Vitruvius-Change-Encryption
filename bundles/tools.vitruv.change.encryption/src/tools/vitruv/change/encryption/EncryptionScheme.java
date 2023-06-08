@@ -78,33 +78,25 @@ public class EncryptionScheme {
 	public void encryptDeltaChange(Map<?,?> encryptionMap, EChange change,File encryptedChangesFile) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IOException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException {
 			
 		
-		
+		/*
 			SecretKey secretKey = (SecretKey) encryptionMap.get("secretKey");
 			String algorithm =  (String) encryptionMap.get("algorithm");
 			Cipher cipher = Cipher.getInstance("AES");
 			cipher.init(Cipher.ENCRYPT_MODE, secretKey);
-		 	
+		 	*/
 	        
-			 ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-			 ResourceSet resourceSet = new ResourceSetImpl();
-			    resourceSet.getResourceFactoryRegistry().getExtensionToFactoryMap().put("ecore", new EcoreResourceFactoryImpl());
-			    Resource resource = resourceSet.createResource(URI.createFileURI(new File("").getAbsolutePath() + "/dummy.ecore"));
-			    resource.getContents().add(change);
-			    resource.save(byteArrayOutputStream,Collections.EMPTY_MAP);
-	
-			    
-			    try {
-			        byte[] encryptedData = cipher.doFinal(byteArrayOutputStream.toByteArray());
-			        FileOutputStream fileOutputStream = new FileOutputStream(encryptedChangesFile);
-			        try {
-			            fileOutputStream.write(encryptedData);
-			        } finally {
-			            fileOutputStream.close();
-			        }
-			    } finally {
-			    	byteArrayOutputStream.close();
-			    }
-	
+			ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+			ResourceSet resourceSet = new ResourceSetImpl();
+		    resourceSet.getResourceFactoryRegistry().getExtensionToFactoryMap().put("enc", new EncryptedResourceFactoryImpl());
+		    
+		    Resource resource = resourceSet.createResource(URI.createFileURI(new File("").getAbsolutePath() + "/dummy.enc"));
+		    resource.getContents().add(change);
+
+		    ((EncryptedResourceImpl)resource).doSave(byteArrayOutputStream,Collections.EMPTY_MAP);
+		    FileOutputStream fileOutputStream = new FileOutputStream(encryptedChangesFile);
+		    byteArrayOutputStream.writeTo(fileOutputStream);
+		    byteArrayOutputStream.close();
+		    fileOutputStream.close();
 			    
 
 		
@@ -124,41 +116,21 @@ public class EncryptionScheme {
 	 * @throws InvalidAlgorithmParameterException 
 	 */
 	public EChange decryptDeltaChange(Map<?,?> decryptionMap, File encryptedChanges) throws IOException, ClassNotFoundException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException{
-		FileInputStream fileInputStream = new FileInputStream(encryptedChanges);
+			FileInputStream fileInputStream = new FileInputStream(encryptedChanges);
 		
 	        byte[] encryptedData = fileInputStream.readAllBytes();
 
-	        SecretKey secretKey = (SecretKey) decryptionMap.get("secretKey");
-	        String algorithm = (String) decryptionMap.get("algorithm");
-	        Cipher cipher = Cipher.getInstance("AES");
-	        cipher.init(Cipher.DECRYPT_MODE, secretKey);
-	        byte[] decryptedData = cipher.doFinal(encryptedData);
-	        ByteArrayInputStream decryptedStream = new ByteArrayInputStream(decryptedData);
-	        /*
-	        ResourceSet resourceSet = new ResourceSetImpl();
-	        resourceSet.getResourceFactoryRegistry().getExtensionToFactoryMap().put(Resource.Factory.Registry.DEFAULT_EXTENSION, new XMIResourceFactoryImpl());
-	        Resource resource = resourceSet.createResource(URI.createFileURI(new File("").getAbsolutePath() + "/decrypted.xmi"));
-	        */
+	        
+	        ByteArrayInputStream encryptedStream = new ByteArrayInputStream(encryptedData);
+	        
 	        final ResourceSet resourceSet = new ResourceSetImpl();
-	        resourceSet.getResourceFactoryRegistry().getExtensionToFactoryMap().put( "ecore", new EcoreResourceFactoryImpl());
-	        final Resource resource = resourceSet.createResource(URI.createFileURI(new File("").getAbsolutePath() + "/decrypted.ecore"));
-	        resource.load(decryptedStream,Collections.EMPTY_MAP);
-	        System.out.println("loaded contents" +resource.getContents());
+	        resourceSet.getResourceFactoryRegistry().getExtensionToFactoryMap().put("enc", new EncryptedResourceFactoryImpl());
+	        final Resource resource = resourceSet.createResource(URI.createFileURI(new File("").getAbsolutePath() + "/decrypted.enc"));
+	        ((EncryptedResourceImpl)resource).doLoad(encryptedStream,Collections.EMPTY_MAP);
+	        
             EChange decryptedChange = (EChange) resource.getContents().get(0);
             return decryptedChange;
-	        /*
-	        try {
-	            resource.load(decryptedStream, null);
-	            System.out.println("loaded contents" +resource.getContents());
-	            EChange decryptedChange = (EChange) resource.getContents().get(0);
-	            return decryptedChange;
-	        } finally {
-	        	resource.unload();
-	            
-	        }
-	   
-	        fileInputStream.close();
-	   */
+	       
 		
 	
 	}

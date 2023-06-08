@@ -36,6 +36,7 @@ import tools.vitruv.change.atomic.EChange;
 import tools.vitruv.change.atomic.TypeInferringAtomicEChangeFactory;
 import tools.vitruv.change.atomic.eobject.CreateEObject;
 import tools.vitruv.change.atomic.root.InsertRootEObject;
+import tools.vitruv.change.encryption.EncryptedResourceFactoryImpl;
 import tools.vitruv.change.encryption.EncryptionScheme;
 
 
@@ -47,7 +48,7 @@ import tools.vitruv.change.encryption.EncryptionScheme;
 
 public class SymmetricTest {
 	private static final Logger logger = Logger.getLogger(SymmetricTest.class.getName());
-	private URI MEMBER_URI = URI.createFileURI(new File("").getAbsolutePath() + "/member.ecore");
+	private URI MEMBER_URI = URI.createFileURI(new File("").getAbsolutePath() + "/member.enc");
 	
 	
 
@@ -70,11 +71,9 @@ public class SymmetricTest {
 		 Member member = FamiliesFactory.eINSTANCE.createMember();
 	     member.setFirstName("Clara");
 	     ResourceSet memberResourceSet = new ResourceSetImpl();
-	     memberResourceSet.getResourceFactoryRegistry().getExtensionToFactoryMap().put("ecore", new EcoreResourceFactoryImpl());
+	     memberResourceSet.getResourceFactoryRegistry().getExtensionToFactoryMap().put("enc", new EncryptedResourceFactoryImpl());
 	     Resource memberResource = memberResourceSet.createResource(MEMBER_URI);
 	     memberResource.getContents().add(member);
-		
-		 
 		
 		 CreateEObject<Member> createObj =  TypeInferringAtomicEChangeFactory.getInstance().createCreateEObjectChange(member);
 		 
@@ -85,7 +84,7 @@ public class SymmetricTest {
 	     
 	     scheme.encryptDeltaChange(map, createObj, file);
 	     EChange decryptedChange = scheme.decryptDeltaChange(map, file);
-	     logger.info("Decrypted: "+(EChange)decryptedChange+"\nReal Object: "+createObj);
+	     logger.severe("Decrypted: "+((CreateEObject<Member>)decryptedChange+"\nReal Object: "+createObj));
 	     
 	     
 	     //file.delete();
@@ -98,10 +97,9 @@ public class SymmetricTest {
 	            for (Field field : fields) {
 	                field.setAccessible(true); // Set field accessible to read its value
 	                try {
-	                    Member value1 = (Member)field.get(createObj);
-	                    Member value2 =  (Member)field.get(decryptedChange);
-	                    System.out.println(value1);
-	                    System.out.println(value2);
+	                	Object value1 = field.get(createObj);
+	                    Object value2 =  field.get(decryptedChange);
+	                    
 	                    
 	                    if (!value1.equals(value2)) {
 	                        assert false;
