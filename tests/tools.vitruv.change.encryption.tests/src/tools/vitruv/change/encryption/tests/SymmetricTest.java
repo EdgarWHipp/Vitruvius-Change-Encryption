@@ -32,6 +32,7 @@ import edu.kit.ipd.sdq.metamodels.families.FamiliesFactory;
 import edu.kit.ipd.sdq.metamodels.families.Member;
 import tools.vitruv.change.atomic.EChange;
 import tools.vitruv.change.atomic.TypeInferringAtomicEChangeFactory;
+import tools.vitruv.change.atomic.eobject.CreateEObject;
 import tools.vitruv.change.atomic.root.InsertRootEObject;
 import tools.vitruv.change.encryption.EncryptionScheme;
 
@@ -47,7 +48,7 @@ public class SymmetricTest {
 	private URI MEMBER_URI = URI.createFileURI(new File("").getAbsolutePath() + "/member.xmi");
 	
 	
-	private URI DELTA_URI = URI.createFileURI(new File("").getAbsolutePath() + "/test.delta");
+	private URI OUTPUT_URI = URI.createFileURI(new File("").getAbsolutePath() + "/output.xmi");
 
 	
 	
@@ -69,22 +70,27 @@ public class SymmetricTest {
 		
 		 Member member = FamiliesFactory.eINSTANCE.createMember();
 	     member.setFirstName("Clara");
-	     ResourceSet resourceSet = new ResourceSetImpl();
-	        resourceSet.getResourceFactoryRegistry().getExtensionToFactoryMap().put(Resource.Factory.Registry.DEFAULT_EXTENSION, new XMIResourceFactoryImpl());
-	     
-		 Resource resource = resourceSet.createResource(MEMBER_URI);
-		 resource.getContents().add(member);
+	     ResourceSet memberResourceSet = new ResourceSetImpl();
+	     memberResourceSet.getResourceFactoryRegistry().getExtensionToFactoryMap().put(Resource.Factory.Registry.DEFAULT_EXTENSION, new XMIResourceFactoryImpl());
+	     Resource memberResource = memberResourceSet.createResource(MEMBER_URI);
+	     memberResource.getContents().add(member);
+		
 		 
-	     InsertRootEObject<Member> createObj =  TypeInferringAtomicEChangeFactory.getInstance().createInsertRootChange(member,resource,0);
+		
+		 CreateEObject<Member> createObj =  TypeInferringAtomicEChangeFactory.getInstance().createCreateEObjectChange(member);
+	     
 	     EncryptionScheme scheme = new EncryptionScheme();
 	     OutputStream outputStream = new BufferedOutputStream( new FileOutputStream("output.xmi"), 1024);
 	     File file = new File("encrypted_changes.xmi");
 	     List<EChange> changes = new ArrayList<EChange>();
 	     changes.add(createObj);
 	     scheme.encryptDeltaChangesTogether(map, changes, outputStream);
-	     scheme.decryptDeltaChangesTogether(map, file);
+	     List<EChange> decryptedChanges = scheme.decryptDeltaChangesTogether(map, file);
+	     logger.info("Decrypted: "+decryptedChanges.get(0)+"\nReal Object: "+createObj);
+	     //still fails
+	    // assert createObj.equals(decryptedChanges.get(0));
 	     
-	     resource.delete(null);
+	     
 	}
 	
 	

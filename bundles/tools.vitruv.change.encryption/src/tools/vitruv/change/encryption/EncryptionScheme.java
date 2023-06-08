@@ -37,6 +37,7 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 
 import org.eclipse.emf.common.util.URI;
+import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
@@ -91,14 +92,14 @@ public class EncryptionScheme {
 			
 			resource.save(Collections.EMPTY_MAP);
 			FileInputStream fileInputStream= new FileInputStream(new File("").getAbsolutePath() + "/dummy.xmi");
-			ByteArrayInputStream outputStream = new ByteArrayInputStream(fileInputStream.readAllBytes());
+			ByteArrayInputStream byteInputStream = new ByteArrayInputStream(fileInputStream.readAllBytes());
 			resource.delete(null);
 			out.close();
-			byte[] encryptedData = cipher.doFinal(outputStream.readAllBytes());
-			System.out.println(encryptedData);
+			byte[] encryptedData = cipher.doFinal(byteInputStream.readAllBytes());
 			FileOutputStream fileOutputStream = new FileOutputStream("encrypted_changes.xmi");
 			fileOutputStream.write(encryptedData);
 			fileOutputStream.close();
+			fileInputStream.close();
 			
 		   /*
 			List<EncryptedEChange> listOfEncryptedChanges = new ArrayList<>();
@@ -157,18 +158,22 @@ public class EncryptionScheme {
         
         
         resource.load(decryptedStream, null);
-        System.out.println(resource.getContents());
         inputStream.close();
         
         
         
         
 		
+        List<EChange> decryptedChanges = new ArrayList<EChange>();
+        for (EObject obj : resource.getContents()) {
+        	if (obj instanceof EChange) {
+        		EChange change = (EChange) obj;
+        		decryptedChanges.add(change);
+        	}
+        }
+       // resource.delete(null);
        
-       // List<EChange> changes = (List<EChange>) resource.getContents();
-        resource.delete(null);
-        //List<EChange> changes = resource.getContents();
-        return null;
+        return decryptedChanges;
 		
 	
 	}
