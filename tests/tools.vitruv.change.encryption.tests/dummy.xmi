@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="ASCII"?>
-<eobject:CreateEObject xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:eobject="http://vitruv.tools/metamodels/change/atomic/eobject/1.0" xmlns:families="edu.kit.ipd.sdq.metamodels.families">
-  <affectedEObject xsi:type="families:Member" href="member.xmi#/"/>
-  <affectedEObjectType href="edu.kit.ipd.sdq.metamodels.families#//Member"/>
-</eobject:CreateEObject>

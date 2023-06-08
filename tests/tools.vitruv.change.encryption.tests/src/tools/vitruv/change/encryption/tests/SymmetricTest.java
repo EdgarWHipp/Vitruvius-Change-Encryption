@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -25,6 +26,7 @@ import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
+import org.eclipse.emf.ecore.xmi.impl.EcoreResourceFactoryImpl;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl;
 import org.junit.jupiter.api.Test;
 
@@ -45,10 +47,9 @@ import tools.vitruv.change.encryption.EncryptionScheme;
 
 public class SymmetricTest {
 	private static final Logger logger = Logger.getLogger(SymmetricTest.class.getName());
-	private URI MEMBER_URI = URI.createFileURI(new File("").getAbsolutePath() + "/member.xmi");
+	private URI MEMBER_URI = URI.createFileURI(new File("").getAbsolutePath() + "/member.ecore");
 	
 	
-	private URI OUTPUT_URI = URI.createFileURI(new File("").getAbsolutePath() + "/output.xmi");
 
 	
 	
@@ -65,30 +66,52 @@ public class SymmetricTest {
 		map.put("secretKey", secretKey);
 		map.put("algorithm", "AES");
 		
-		Map<String, Map<String,Object>> encryptionOption = Map.of("encryption", map);
-		Map<String, Map<String,Object>> decryptionOption = Map.of("decryption", map);
-		
+	
 		 Member member = FamiliesFactory.eINSTANCE.createMember();
 	     member.setFirstName("Clara");
 	     ResourceSet memberResourceSet = new ResourceSetImpl();
-	     memberResourceSet.getResourceFactoryRegistry().getExtensionToFactoryMap().put(Resource.Factory.Registry.DEFAULT_EXTENSION, new XMIResourceFactoryImpl());
+	     memberResourceSet.getResourceFactoryRegistry().getExtensionToFactoryMap().put("ecore", new EcoreResourceFactoryImpl());
 	     Resource memberResource = memberResourceSet.createResource(MEMBER_URI);
 	     memberResource.getContents().add(member);
 		
 		 
 		
 		 CreateEObject<Member> createObj =  TypeInferringAtomicEChangeFactory.getInstance().createCreateEObjectChange(member);
-	     
+		 
+		 createObj.setAffectedEObjectID("123");
+		 createObj.setIdAttributeValue("testAttribute");
 	     EncryptionScheme scheme = new EncryptionScheme();
-	     OutputStream outputStream = new BufferedOutputStream( new FileOutputStream("output.xmi"), 1024);
-	     File file = new File("encrypted_changes.xmi");
-	     List<EChange> changes = new ArrayList<EChange>();
-	     changes.add(createObj);
-	     scheme.encryptDeltaChangesTogether(map, changes, outputStream);
-	     List<EChange> decryptedChanges = scheme.decryptDeltaChangesTogether(map, file);
-	     logger.info("Decrypted: "+decryptedChanges.get(0)+"\nReal Object: "+createObj);
-	     //still fails
-	    // assert createObj.equals(decryptedChanges.get(0));
+	     File file = new File("encrypted_changes");
+	     
+	     scheme.encryptDeltaChange(map, createObj, file);
+	     EChange decryptedChange = scheme.decryptDeltaChange(map, file);
+	     logger.info("Decrypted: "+(EChange)decryptedChange+"\nReal Object: "+createObj);
+	     
+	     
+	     //file.delete();
+	     
+	     
+	     //Iterate over the fields
+	     Class<? extends EChange> concreteClass = createObj.getClass();
+	        while (concreteClass != null) {
+	            Field[] fields = concreteClass.getDeclaredFields();
+	            for (Field field : fields) {
+	                field.setAccessible(true); // Set field accessible to read its value
+	                try {
+	                    Member value1 = (Member)field.get(createObj);
+	                    Member value2 =  (Member)field.get(decryptedChange);
+	                    System.out.println(value1);
+	                    System.out.println(value2);
+	                    
+	                    if (!value1.equals(value2)) {
+	                        assert false;
+	                    }
+	                } catch (IllegalAccessException e) {
+	                    e.printStackTrace();
+	                }
+	            }
+	            concreteClass =  (Class<? extends EChange>) concreteClass.getSuperclass(); // Move to the next class in the inheritance hierarchy
+	        }
 	     
 	     
 	}

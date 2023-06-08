@@ -16,6 +16,7 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.security.InvalidAlgorithmParameterException;
@@ -41,6 +42,7 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
+import org.eclipse.emf.ecore.xmi.impl.EcoreResourceFactoryImpl;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl;
 
 import com.google.common.io.ByteArrayDataOutput;
@@ -57,8 +59,9 @@ import tools.vitruv.change.encryption.impl.EncryptedEChangeImpl;
 public class EncryptionScheme {
 	private static final Logger logger = Logger.getLogger(EncryptionScheme.class.getName());
 	public EncryptionScheme() {
-		
+	
 	}
+	
 	/**
 	 * Writes a list of EncryptedEChanges to the OutputStream, these contain the EChanges in the encryptedBytes field.
 	 * @param encryptionMap
@@ -72,47 +75,37 @@ public class EncryptionScheme {
 	 * @throws IllegalBlockSizeException 
 	 * @throws InvalidAlgorithmParameterException 
 	 */
-	public void encryptDeltaChangesTogether(Map<?,?> encryptionMap, List<EChange> changes,OutputStream out) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IOException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException {
+	public void encryptDeltaChange(Map<?,?> encryptionMap, EChange change,File encryptedChangesFile) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IOException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException {
 			
 		
 		
 			SecretKey secretKey = (SecretKey) encryptionMap.get("secretKey");
 			String algorithm =  (String) encryptionMap.get("algorithm");
-			Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-			cipher.init(Cipher.ENCRYPT_MODE, secretKey,new IvParameterSpec(new byte[16]));
+			Cipher cipher = Cipher.getInstance("AES");
+			cipher.init(Cipher.ENCRYPT_MODE, secretKey);
 		 	
 	        
-			
+			 ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 			 ResourceSet resourceSet = new ResourceSetImpl();
-		        resourceSet.getResourceFactoryRegistry().getExtensionToFactoryMap().put(
-		                Resource.Factory.Registry.DEFAULT_EXTENSION, new XMIResourceFactoryImpl());
-	        Resource resource = resourceSet.createResource(URI.createFileURI(new File("").getAbsolutePath() + "/dummy.xmi"));
-			resource.getContents().addAll(changes);
-			
-			
-			resource.save(Collections.EMPTY_MAP);
-			FileInputStream fileInputStream= new FileInputStream(new File("").getAbsolutePath() + "/dummy.xmi");
-			ByteArrayInputStream byteInputStream = new ByteArrayInputStream(fileInputStream.readAllBytes());
-			resource.delete(null);
-			out.close();
-			byte[] encryptedData = cipher.doFinal(byteInputStream.readAllBytes());
-			FileOutputStream fileOutputStream = new FileOutputStream("encrypted_changes.xmi");
-			fileOutputStream.write(encryptedData);
-			fileOutputStream.close();
-			fileInputStream.close();
-			
-		   /*
-			List<EncryptedEChange> listOfEncryptedChanges = new ArrayList<>();
-			
-			for (EChange change : changes) {
-				
-				EncryptedEChange encryptedChange = new EncryptedEChangeImpl();
-				encryptedChange.setEncryptedChanges(secretKey, change,algorithm);
-				listOfEncryptedChanges.add(encryptedChange);
-			}
-			// write the list of encrypted changes to the output stream;
-			*/
-			
+			    resourceSet.getResourceFactoryRegistry().getExtensionToFactoryMap().put("ecore", new EcoreResourceFactoryImpl());
+			    Resource resource = resourceSet.createResource(URI.createFileURI(new File("").getAbsolutePath() + "/dummy.ecore"));
+			    resource.getContents().add(change);
+			    resource.save(byteArrayOutputStream,Collections.EMPTY_MAP);
+	
+			    
+			    try {
+			        byte[] encryptedData = cipher.doFinal(byteArrayOutputStream.toByteArray());
+			        FileOutputStream fileOutputStream = new FileOutputStream(encryptedChangesFile);
+			        try {
+			            fileOutputStream.write(encryptedData);
+			        } finally {
+			            fileOutputStream.close();
+			        }
+			    } finally {
+			    	byteArrayOutputStream.close();
+			    }
+	
+			    
 
 		
 	}
@@ -130,51 +123,44 @@ public class EncryptionScheme {
 	 * @throws NoSuchPaddingException
 	 * @throws InvalidAlgorithmParameterException 
 	 */
-	public List<EChange> decryptDeltaChangesTogether(Map<?,?> decryptionMap, File encryptedChanges) throws IOException, ClassNotFoundException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException{
+	public EChange decryptDeltaChange(Map<?,?> decryptionMap, File encryptedChanges) throws IOException, ClassNotFoundException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException{
 		FileInputStream fileInputStream = new FileInputStream(encryptedChanges);
-		ByteArrayInputStream inputStream=new ByteArrayInputStream(fileInputStream.readAllBytes());
 		
-        byte[] encryptedData = inputStream.readAllBytes();
-        System.out.println(encryptedData);
-        fileInputStream.close();
+	        byte[] encryptedData = fileInputStream.readAllBytes();
 
-		
-		SecretKey secretKey = (SecretKey) decryptionMap.get("secretKey");
-		String algorithm =  (String) decryptionMap.get("algorithm");
-		Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-		cipher.init(Cipher.DECRYPT_MODE, secretKey,new IvParameterSpec(new byte[16]));
-		byte[] decryptedData = cipher.doFinal(encryptedData);
-		ByteArrayInputStream decryptedStream=new ByteArrayInputStream(decryptedData);
-		
-        
-        
-        
-        fileInputStream.close();
-        // Create a resource and load the decrypted data
-        ResourceSet resourceSet = new ResourceSetImpl();
-        resourceSet.getResourceFactoryRegistry().getExtensionToFactoryMap().put(
-                Resource.Factory.Registry.DEFAULT_EXTENSION, new XMIResourceFactoryImpl());
-        Resource resource = resourceSet.createResource(URI.createFileURI(new File("").getAbsolutePath() + "/dummy.xmi"));
-        
-        
-        resource.load(decryptedStream, null);
-        inputStream.close();
-        
-        
-        
-        
-		
-        List<EChange> decryptedChanges = new ArrayList<EChange>();
-        for (EObject obj : resource.getContents()) {
-        	if (obj instanceof EChange) {
-        		EChange change = (EChange) obj;
-        		decryptedChanges.add(change);
-        	}
-        }
-       // resource.delete(null);
-       
-        return decryptedChanges;
+	        SecretKey secretKey = (SecretKey) decryptionMap.get("secretKey");
+	        String algorithm = (String) decryptionMap.get("algorithm");
+	        Cipher cipher = Cipher.getInstance("AES");
+	        cipher.init(Cipher.DECRYPT_MODE, secretKey);
+	        byte[] decryptedData = cipher.doFinal(encryptedData);
+	        ByteArrayInputStream decryptedStream = new ByteArrayInputStream(decryptedData);
+	        /*
+	        ResourceSet resourceSet = new ResourceSetImpl();
+	        resourceSet.getResourceFactoryRegistry().getExtensionToFactoryMap().put(Resource.Factory.Registry.DEFAULT_EXTENSION, new XMIResourceFactoryImpl());
+	        Resource resource = resourceSet.createResource(URI.createFileURI(new File("").getAbsolutePath() + "/decrypted.xmi"));
+	        */
+	        final ResourceSet resourceSet = new ResourceSetImpl();
+	        resourceSet.getResourceFactoryRegistry().getExtensionToFactoryMap().put( "ecore", new EcoreResourceFactoryImpl());
+	        final Resource resource = resourceSet.createResource(URI.createFileURI(new File("").getAbsolutePath() + "/decrypted.ecore"));
+	        resource.load(decryptedStream,Collections.EMPTY_MAP);
+	        System.out.println("loaded contents" +resource.getContents());
+            EChange decryptedChange = (EChange) resource.getContents().get(0);
+            return decryptedChange;
+	        /*
+	        try {
+	            resource.load(decryptedStream, null);
+	            System.out.println("loaded contents" +resource.getContents());
+	            EChange decryptedChange = (EChange) resource.getContents().get(0);
+	            return decryptedChange;
+	        } finally {
+	        	resource.unload();
+	            
+	        }
+	   
+	        fileInputStream.close();
+	   */
 		
 	
 	}
+	
 }
