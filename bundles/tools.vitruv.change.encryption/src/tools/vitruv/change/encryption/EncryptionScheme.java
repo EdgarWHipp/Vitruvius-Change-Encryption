@@ -75,7 +75,7 @@ public class EncryptionScheme {
 	 * @throws IllegalBlockSizeException 
 	 * @throws InvalidAlgorithmParameterException 
 	 */
-	public void encryptDeltaChange(Map<?,?> encryptionMap, EChange change,File encryptedChangesFile) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IOException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException {
+	public void encryptDeltaChange(Map<?,?> encryptionMap, List<EChange> change,File encryptedChangesFile) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IOException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException {
 			
 		
 		
@@ -89,7 +89,7 @@ public class EncryptionScheme {
 			 ResourceSet resourceSet = new ResourceSetImpl();
 			    resourceSet.getResourceFactoryRegistry().getExtensionToFactoryMap().put("ecore", new EcoreResourceFactoryImpl());
 			    Resource resource = resourceSet.createResource(URI.createFileURI(new File("").getAbsolutePath() + "/dummy.ecore"));
-			    resource.getContents().add(change);
+			    resource.getContents().addAll(change);
 			    resource.save(byteArrayOutputStream,Collections.EMPTY_MAP);
 	
 			    
@@ -123,7 +123,7 @@ public class EncryptionScheme {
 	 * @throws NoSuchPaddingException
 	 * @throws InvalidAlgorithmParameterException 
 	 */
-	public EChange decryptDeltaChange(Map<?,?> decryptionMap, File encryptedChanges) throws IOException, ClassNotFoundException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException{
+	public List<EChange> decryptDeltaChange(Map<?,?> decryptionMap, File encryptedChanges) throws IOException, ClassNotFoundException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException{
 		FileInputStream fileInputStream = new FileInputStream(encryptedChanges);
 		
 	        byte[] encryptedData = fileInputStream.readAllBytes();
@@ -144,7 +144,7 @@ public class EncryptionScheme {
 	        final Resource resource = resourceSet.createResource(URI.createFileURI(new File("").getAbsolutePath() + "/decrypted.ecore"));
 	        resource.load(decryptedStream,Collections.EMPTY_MAP);
 	        System.out.println("loaded contents" +resource.getContents());
-            EChange decryptedChange = (EChange) resource.getContents().get(0);
+	        List<EChange> decryptedChange = resource.getContents().stream().map(it -> (EChange) it).toList();
             return decryptedChange;
 	        /*
 	        try {

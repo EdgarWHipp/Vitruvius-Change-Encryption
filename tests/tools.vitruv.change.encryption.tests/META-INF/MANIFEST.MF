@@ -13,5 +13,9 @@ Require-Bundle: org.eclipse.core.runtime,
  edu.kit.ipd.sdq.metamodels.families;visibility:=reexport,
  tools.vitruv.change.atomic,
  tools.vitruv.change.encryption,
- org.junit.jupiter.api;bundle-version="5.7.0"
+ org.junit.jupiter.api;bundle-version="5.7.0",
+ tools.vitruv.change.composite,
+ tools.vitruv.change.changederivation,
+ org.eclipse.emf.compare,
+ org.eclipse.emf.edit
 

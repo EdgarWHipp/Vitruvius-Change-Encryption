@@ -1,5 +1,7 @@
 package tools.vitruv.change.encryption.tests;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.io.BufferedOutputStream;
 
 import java.io.File;
@@ -26,6 +28,7 @@ import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
+import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.emf.ecore.xmi.impl.EcoreResourceFactoryImpl;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl;
 import org.junit.jupiter.api.Test;
@@ -35,8 +38,12 @@ import edu.kit.ipd.sdq.metamodels.families.Member;
 import tools.vitruv.change.atomic.EChange;
 import tools.vitruv.change.atomic.TypeInferringAtomicEChangeFactory;
 import tools.vitruv.change.atomic.eobject.CreateEObject;
+import tools.vitruv.change.atomic.id.IdResolver;
 import tools.vitruv.change.atomic.root.InsertRootEObject;
+import tools.vitruv.change.atomic.uuid.UuidResolver;
 import tools.vitruv.change.encryption.EncryptionScheme;
+import tools.vitruv.change.composite.description.VitruviusChangeFactory;
+import tools.vitruv.change.changederivation.DefaultStateBasedChangeResolutionStrategy;
 
 
 
@@ -67,53 +74,40 @@ public class SymmetricTest {
 		map.put("algorithm", "AES");
 		
 	
-		 Member member = FamiliesFactory.eINSTANCE.createMember();
-	     member.setFirstName("Clara");
-	     ResourceSet memberResourceSet = new ResourceSetImpl();
-	     memberResourceSet.getResourceFactoryRegistry().getExtensionToFactoryMap().put("ecore", new EcoreResourceFactoryImpl());
-	     Resource memberResource = memberResourceSet.createResource(MEMBER_URI);
-	     memberResource.getContents().add(member);
-		
-		 
-		
-		 CreateEObject<Member> createObj =  TypeInferringAtomicEChangeFactory.getInstance().createCreateEObjectChange(member);
-		 
-		 createObj.setAffectedEObjectID("123");
-		 createObj.setIdAttributeValue("testAttribute");
+		List<EChange> changes = new ArrayList<>();
+		var set = new ResourceSetImpl();
+		createCreateMemberChangeSequence(changes, set);
+
 	     EncryptionScheme scheme = new EncryptionScheme();
 	     File file = new File("encrypted_changes");
 	     
-	     scheme.encryptDeltaChange(map, createObj, file);
-	     EChange decryptedChange = scheme.decryptDeltaChange(map, file);
-	     logger.info("Decrypted: "+(EChange)decryptedChange+"\nReal Object: "+createObj);
+	     scheme.encryptDeltaChange(map, changes, file);
+	     List<EChange> decryptedChange = scheme.decryptDeltaChange(map, file);
+	     logger.info("Decrypted: "+decryptedChange+"\nReal Object: "+changes);
 	     
-	     
-	     //file.delete();
-	     
-	     
-	     //Iterate over the fields
-	     Class<? extends EChange> concreteClass = createObj.getClass();
-	        while (concreteClass != null) {
-	            Field[] fields = concreteClass.getDeclaredFields();
-	            for (Field field : fields) {
-	                field.setAccessible(true); // Set field accessible to read its value
-	                try {
-	                    Member value1 = (Member)field.get(createObj);
-	                    Member value2 =  (Member)field.get(decryptedChange);
-	                    System.out.println(value1);
-	                    System.out.println(value2);
-	                    
-	                    if (!value1.equals(value2)) {
-	                        assert false;
-	                    }
-	                } catch (IllegalAccessException e) {
-	                    e.printStackTrace();
-	                }
-	            }
-	            concreteClass =  (Class<? extends EChange>) concreteClass.getSuperclass(); // Move to the next class in the inheritance hierarchy
-	        }
-	     
-	     
+	     var transactionalChange = VitruviusChangeFactory.getInstance().createTransactionalChange(decryptedChange);
+	     var newResourceSet = new ResourceSetImpl();
+	     withFactories(newResourceSet);
+	     transactionalChange.resolveAndApply(IdResolver.create(newResourceSet));
+
+	     assertTrue(new EcoreUtil.EqualityHelper().equals(set.getResources().get(0).getContents(), newResourceSet.getResources().get(0).getContents()));    
+	}
+
+
+
+
+	private void withFactories(ResourceSet set) {
+		set.getResourceFactoryRegistry().getExtensionToFactoryMap().put("ecore", new EcoreResourceFactoryImpl());
+	}
+
+
+	private void createCreateMemberChangeSequence(List<EChange> changes, ResourceSet set) {
+		Member member = FamiliesFactory.eINSTANCE.createMember();
+		 member.setFirstName("Clara");
+		 withFactories(set);
+	     Resource memberResource = set.createResource(MEMBER_URI);
+	     memberResource.getContents().add(member);
+		 changes.addAll(new DefaultStateBasedChangeResolutionStrategy().getChangeSequenceForCreated(memberResource).getEChanges());
 	}
 	
 	
