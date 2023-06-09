@@ -12,7 +12,11 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 
 import edu.kit.ipd.sdq.metamodels.families.FamiliesFactory;
 import edu.kit.ipd.sdq.metamodels.families.Member;
+import tools.vitruv.change.atomic.AtomicFactory;
 import tools.vitruv.change.atomic.EChange;
+import tools.vitruv.change.atomic.TypeInferringAtomicEChangeFactory;
+import tools.vitruv.change.atomic.TypeInferringCompoundEChangeFactory;
+import tools.vitruv.change.atomic.eobject.CreateEObject;
 import tools.vitruv.change.atomic.eobject.impl.CreateEObjectImpl;
 import tools.vitruv.change.atomic.feature.attribute.impl.ReplaceSingleValuedEAttributeImpl;
 import tools.vitruv.change.atomic.root.impl.InsertRootEObjectImpl;
@@ -47,8 +51,10 @@ public class EChangeDeserializer extends StdDeserializer<EChange> {
 	    	 
 	      // Handle deserialization for CreateEObjectImpl
 	      // Example:
-	      CreateEObjectImpl<Member> createEObjectImpl = new CreateEObjectImpl<Member>();
+	    	
+
 	      Member member = FamiliesFactory.eINSTANCE.createMember();
+	      CreateEObject<Member> createEObjectImpl = TypeInferringAtomicEChangeFactory.getInstance().createCreateEObjectChange(member);
 		  member.setFirstName("Clara");
 	      createEObjectImpl.setAffectedEObjectID("123");
 	      createEObjectImpl.setIdAttributeValue("test");
@@ -65,10 +71,9 @@ public class EChangeDeserializer extends StdDeserializer<EChange> {
 	      //CreateERootObjectImpl createERootObjectImpl = new CreateERootObjectImpl();
 	      // Set specific properties for CreateERootObjectImpl
 	      // ...
-	      
-	      return new ReplaceSingleValuedEAttributeImpl();
+	    	TypeInferringAtomicEChangeFactory.getInstance().createReplaceSingleAttributeChange(null, null, null, null);
 	    case "InsertRootEObjectImpl":
-	    	 return new InsertRootEObjectImpl();
+	    	TypeInferringCompoundEChangeFactory.getInstance().createCreateAndInsertRootChange(null, null, 0);
 	    default:
 	      // Handle unknown classType or default case
 	      

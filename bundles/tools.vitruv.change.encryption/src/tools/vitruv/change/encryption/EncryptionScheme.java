@@ -75,28 +75,32 @@ public class EncryptionScheme {
 	 * @throws IllegalBlockSizeException 
 	 * @throws InvalidAlgorithmParameterException 
 	 */
-	public void encryptDeltaChange(Map<?,?> encryptionMap, EChange change,File encryptedChangesFile) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IOException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException {
+	public void encryptDeltaChange(Map<?,?> encryptionMap, List<EChange> changes,File encryptedChangesFile) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IOException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException {
 			
 		
-		/*
+		
 			SecretKey secretKey = (SecretKey) encryptionMap.get("secretKey");
 			String algorithm =  (String) encryptionMap.get("algorithm");
 			Cipher cipher = Cipher.getInstance("AES");
 			cipher.init(Cipher.ENCRYPT_MODE, secretKey);
-		 	*/
+		 	
 	        
+
 			ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 			ResourceSet resourceSet = new ResourceSetImpl();
 		    resourceSet.getResourceFactoryRegistry().getExtensionToFactoryMap().put("enc", new EncryptedResourceFactoryImpl());
 		    
 		    Resource resource = resourceSet.createResource(URI.createFileURI(new File("").getAbsolutePath() + "/dummy.enc"));
-		    resource.getContents().add(change);
+		    resource.getContents().addAll(changes);
 
 		    ((EncryptedResourceImpl)resource).doSave(byteArrayOutputStream,Collections.EMPTY_MAP);
 		    FileOutputStream fileOutputStream = new FileOutputStream(encryptedChangesFile);
 		    byteArrayOutputStream.writeTo(fileOutputStream);
 		    byteArrayOutputStream.close();
 		    fileOutputStream.close();
+
+		
+
 			    
 
 		
@@ -115,8 +119,10 @@ public class EncryptionScheme {
 	 * @throws NoSuchPaddingException
 	 * @throws InvalidAlgorithmParameterException 
 	 */
-	public EChange decryptDeltaChange(Map<?,?> decryptionMap, File encryptedChanges) throws IOException, ClassNotFoundException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException{
+
+	public  List<EChange> decryptDeltaChange(Map<?,?> decryptionMap, File encryptedChanges) throws IOException, ClassNotFoundException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException{
 			FileInputStream fileInputStream = new FileInputStream(encryptedChanges);
+
 		
 	        byte[] encryptedData = fileInputStream.readAllBytes();
 
@@ -124,12 +130,13 @@ public class EncryptionScheme {
 	        ByteArrayInputStream encryptedStream = new ByteArrayInputStream(encryptedData);
 	        
 	        final ResourceSet resourceSet = new ResourceSetImpl();
+
 	        resourceSet.getResourceFactoryRegistry().getExtensionToFactoryMap().put("enc", new EncryptedResourceFactoryImpl());
 	        final Resource resource = resourceSet.createResource(URI.createFileURI(new File("").getAbsolutePath() + "/decrypted.enc"));
 	        ((EncryptedResourceImpl)resource).doLoad(encryptedStream,Collections.EMPTY_MAP);
 	        
-            EChange decryptedChange = (EChange) resource.getContents().get(0);
-            return decryptedChange;
+	        List<EChange> decryptedChanges = resource.getContents().stream().map(it -> (EChange) it).toList();
+            return decryptedChanges;
 	       
 		
 	

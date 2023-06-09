@@ -15,9 +15,9 @@ Require-Bundle: org.apache.log4j,
  edu.kit.ipd.sdq.commons.util.emf,
  edu.kit.ipd.sdq.metamodels.families,
  org.eclipse.emf.ecore.xmi,
- org.tmatesoft.sqljet;bundle-version="1.1.13",
  org.apache.xml.resolver;bundle-version="1.2.0",
- junit-jupiter-api
+ junit-jupiter-api,
+ org.eclipse.emf.common
 Export-Package: tools.vitruv.change.encryption,
  tools.vitruv.change.serialization
 Bundle-Vendor: vitruv.tools
