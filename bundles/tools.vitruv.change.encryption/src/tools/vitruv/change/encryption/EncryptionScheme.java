@@ -120,8 +120,8 @@ public class EncryptionScheme {
 	 * @throws InvalidAlgorithmParameterException 
 	 */
 
-	public  List<EChange> decryptDeltaChange(Map<?,?> decryptionMap, File encryptedChanges) throws IOException, ClassNotFoundException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException{
-			FileInputStream fileInputStream = new FileInputStream(encryptedChanges);
+	public  List<EChange> decryptDeltaChange(Map<?,?> decryptionMap, File encryptedChangesFile) throws IOException, ClassNotFoundException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException{
+			FileInputStream fileInputStream = new FileInputStream(encryptedChangesFile);
 
 		
 	        byte[] encryptedData = fileInputStream.readAllBytes();
@@ -136,7 +136,9 @@ public class EncryptionScheme {
 	        ((EncryptedResourceImpl)resource).doLoad(encryptedStream,Collections.EMPTY_MAP);
 	        
 	        List<EChange> decryptedChanges = resource.getContents().stream().map(it -> (EChange) it).toList();
-            return decryptedChanges;
+	        fileInputStream.close();
+	        encryptedChangesFile.delete();
+	        return decryptedChanges;
 	       
 		
 	
