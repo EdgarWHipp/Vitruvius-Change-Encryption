@@ -1,9 +1,10 @@
-package tools.vitruv.change.encryption;
+package tools.vitruv.change.encryption.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.NoSuchAlgorithmException;
+import java.util.Collections;
 import java.util.Map;
 
 import javax.crypto.Cipher;
@@ -41,17 +42,17 @@ public class EncryptedResourceImpl extends XMIResourceImpl{
 			
 		}
 	}
-	public void doSave(OutputStream outputStream, Map options) throws IOException {
+	public void doSave(OutputStream outputStream, SecretKey key) throws IOException {
 	
 	CipherOutputStream encryptedStream = null;
 
 	if ( encryptionEnabled ) {
-		encryptedStream = encrypt(outputStream);
-		super.doSave(encryptedStream, options);
+		encryptedStream = encrypt(outputStream,key);
+		super.doSave(encryptedStream, Collections.EMPTY_MAP);
 		encryptedStream.flush();
 		encryptedStream.close();
 	} else {
-		super.doSave(outputStream, options);
+		super.doSave(outputStream, Collections.EMPTY_MAP);
 		}
 	}
 	
@@ -85,13 +86,18 @@ public class EncryptedResourceImpl extends XMIResourceImpl{
 	return null;
 	}
 
-	public CipherOutputStream encrypt(OutputStream outputStream){
+	public CipherOutputStream encrypt(OutputStream outputStream,SecretKey key){
 		Cipher cipher = null;
 
 	try {
 		cipher = Cipher.getInstance( ENCRYPTION_SCHEME );
-		cipher.init( Cipher.ENCRYPT_MODE, getKey() );
-		return new CipherOutputStream(outputStream, cipher);
+		if (key==null) {
+			cipher.init( Cipher.ENCRYPT_MODE, getKey() );
+			return new CipherOutputStream(outputStream, cipher);
+		}else {
+			cipher.init( Cipher.ENCRYPT_MODE,key);
+			return new CipherOutputStream(outputStream, cipher);
+		}
 	} catch ( Exception e ) {
 		e.printStackTrace();
 	}

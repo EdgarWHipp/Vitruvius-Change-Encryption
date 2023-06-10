@@ -5,6 +5,8 @@ import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.xmi.XMLResource;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl;
 
+import tools.vitruv.change.encryption.impl.EncryptedResourceImpl;
+
 public class EncryptedResourceFactoryImpl extends XMIResourceFactoryImpl{
 	public EncryptedResourceFactoryImpl() {
 		super();

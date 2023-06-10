@@ -19,5 +19,6 @@ Require-Bundle: org.apache.log4j,
  junit-jupiter-api,
  org.eclipse.emf.common
 Export-Package: tools.vitruv.change.encryption,
+ tools.vitruv.change.encryption.impl,
  tools.vitruv.change.serialization
 Bundle-Vendor: vitruv.tools
