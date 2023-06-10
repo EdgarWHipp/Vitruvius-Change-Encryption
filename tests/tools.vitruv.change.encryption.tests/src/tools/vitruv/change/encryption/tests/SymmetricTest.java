@@ -84,7 +84,8 @@ public class SymmetricTest {
 	
 	
 	
-	@Test void testSaveAndLoadCreateReplaceSingleAttributeChange() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, IOException, ClassNotFoundException {
+	@Test 
+	public void testSaveAndLoadCreateReplaceSingleAttributeChange() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, IOException, ClassNotFoundException {
 		
 		
 	
@@ -124,7 +125,8 @@ public class SymmetricTest {
 
 	    assertTrue(new EcoreUtil.EqualityHelper().equals(set.getResources().get(0).getContents(), newResourceSet.getResources().get(0).getContents()));    
 	}
-	@Test public void testSaveAndLoadcreateDleteEObjectChange() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, IOException, ClassNotFoundException {
+	@Test 
+	public void testSaveAndLoadcreateDleteEObjectChange() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, IOException, ClassNotFoundException {
 		List<EChange> changes = new ArrayList<>();
 		ResourceSet set = new ResourceSetImpl();
 		createDeleteEObjectChange(changes, set);
@@ -207,7 +209,7 @@ public class SymmetricTest {
 	public void testSaveAndLoadInsertEAttributeValueChange() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, IOException, ClassNotFoundException {
 		List<EChange> changes = new ArrayList<>();
 		ResourceSet set = new ResourceSetImpl();
-		createDeleteRootEObjectChange(changes, set);
+		createInsertEAttributeValueChange(changes, set);
 	    
 	     
 	    encryptionScheme.encryptDeltaChange(getEncryptionDetailsMap(), changes, fileWithEncryptedChanges);
@@ -294,14 +296,12 @@ public class SymmetricTest {
 		withFactories(set);
 		Resource memberResource = set.createResource(MEMBER_URI);
 		RemoveRootEObject<Member> change = TypeInferringAtomicEChangeFactory.getInstance().createRemoveRootChange(member,memberResource,0);
-		System.out.println(change);
 		change.setResource(null);
 		memberResource.getContents().add(member);
 		
 
 	    memberResource.getContents().add(change);
 		changes.addAll(new DefaultStateBasedChangeResolutionStrategy().getChangeSequenceForCreated(memberResource).getEChanges());
-		System.out.println(changes.get(1));
 	}
 	/**
 	 * DeleteEObjectChange
@@ -379,9 +379,7 @@ public class SymmetricTest {
 		map.put("algorithm", "AES");
 		return map;
 	}
-	private Family getFamily() {
-		
-	}
+	
 	private Member getMember() {
 		Member member = FamiliesFactory.eINSTANCE.createMember();
 		member.setFirstName("Clara");
