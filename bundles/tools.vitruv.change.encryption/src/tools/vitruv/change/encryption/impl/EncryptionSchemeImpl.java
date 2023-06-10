@@ -160,6 +160,18 @@ public class EncryptionSchemeImpl implements EncryptionScheme{
 	 */
 
 	public  List<EChange> decryptDeltaChangesTogether(Map<?,?> decryptionMap, File encryptedChangesFile) throws IOException, ClassNotFoundException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException{
+		if (decryptionMap.containsKey("differentDecryption")) {
+			SecretKey[] keys = (SecretKey[]) decryptionMap.get("differentEncryption");
+			int counter=0;
+			// copied over has to filter each EChange objects from the file for different decryption!
+			for (EChange change : changes) {
+				
+				EChange decryptedChange = this.decryptDeltaChangeAlone(keys[counter], change,encryptedChangesFile);
+				counter++;
+			}
+			return;
+		}
+		
 			FileInputStream fileInputStream = new FileInputStream(encryptedChangesFile);
 
 		
