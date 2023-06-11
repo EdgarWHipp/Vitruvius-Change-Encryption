@@ -36,16 +36,16 @@ public class EncryptedResourceImpl extends XMIResourceImpl{
 	
 		if ( encryptionEnabled ) {
 			decryptedStream = decrypt(inputStream);
-			super.doLoad(decryptedStream, options);
+			super.doLoad(decryptedStream, Collections.EMPTY_MAP);
 			decryptedStream.close();
 		} else {
 			
 		}
 	}
 	public void doSave(OutputStream outputStream, SecretKey key) throws IOException {
-	
-	CipherOutputStream encryptedStream = null;
-
+		System.out.println("correct save executed");
+		CipherOutputStream encryptedStream = null;
+		System.out.println("key:" +key);
 	if ( encryptionEnabled ) {
 		encryptedStream = encrypt(outputStream,key);
 		super.doSave(encryptedStream, Collections.EMPTY_MAP);

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xmi:XMI xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:attribute="http://vitruv.tools/metamodels/change/atomic/feature/attribute/1.0" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" xmlns:eobject="http://vitruv.tools/metamodels/change/atomic/eobject/1.0" xmlns:reference="http://vitruv.tools/metamodels/change/atomic/feature/reference/1.0" xmlns:root="http://vitruv.tools/metamodels/change/atomic/root/1.0">
+  <eobject:CreateEObject affectedEObjectID="cache:/0">
+    <affectedEObjectType href="edu.kit.ipd.sdq.metamodels.families#//Member"/>
+  </eobject:CreateEObject>
+  <root:InsertRootEObject uri="file:/C:/Users/Klavi/git/Vitruvius-Change-Encryption/tests/tools.vitruv.change.encryption.tests/member.ecore" newValueID="cache:/0"/>
+  <attribute:ReplaceSingleValuedEAttribute affectedEObjectID="file:/C:/Users/Klavi/git/Vitruvius-Change-Encryption/tests/tools.vitruv.change.encryption.tests/member.ecore#/0" newValue="ACED0005740005436C617261">
+    <affectedFeature xsi:type="ecore:EAttribute" href="edu.kit.ipd.sdq.metamodels.families#//Member/firstName"/>
+  </attribute:ReplaceSingleValuedEAttribute>
+  <eobject:CreateEObject affectedEObjectID="cache:/0">
+    <affectedEObjectType href="http://vitruv.tools/metamodels/change/atomic/1.0#//eobject/DeleteEObject"/>
+  </eobject:CreateEObject>
+  <root:InsertRootEObject uri="file:/C:/Users/Klavi/git/Vitruvius-Change-Encryption/tests/tools.vitruv.change.encryption.tests/member.ecore" index="1" newValueID="cache:/0"/>
+  <reference:ReplaceSingleValuedEReference affectedEObjectID="file:/C:/Users/Klavi/git/Vitruvius-Change-Encryption/tests/tools.vitruv.change.encryption.tests/member.ecore#/1" newValueID="file:/C:/Users/Klavi/git/Vitruvius-Change-Encryption/tests/tools.vitruv.change.encryption.tests/member.ecore#/0">
+    <affectedFeature xsi:type="ecore:EReference" href="http://vitruv.tools/metamodels/change/atomic/1.0#//eobject/EObjectExistenceEChange/affectedEObject"/>
+  </reference:ReplaceSingleValuedEReference>
+  <reference:ReplaceSingleValuedEReference affectedEObjectID="file:/C:/Users/Klavi/git/Vitruvius-Change-Encryption/tests/tools.vitruv.change.encryption.tests/member.ecore#/1" newValueID="edu.kit.ipd.sdq.metamodels.families#/0/Member">
+    <affectedFeature xsi:type="ecore:EReference" href="http://vitruv.tools/metamodels/change/atomic/1.0#//eobject/EObjectExistenceEChange/affectedEObjectType"/>
+  </reference:ReplaceSingleValuedEReference>
+</xmi:XMI>

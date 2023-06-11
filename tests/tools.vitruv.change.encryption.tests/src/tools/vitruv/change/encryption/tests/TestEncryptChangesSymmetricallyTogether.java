@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Logger;
@@ -26,6 +27,7 @@ import org.junit.jupiter.api.Test;
 
 import tools.vitruv.change.atomic.EChange;
 import tools.vitruv.change.atomic.id.IdResolver;
+import tools.vitruv.change.changederivation.DefaultStateBasedChangeResolutionStrategy;
 import tools.vitruv.change.encryption.EncryptionScheme;
 import tools.vitruv.change.encryption.impl.EncryptionSchemeImpl;
 import tools.vitruv.change.encryption.tests.util.EChangeCreationUtility;
@@ -35,7 +37,8 @@ import tools.vitruv.change.composite.description.VitruviusChangeFactory;
 
 
 /*
- * Defines a set of Unit Tests for the symmetric encryption of model deltas.
+ * Defines a set of Unit Tests for the symmetric encryption of model deltas. All the changes in this test class are applied to a Member object
+ *  and uses the new DefaultStateBasedChangeResolutionStrategy().getChangeSequenceForCreated(memberResource).getEChanges() function to create ONLY valid changes.
  */
 
 
@@ -49,7 +52,17 @@ public class TestEncryptChangesSymmetricallyTogether {
 	
 	
 
-	
+	/**
+	 * Test the Encryption and Decryption of the ReplaceSingleAttribute change; 
+	 * @throws InvalidKeyException
+	 * @throws NoSuchAlgorithmException
+	 * @throws NoSuchPaddingException
+	 * @throws IllegalBlockSizeException
+	 * @throws BadPaddingException
+	 * @throws InvalidAlgorithmParameterException
+	 * @throws IOException
+	 * @throws ClassNotFoundException
+	 */
 	@Test 
 	public void testSaveAndLoadCreateReplaceSingleAttributeChange() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, IOException, ClassNotFoundException {
 		
@@ -60,8 +73,8 @@ public class TestEncryptChangesSymmetricallyTogether {
 
 	 
 		long startTime = System.currentTimeMillis();
-	    encryptionScheme.encryptDeltaChangesTogether(getEncryptionDetailsMap(), changes, fileWithEncryptedChanges);
-	    List<EChange> decryptedChange = encryptionScheme.decryptDeltaChangesTogether(getEncryptionDetailsMap(), fileWithEncryptedChanges);
+	    encryptionScheme.encryptDeltaChangesTogether(Collections.EMPTY_MAP, changes, fileWithEncryptedChanges);
+	    List<EChange> decryptedChange = encryptionScheme.decryptDeltaChangesTogether(Collections.EMPTY_MAP, fileWithEncryptedChanges);
 	    long endTime = System.currentTimeMillis();
 
 		long totalTime = endTime - startTime;
@@ -80,7 +93,17 @@ public class TestEncryptChangesSymmetricallyTogether {
 	    assertTrue(new EcoreUtil.EqualityHelper().equals(set.getResources().get(0).getContents(), newResourceSet.getResources().get(0).getContents()));  
 	    
 	}
-	
+	/**
+	 * Test the Encryption and Decryption of a complete member creation (CreateEObject,CreateRootEObject,CreateEAttribute).
+	 * @throws NoSuchAlgorithmException
+	 * @throws InvalidKeyException
+	 * @throws ClassNotFoundException
+	 * @throws IllegalBlockSizeException
+	 * @throws BadPaddingException
+	 * @throws NoSuchPaddingException
+	 * @throws IOException
+	 * @throws InvalidAlgorithmParameterException
+	 */
 	@Test
 	public void testSaveAndLoadMemberCreation() throws NoSuchAlgorithmException, InvalidKeyException, ClassNotFoundException, IllegalBlockSizeException, BadPaddingException, NoSuchPaddingException, IOException, InvalidAlgorithmParameterException {
 		
@@ -103,8 +126,19 @@ public class TestEncryptChangesSymmetricallyTogether {
 
 	    assertTrue(new EcoreUtil.EqualityHelper().equals(set.getResources().get(0).getContents(), newResourceSet.getResources().get(0).getContents()));    
 	}
+	/**
+	 * Test the Encryption and Decryption of the DeleteEObject change; 
+	 * @throws InvalidKeyException
+	 * @throws NoSuchAlgorithmException
+	 * @throws NoSuchPaddingException
+	 * @throws IllegalBlockSizeException
+	 * @throws BadPaddingException
+	 * @throws InvalidAlgorithmParameterException
+	 * @throws IOException
+	 * @throws ClassNotFoundException
+	 */
 	@Test 
-	public void testSaveAndLoadcreateDleteEObjectChange() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, IOException, ClassNotFoundException {
+	public void testSaveAndLoadcreateDeleteEObjectChange() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, IOException, ClassNotFoundException {
 		List<EChange> changes = new ArrayList<>();
 		ResourceSet set = new ResourceSetImpl();
 		creationUtil.createDeleteEObjectChange(changes, set);
@@ -120,7 +154,17 @@ public class TestEncryptChangesSymmetricallyTogether {
 
 	    assertTrue(new EcoreUtil.EqualityHelper().equals(set.getResources().get(0).getContents(), newResourceSet.getResources().get(0).getContents()));    
 	}
-	
+	/**
+	 * Test the Encryption and Decryption of the RemoveEAttributeValue change;
+	 * @throws InvalidKeyException
+	 * @throws NoSuchAlgorithmException
+	 * @throws NoSuchPaddingException
+	 * @throws IllegalBlockSizeException
+	 * @throws BadPaddingException
+	 * @throws InvalidAlgorithmParameterException
+	 * @throws IOException
+	 * @throws ClassNotFoundException
+	 */
 	@Test
 	public void testSaveAndLoadcreateRemoveAttributeChange() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, IOException, ClassNotFoundException {
 		List<EChange> changes = new ArrayList<>();
@@ -139,7 +183,7 @@ public class TestEncryptChangesSymmetricallyTogether {
 	    assertTrue(new EcoreUtil.EqualityHelper().equals(set.getResources().get(0).getContents(), newResourceSet.getResources().get(0).getContents()));    
 	}
 	/**
-	 * Test the Encryption and Decryption of the DeleteRootEObjectChange;
+	 * Test the Encryption and Decryption of the DeleteRootEObject change;
 	 * @throws InvalidKeyException
 	 * @throws NoSuchAlgorithmException
 	 * @throws NoSuchPaddingException
@@ -166,7 +210,17 @@ public class TestEncryptChangesSymmetricallyTogether {
 
 	    assertTrue(new EcoreUtil.EqualityHelper().equals(set.getResources().get(0).getContents(), newResourceSet.getResources().get(0).getContents()));    
 	}
-	
+	/**
+	 * Test the Encryption and Decryption of the InsertEAttributeValue change;
+	 * @throws InvalidKeyException
+	 * @throws NoSuchAlgorithmException
+	 * @throws NoSuchPaddingException
+	 * @throws IllegalBlockSizeException
+	 * @throws BadPaddingException
+	 * @throws InvalidAlgorithmParameterException
+	 * @throws IOException
+	 * @throws ClassNotFoundException
+	 */
 	@Test
 	public void testSaveAndLoadInsertEAttributeValueChange() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, IOException, ClassNotFoundException {
 		List<EChange> changes = new ArrayList<>();

@@ -118,25 +118,25 @@ public class EncryptionSchemeImpl implements EncryptionScheme{
 					this.encryptDeltaChangeAlone(keys[counter], change,encryptedChangesFile);
 					counter++;
 				}
-				return;
-			}
+				
+			}else {
 		
 			
 		 	
 	        
-
-			ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-			ResourceSet resourceSet = new ResourceSetImpl();
-		    resourceSet.getResourceFactoryRegistry().getExtensionToFactoryMap().put("enc", new EncryptedResourceFactoryImpl());
-		    
-		    Resource resource = resourceSet.createResource(URI.createFileURI(new File("").getAbsolutePath() + "/dummy.enc"));
-		    resource.getContents().addAll(changes);
-
-		    ((EncryptedResourceImpl)resource).doSave(byteArrayOutputStream,Collections.EMPTY_MAP);
-		    FileOutputStream fileOutputStream = new FileOutputStream(encryptedChangesFile);
-		    byteArrayOutputStream.writeTo(fileOutputStream);
-		    byteArrayOutputStream.close();
-		    fileOutputStream.close();
+				ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+				ResourceSet resourceSet = new ResourceSetImpl();
+			    resourceSet.getResourceFactoryRegistry().getExtensionToFactoryMap().put("enc", new EncryptedResourceFactoryImpl());
+			    
+			    final Resource resource = resourceSet.createResource(URI.createFileURI(new File("").getAbsolutePath() + "/dummy.enc"));
+			    resource.getContents().addAll(changes);
+	
+			    ((EncryptedResourceImpl)resource).doSave(byteArrayOutputStream,Collections.EMPTY_MAP);
+			    FileOutputStream fileOutputStream = new FileOutputStream(encryptedChangesFile);
+			    byteArrayOutputStream.writeTo(fileOutputStream);
+			    byteArrayOutputStream.close();
+			    fileOutputStream.close();
+			}
 
 		
 
@@ -164,13 +164,16 @@ public class EncryptionSchemeImpl implements EncryptionScheme{
 			SecretKey[] keys = (SecretKey[]) decryptionMap.get("differentEncryption");
 			int counter=0;
 			// copied over has to filter each EChange objects from the file for different decryption!
+			/*
 			for (EChange change : changes) {
 				
 				EChange decryptedChange = this.decryptDeltaChangeAlone(keys[counter], change,encryptedChangesFile);
 				counter++;
 			}
-			return;
-		}
+			*/
+			return null;
+		}else {
+			System.out.println("this?");
 		
 			FileInputStream fileInputStream = new FileInputStream(encryptedChangesFile);
 
@@ -190,6 +193,7 @@ public class EncryptionSchemeImpl implements EncryptionScheme{
 	        fileInputStream.close();
 	        encryptedChangesFile.delete();
 	        return decryptedChanges;
+		}
 	       
 		
 	

@@ -146,6 +146,7 @@ public class EChangeCreationUtility {
 	    memberResource.getContents().add(member);
 	    memberResource.getContents().add(changeAttribute);
 		changes.addAll(new DefaultStateBasedChangeResolutionStrategy().getChangeSequenceForCreated(memberResource).getEChanges());
+		System.out.println(changes);
 		
 	}
 	
