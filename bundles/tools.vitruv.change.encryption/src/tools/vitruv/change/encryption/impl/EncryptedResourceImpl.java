@@ -5,11 +5,13 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.crypto.Cipher;
 import javax.crypto.CipherInputStream;
 import javax.crypto.CipherOutputStream;
+import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.DESKeySpec;
@@ -18,9 +20,15 @@ import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceImpl;
 
 public class EncryptedResourceImpl extends XMIResourceImpl{
-	private static final String ENCRYPTION_KEY = "com.ibm.enav.key";
-	private static final String ENCRYPTION_SCHEME = "DES";
-	private static final String UNICODE_FORMAT = "UTF-8"; 
+		private final KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
+		keyGenerator.init(128);
+		
+		// Create map of encryptionOptions
+		SecretKey secretKey = keyGenerator.generateKey();
+		
+		return map;
+	}
+	
 	private boolean encryptionEnabled = true;
 	
 	
@@ -36,16 +44,16 @@ public class EncryptedResourceImpl extends XMIResourceImpl{
 	
 		if ( encryptionEnabled ) {
 			decryptedStream = decrypt(inputStream);
-			super.doLoad(decryptedStream, Collections.EMPTY_MAP);
+			super.doLoad(decryptedStream, options);
 			decryptedStream.close();
 		} else {
 			
 		}
 	}
 	public void doSave(OutputStream outputStream, SecretKey key) throws IOException {
-		System.out.println("correct save executed");
-		CipherOutputStream encryptedStream = null;
-		System.out.println("key:" +key);
+	
+	CipherOutputStream encryptedStream = null;
+
 	if ( encryptionEnabled ) {
 		encryptedStream = encrypt(outputStream,key);
 		super.doSave(encryptedStream, Collections.EMPTY_MAP);
@@ -68,7 +76,6 @@ public class EncryptedResourceImpl extends XMIResourceImpl{
 		} catch ( Exception e ) {
 			e.printStackTrace();
 		}
-
 		return key;
 		}
 

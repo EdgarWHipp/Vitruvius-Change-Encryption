@@ -50,7 +50,6 @@ import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.Files;
 
 import tools.vitruv.change.atomic.EChange;
-import tools.vitruv.change.encryption.EncryptedResourceFactoryImpl;
 import tools.vitruv.change.encryption.EncryptionScheme;
 
 /**
@@ -110,34 +109,31 @@ public class EncryptionSchemeImpl implements EncryptionScheme{
 	 */
 	public void encryptDeltaChangesTogether(Map<?,?> encryptionMap, List<EChange> changes,File encryptedChangesFile) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IOException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException {
 			
-			if (encryptionMap.containsKey("differentEncryption")) {
-				SecretKey[] keys = (SecretKey[]) encryptionMap.get("differentEncryption");
-				int counter=0;
-				for (EChange change : changes) {
-					
-					this.encryptDeltaChangeAlone(keys[counter], change,encryptedChangesFile);
-					counter++;
-				}
-				
-			}else {
-		
-			
-		 	
-	        
-				ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-				ResourceSet resourceSet = new ResourceSetImpl();
-			    resourceSet.getResourceFactoryRegistry().getExtensionToFactoryMap().put("enc", new EncryptedResourceFactoryImpl());
-			    
-			    final Resource resource = resourceSet.createResource(URI.createFileURI(new File("").getAbsolutePath() + "/dummy.enc"));
-			    resource.getContents().addAll(changes);
-	
-			    ((EncryptedResourceImpl)resource).doSave(byteArrayOutputStream,Collections.EMPTY_MAP);
-			    FileOutputStream fileOutputStream = new FileOutputStream(encryptedChangesFile);
-			    byteArrayOutputStream.writeTo(fileOutputStream);
-			    byteArrayOutputStream.close();
-			    fileOutputStream.close();
-			}
+		SecretKey secretKey = (SecretKey) encryptionMap.get("secretKey");
+		String algorithm =  (String) encryptionMap.get("algorithm");
+		Cipher cipher = Cipher.getInstance("AES");
+		cipher.init(Cipher.ENCRYPT_MODE, secretKey);
+	 	
+        
+		 ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+		 ResourceSet resourceSet = new ResourceSetImpl();
+		    resourceSet.getResourceFactoryRegistry().getExtensionToFactoryMap().put("ecore", new EcoreResourceFactoryImpl());
+		    Resource resource = resourceSet.createResource(URI.createFileURI(new File("").getAbsolutePath() + "/dummy.ecore"));
+		    resource.getContents().addAll(changes);
+		    resource.save(byteArrayOutputStream,Collections.EMPTY_MAP);
 
+		    
+		    try {
+		        byte[] encryptedData = cipher.doFinal(byteArrayOutputStream.toByteArray());
+		        FileOutputStream fileOutputStream = new FileOutputStream(encryptedChangesFile);
+		        try {
+		            fileOutputStream.write(encryptedData);
+		        } finally {
+		            fileOutputStream.close();
+		        }
+		    } finally {
+		    	byteArrayOutputStream.close();
+		    }
 		
 
 			    
@@ -160,43 +156,29 @@ public class EncryptionSchemeImpl implements EncryptionScheme{
 	 */
 
 	public  List<EChange> decryptDeltaChangesTogether(Map<?,?> decryptionMap, File encryptedChangesFile) throws IOException, ClassNotFoundException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException{
-		if (decryptionMap.containsKey("differentDecryption")) {
-			SecretKey[] keys = (SecretKey[]) decryptionMap.get("differentEncryption");
-			int counter=0;
-			// copied over has to filter each EChange objects from the file for different decryption!
-			/*
-			for (EChange change : changes) {
-				
-				EChange decryptedChange = this.decryptDeltaChangeAlone(keys[counter], change,encryptedChangesFile);
-				counter++;
-			}
-			*/
-			return null;
-		}else {
-			System.out.println("this?");
+		FileInputStream fileInputStream = new FileInputStream(encryptedChangesFile);
 		
-			FileInputStream fileInputStream = new FileInputStream(encryptedChangesFile);
+        byte[] encryptedData = fileInputStream.readAllBytes();
 
-		
-	        byte[] encryptedData = fileInputStream.readAllBytes();
-
-	        
-	        ByteArrayInputStream encryptedStream = new ByteArrayInputStream(encryptedData);
-	        
-	        final ResourceSet resourceSet = new ResourceSetImpl();
-
-	        resourceSet.getResourceFactoryRegistry().getExtensionToFactoryMap().put("enc", new EncryptedResourceFactoryImpl());
-	        final Resource resource = resourceSet.createResource(URI.createFileURI(new File("").getAbsolutePath() + "/decrypted.enc"));
-	        ((EncryptedResourceImpl)resource).doLoad(encryptedStream,Collections.EMPTY_MAP);
-	        
-	        List<EChange> decryptedChanges = resource.getContents().stream().map(it -> (EChange) it).toList();
-	        fileInputStream.close();
-	        encryptedChangesFile.delete();
-	        return decryptedChanges;
-		}
-	       
-		
+        SecretKey secretKey = (SecretKey) decryptionMap.get("secretKey");
+        String algorithm = (String) decryptionMap.get("algorithm");
+        Cipher cipher = Cipher.getInstance("AES");
+        cipher.init(Cipher.DECRYPT_MODE, secretKey);
+        byte[] decryptedData = cipher.doFinal(encryptedData);
+        ByteArrayInputStream decryptedStream = new ByteArrayInputStream(decryptedData);
+       
+        ResourceSet resourceSet = new ResourceSetImpl();
+        resourceSet.getResourceFactoryRegistry().getExtensionToFactoryMap().put( "ecore", new EcoreResourceFactoryImpl());
+        Resource resource = resourceSet.createResource(URI.createFileURI(new File("").getAbsolutePath() + "/decrypted.ecore"));
+        resource.load(decryptedStream,Collections.EMPTY_MAP);
+        System.out.println("loaded contents" +resource.getContents());
+        List<EChange> decryptedChange = resource.getContents().stream().map(it -> (EChange) it).toList();
+        return decryptedChange;
+        
 	
+
 	}
+	
+	
 	
 }

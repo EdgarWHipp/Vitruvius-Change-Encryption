@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
@@ -65,7 +66,8 @@ public class TestEncryptChangesSymmetricallyTogether {
 	 */
 	@Test 
 	public void testSaveAndLoadCreateReplaceSingleAttributeChange() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, IOException, ClassNotFoundException {
-		
+		Map options = getEncryptionDetailsMap();
+
 
 		List<EChange> changes = new ArrayList<>();
 		ResourceSet set = new ResourceSetImpl();
@@ -73,8 +75,8 @@ public class TestEncryptChangesSymmetricallyTogether {
 
 	 
 		long startTime = System.currentTimeMillis();
-	    encryptionScheme.encryptDeltaChangesTogether(Collections.EMPTY_MAP, changes, fileWithEncryptedChanges);
-	    List<EChange> decryptedChange = encryptionScheme.decryptDeltaChangesTogether(Collections.EMPTY_MAP, fileWithEncryptedChanges);
+	    encryptionScheme.encryptDeltaChangesTogether(options, changes, fileWithEncryptedChanges);
+	    List<EChange> decryptedChange = encryptionScheme.decryptDeltaChangesTogether(options, fileWithEncryptedChanges);
 	    long endTime = System.currentTimeMillis();
 
 		long totalTime = endTime - startTime;
@@ -106,14 +108,14 @@ public class TestEncryptChangesSymmetricallyTogether {
 	 */
 	@Test
 	public void testSaveAndLoadMemberCreation() throws NoSuchAlgorithmException, InvalidKeyException, ClassNotFoundException, IllegalBlockSizeException, BadPaddingException, NoSuchPaddingException, IOException, InvalidAlgorithmParameterException {
-		
+		Map options = getEncryptionDetailsMap();
 		List<EChange> changes = new ArrayList<>();
 		ResourceSet set = new ResourceSetImpl();
 		creationUtil.createCreateMemberChangeSequence(changes, set);
 	    
 		long startTime = System.currentTimeMillis();
-	    encryptionScheme.encryptDeltaChangesTogether(getEncryptionDetailsMap(), changes, fileWithEncryptedChanges);
-	    List<EChange> decryptedChange = encryptionScheme.decryptDeltaChangesTogether(getEncryptionDetailsMap(), fileWithEncryptedChanges);
+	    encryptionScheme.encryptDeltaChangesTogether(options, changes, fileWithEncryptedChanges);
+	    List<EChange> decryptedChange = encryptionScheme.decryptDeltaChangesTogether(options, fileWithEncryptedChanges);
 	    long endTime = System.currentTimeMillis();
 
 		long totalTime = endTime - startTime;
@@ -139,13 +141,14 @@ public class TestEncryptChangesSymmetricallyTogether {
 	 */
 	@Test 
 	public void testSaveAndLoadcreateDeleteEObjectChange() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, IOException, ClassNotFoundException {
+		Map options = getEncryptionDetailsMap();
 		List<EChange> changes = new ArrayList<>();
 		ResourceSet set = new ResourceSetImpl();
 		creationUtil.createDeleteEObjectChange(changes, set);
 	    
 	     
-	    encryptionScheme.encryptDeltaChangesTogether(getEncryptionDetailsMap(), changes, fileWithEncryptedChanges);
-	    List<EChange> decryptedChange = encryptionScheme.decryptDeltaChangesTogether(getEncryptionDetailsMap(), fileWithEncryptedChanges);
+	    encryptionScheme.encryptDeltaChangesTogether(options, changes, fileWithEncryptedChanges);
+	    List<EChange> decryptedChange = encryptionScheme.decryptDeltaChangesTogether(options, fileWithEncryptedChanges);
 	     
 	    TransactionalChange transactionalChange = VitruviusChangeFactory.getInstance().createTransactionalChange(decryptedChange);
 	    ResourceSet newResourceSet = new ResourceSetImpl();
@@ -167,13 +170,14 @@ public class TestEncryptChangesSymmetricallyTogether {
 	 */
 	@Test
 	public void testSaveAndLoadcreateRemoveAttributeChange() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, IOException, ClassNotFoundException {
+		Map options = getEncryptionDetailsMap();
 		List<EChange> changes = new ArrayList<>();
 		ResourceSet set = new ResourceSetImpl();
 		creationUtil.createRemoveAttributeChange(changes, set);
 	    
 	     
-	    encryptionScheme.encryptDeltaChangesTogether(getEncryptionDetailsMap(), changes, fileWithEncryptedChanges);
-	    List<EChange> decryptedChange = encryptionScheme.decryptDeltaChangesTogether(getEncryptionDetailsMap(), fileWithEncryptedChanges);
+	    encryptionScheme.encryptDeltaChangesTogether(options, changes, fileWithEncryptedChanges);
+	    List<EChange> decryptedChange = encryptionScheme.decryptDeltaChangesTogether(options, fileWithEncryptedChanges);
 	     
 	    TransactionalChange transactionalChange = VitruviusChangeFactory.getInstance().createTransactionalChange(decryptedChange);
 	    ResourceSet newResourceSet = new ResourceSetImpl();
@@ -195,13 +199,15 @@ public class TestEncryptChangesSymmetricallyTogether {
 	 */
 	@Test
 	public void testSaveAndLoadDeleteRootEObjectChange() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, IOException, ClassNotFoundException {
+		Map options = getEncryptionDetailsMap();
+
 		List<EChange> changes = new ArrayList<>();
 		ResourceSet set = new ResourceSetImpl();
 		creationUtil.createDeleteRootEObjectChange(changes, set);
 	    
 	     
-	    encryptionScheme.encryptDeltaChangesTogether(getEncryptionDetailsMap(), changes, fileWithEncryptedChanges);
-	    List<EChange> decryptedChange = encryptionScheme.decryptDeltaChangesTogether(getEncryptionDetailsMap(), fileWithEncryptedChanges);
+	    encryptionScheme.encryptDeltaChangesTogether(options, changes, fileWithEncryptedChanges);
+	    List<EChange> decryptedChange = encryptionScheme.decryptDeltaChangesTogether(options, fileWithEncryptedChanges);
 	     
 	    TransactionalChange transactionalChange = VitruviusChangeFactory.getInstance().createTransactionalChange(decryptedChange);
 	    ResourceSet newResourceSet = new ResourceSetImpl();
@@ -223,13 +229,15 @@ public class TestEncryptChangesSymmetricallyTogether {
 	 */
 	@Test
 	public void testSaveAndLoadInsertEAttributeValueChange() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, IOException, ClassNotFoundException {
+		Map options = getEncryptionDetailsMap();
+
 		List<EChange> changes = new ArrayList<>();
 		ResourceSet set = new ResourceSetImpl();
 		creationUtil.createInsertEAttributeValueChange(changes, set);
 	    
 	     
-	    encryptionScheme.encryptDeltaChangesTogether(getEncryptionDetailsMap(), changes, fileWithEncryptedChanges);
-	    List<EChange> decryptedChange = encryptionScheme.decryptDeltaChangesTogether(getEncryptionDetailsMap(), fileWithEncryptedChanges);
+	    encryptionScheme.encryptDeltaChangesTogether(options, changes, fileWithEncryptedChanges);
+	    List<EChange> decryptedChange = encryptionScheme.decryptDeltaChangesTogether(options, fileWithEncryptedChanges);
 	     
 	    TransactionalChange transactionalChange = VitruviusChangeFactory.getInstance().createTransactionalChange(decryptedChange);
 	    ResourceSet newResourceSet = new ResourceSetImpl();
@@ -251,13 +259,15 @@ public class TestEncryptChangesSymmetricallyTogether {
 	 */
 	@Test
 	public void testSaveAndLoadcreateInsertReferenceChange() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, IOException, ClassNotFoundException {
+		Map options = getEncryptionDetailsMap();
+
 		List<EChange> changes = new ArrayList<>();
 		ResourceSet set = new ResourceSetImpl();
 		creationUtil.createInsertReferenceChange(changes, set);
 	    
 	     
-	    encryptionScheme.encryptDeltaChangesTogether(getEncryptionDetailsMap(), changes, fileWithEncryptedChanges);
-	    List<EChange> decryptedChange = encryptionScheme.decryptDeltaChangesTogether(getEncryptionDetailsMap(), fileWithEncryptedChanges);
+	    encryptionScheme.encryptDeltaChangesTogether(options, changes, fileWithEncryptedChanges);
+	    List<EChange> decryptedChange = encryptionScheme.decryptDeltaChangesTogether(options, fileWithEncryptedChanges);
 	     
 	    TransactionalChange transactionalChange = VitruviusChangeFactory.getInstance().createTransactionalChange(decryptedChange);
 	    ResourceSet newResourceSet = new ResourceSetImpl();

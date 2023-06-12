@@ -155,10 +155,10 @@ public class EChangeCreationUtility {
 	 * Adds the CreateEObject, CreateRootEObject and the CreateEAttribute change to a resource and uses addAll() to add all changes of the resource to the List<EChange>.
 	 */
 	public void createCreateMemberChangeSequence(List<EChange> changes, ResourceSet set) {
-		
+		Member member = getMember();
 		withFactories(set);
 	    Resource memberResource = set.createResource(MEMBER_URI);
-	    memberResource.getContents().add(getMember());
+	    memberResource.getContents().add(member);
 		changes.addAll(new DefaultStateBasedChangeResolutionStrategy().getChangeSequenceForCreated(memberResource).getEChanges());
 
 	}
