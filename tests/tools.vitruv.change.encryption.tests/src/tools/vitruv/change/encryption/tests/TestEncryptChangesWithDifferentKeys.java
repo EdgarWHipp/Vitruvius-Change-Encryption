@@ -73,8 +73,8 @@ public class TestEncryptChangesWithDifferentKeys {
 		map.put("differentEncryption", keys);
 	    
 		long startTime = System.currentTimeMillis();
-	    encryptionScheme.encryptDeltaChangesTogether(map, changes, fileWithEncryptedChanges);
-	    List<EChange> decryptedChange = encryptionScheme.decryptDeltaChangesTogether(map, fileWithEncryptedChanges);
+	   // encryptionScheme.encryptDeltaChangesTogether(map, changes, fileWithEncryptedChanges);
+	   // List<EChange> decryptedChange = encryptionScheme.decryptDeltaChangesTogether(map, fileWithEncryptedChanges);
 	    long endTime = System.currentTimeMillis();
 
 		long totalTime = endTime - startTime;

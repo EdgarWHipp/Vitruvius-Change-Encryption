@@ -2,12 +2,15 @@ package tools.vitruv.change.encryption.utils;
 
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.Map;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
+
+import edu.kit.ipd.sdq.commons.util.java.Pair;
 /**
  * This singleton class handles the encryption and decryption of bytes with a given key and algortihm.
  * @author Edgar Hipp
@@ -63,4 +66,14 @@ public final class EncryptionUtils {
 		 cipher.init(Cipher.DECRYPT_MODE, key);
 		 return cipher.doFinal(encryptedBytes);
 	}
+	public Cipher initCipherMode(Map<?,?> options,int opMode) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException{
+		SecretKey secretKey = (SecretKey) options.get("secretKey");
+		String algorithm =  (String) options.get("algorithm");
+		Cipher cipher = Cipher.getInstance(algorithm);
+		cipher.init(opMode, secretKey);
+		return cipher;
+	 	
+	}
+	
+	
 }

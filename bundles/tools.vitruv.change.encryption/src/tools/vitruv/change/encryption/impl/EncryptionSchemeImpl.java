@@ -49,11 +49,13 @@ import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.Files;
 
+import edu.kit.ipd.sdq.commons.util.java.Pair;
 import tools.vitruv.change.atomic.EChange;
 import tools.vitruv.change.encryption.EncryptionScheme;
+import tools.vitruv.change.encryption.utils.EncryptionUtils;
 
 /**
- * Contains the logic for writing a List<EncryptedEChange> to an OutpusStream and to load a List<EChange> from an InputStream.
+ * Contains the logic for writing a List<EncryptedEChange> to an OutputStream and to load a List<EChange> from an InputStream.
  * @author Edgar Hipp
  *	
  */
@@ -62,38 +64,55 @@ public class EncryptionSchemeImpl implements EncryptionScheme{
 	public EncryptionSchemeImpl() {
 	
 	}
+	
+	public void encryptDeltasCustomKeys(Map<EChange,Pair<SecretKey,String>> options,File encryptedChangesFile) {
+		
+	}
 	/**
 	 * @throws IOException 
+	 * @throws NoSuchPaddingException 
+	 * @throws NoSuchAlgorithmException 
+	 * @throws InvalidKeyException 
+	 * @throws BadPaddingException 
+	 * @throws IllegalBlockSizeException 
 	 * 
 	 */
-	public void encryptDeltaChangeAlone(SecretKey key,EChange change,File encryptedChangesFile) throws IOException {
+	public void encryptDeltaChangeAlone(Map<?,?> encryptionOption,EChange change,File encryptedChangesFile) throws IOException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
+		Cipher cipher = EncryptionUtils.getInstance().initCipherMode(encryptionOption,1);
+
+
+
+		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+		ResourceSet resourceSet = new ResourceSetImpl();
+	    resourceSet.getResourceFactoryRegistry().getExtensionToFactoryMap().put("ecore", new EcoreResourceFactoryImpl());
 	    
+	    Resource resource = resourceSet.createResource(URI.createFileURI(new File("").getAbsolutePath() + "/dummy.ecore"));
+	    resource.getContents().add(change);
+	    
+	    
+	    
+	    resource.save(byteArrayOutputStream,Collections.EMPTY_MAP);
+	    FileOutputStream fileOutputStream = new FileOutputStream(encryptedChangesFile);
+	    byte[] encryptedData = cipher.doFinal(byteArrayOutputStream.toByteArray());
+	    fileOutputStream.write(encryptedData);
+	    byteArrayOutputStream.close();
+	    fileOutputStream.close();
 
-				ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-				ResourceSet resourceSet = new ResourceSetImpl();
-			    resourceSet.getResourceFactoryRegistry().getExtensionToFactoryMap().put("enc", new EncryptedResourceFactoryImpl());
-			    
-			    Resource resource = resourceSet.createResource(URI.createFileURI(new File("").getAbsolutePath() + "/dummy.enc"));
-			    resource.getContents().add(change);
-			    
-			    
-			    
-			    ((EncryptedResourceImpl)resource).doSave(byteArrayOutputStream,key);
-			    FileOutputStream fileOutputStream = new FileOutputStream(encryptedChangesFile);
-			    byteArrayOutputStream.writeTo(fileOutputStream);
-			    byteArrayOutputStream.close();
-			    fileOutputStream.close();
-
-		
 		
 		
 	}
 	/**
+	 * @throws NoSuchPaddingException 
+	 * @throws NoSuchAlgorithmException 
+	 * @throws InvalidKeyException 
 	 * 
 	 */
-	public void decryptDeltaChangeAlone() {
+	public EChange decryptDeltaChangeAlone(Map<?,?> decryptionOption,String encryptedEChange) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException {
+		Cipher cipher = EncryptionUtils.getInstance().initCipherMode(decryptionOption,2);
 		
+		return null;
 	}
+	
 	/**
 	 * Writes a list of EncryptedEChanges to the OutputStream, these contain the EChanges in the encryptedBytes field.
 	 * @param encryptionMap
@@ -108,19 +127,16 @@ public class EncryptionSchemeImpl implements EncryptionScheme{
 	 * @throws InvalidAlgorithmParameterException 
 	 */
 	public void encryptDeltaChangesTogether(Map<?,?> encryptionMap, List<EChange> changes,File encryptedChangesFile) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IOException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException {
-			
-		SecretKey secretKey = (SecretKey) encryptionMap.get("secretKey");
-		String algorithm =  (String) encryptionMap.get("algorithm");
-		Cipher cipher = Cipher.getInstance("AES");
-		cipher.init(Cipher.ENCRYPT_MODE, secretKey);
-	 	
+		// 1 = ENCRYPT_MODE
+		Cipher cipher = EncryptionUtils.getInstance().initCipherMode(encryptionMap,1);
+		
         
 		 ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 		 ResourceSet resourceSet = new ResourceSetImpl();
-		    resourceSet.getResourceFactoryRegistry().getExtensionToFactoryMap().put("ecore", new EcoreResourceFactoryImpl());
-		    Resource resource = resourceSet.createResource(URI.createFileURI(new File("").getAbsolutePath() + "/dummy.ecore"));
-		    resource.getContents().addAll(changes);
-		    resource.save(byteArrayOutputStream,Collections.EMPTY_MAP);
+	     resourceSet.getResourceFactoryRegistry().getExtensionToFactoryMap().put("ecore", new EcoreResourceFactoryImpl());
+	     Resource resource = resourceSet.createResource(URI.createFileURI(new File("").getAbsolutePath() + "/dummy.ecore"));
+	     resource.getContents().addAll(changes);
+	     resource.save(byteArrayOutputStream,Collections.EMPTY_MAP);
 
 		    
 		    try {
@@ -156,14 +172,13 @@ public class EncryptionSchemeImpl implements EncryptionScheme{
 	 */
 
 	public  List<EChange> decryptDeltaChangesTogether(Map<?,?> decryptionMap, File encryptedChangesFile) throws IOException, ClassNotFoundException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException{
+		// 2 = DECRYPT_MODE
+		Cipher cipher = EncryptionUtils.getInstance().initCipherMode(decryptionMap,2);
+
 		FileInputStream fileInputStream = new FileInputStream(encryptedChangesFile);
 		
         byte[] encryptedData = fileInputStream.readAllBytes();
 
-        SecretKey secretKey = (SecretKey) decryptionMap.get("secretKey");
-        String algorithm = (String) decryptionMap.get("algorithm");
-        Cipher cipher = Cipher.getInstance("AES");
-        cipher.init(Cipher.DECRYPT_MODE, secretKey);
         byte[] decryptedData = cipher.doFinal(encryptedData);
         ByteArrayInputStream decryptedStream = new ByteArrayInputStream(decryptedData);
        
@@ -171,7 +186,6 @@ public class EncryptionSchemeImpl implements EncryptionScheme{
         resourceSet.getResourceFactoryRegistry().getExtensionToFactoryMap().put( "ecore", new EcoreResourceFactoryImpl());
         Resource resource = resourceSet.createResource(URI.createFileURI(new File("").getAbsolutePath() + "/decrypted.ecore"));
         resource.load(decryptedStream,Collections.EMPTY_MAP);
-        System.out.println("loaded contents" +resource.getContents());
         List<EChange> decryptedChange = resource.getContents().stream().map(it -> (EChange) it).toList();
         return decryptedChange;
         

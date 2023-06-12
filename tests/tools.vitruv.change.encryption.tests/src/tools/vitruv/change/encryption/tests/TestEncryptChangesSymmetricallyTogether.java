@@ -39,7 +39,8 @@ import tools.vitruv.change.composite.description.VitruviusChangeFactory;
 
 /*
  * Defines a set of Unit Tests for the symmetric encryption of model deltas. All the changes in this test class are applied to a Member object
- *  and uses the new DefaultStateBasedChangeResolutionStrategy().getChangeSequenceForCreated(memberResource).getEChanges() function to create ONLY valid changes.
+ *  and uses the new DefaultStateBasedChangeResolutionStrategy().getChangeSequenceForCreated(memberResource).getEChanges() function to create ONLY valid changes. One key 
+ *  and one algorithm is used for the entire encryption and decryption process.
  */
 
 
@@ -111,7 +112,7 @@ public class TestEncryptChangesSymmetricallyTogether {
 		Map options = getEncryptionDetailsMap();
 		List<EChange> changes = new ArrayList<>();
 		ResourceSet set = new ResourceSetImpl();
-		creationUtil.createCreateMemberChangeSequence(changes, set);
+		creationUtil.createCreateMemberChangeSequence(changes, set,1);
 	    
 		long startTime = System.currentTimeMillis();
 	    encryptionScheme.encryptDeltaChangesTogether(options, changes, fileWithEncryptedChanges);
@@ -147,8 +148,14 @@ public class TestEncryptChangesSymmetricallyTogether {
 		creationUtil.createDeleteEObjectChange(changes, set);
 	    
 	     
+		long startTime = System.currentTimeMillis();
 	    encryptionScheme.encryptDeltaChangesTogether(options, changes, fileWithEncryptedChanges);
 	    List<EChange> decryptedChange = encryptionScheme.decryptDeltaChangesTogether(options, fileWithEncryptedChanges);
+	    long endTime = System.currentTimeMillis();
+
+		long totalTime = endTime - startTime;
+
+		logger.severe("Time spend:\t"+totalTime+"ms");
 	     
 	    TransactionalChange transactionalChange = VitruviusChangeFactory.getInstance().createTransactionalChange(decryptedChange);
 	    ResourceSet newResourceSet = new ResourceSetImpl();
@@ -176,8 +183,14 @@ public class TestEncryptChangesSymmetricallyTogether {
 		creationUtil.createRemoveAttributeChange(changes, set);
 	    
 	     
+		long startTime = System.currentTimeMillis();
 	    encryptionScheme.encryptDeltaChangesTogether(options, changes, fileWithEncryptedChanges);
 	    List<EChange> decryptedChange = encryptionScheme.decryptDeltaChangesTogether(options, fileWithEncryptedChanges);
+	    long endTime = System.currentTimeMillis();
+
+		long totalTime = endTime - startTime;
+
+		logger.severe("Time spend:\t"+totalTime+"ms");
 	     
 	    TransactionalChange transactionalChange = VitruviusChangeFactory.getInstance().createTransactionalChange(decryptedChange);
 	    ResourceSet newResourceSet = new ResourceSetImpl();
@@ -206,8 +219,14 @@ public class TestEncryptChangesSymmetricallyTogether {
 		creationUtil.createDeleteRootEObjectChange(changes, set);
 	    
 	     
+		long startTime = System.currentTimeMillis();
 	    encryptionScheme.encryptDeltaChangesTogether(options, changes, fileWithEncryptedChanges);
 	    List<EChange> decryptedChange = encryptionScheme.decryptDeltaChangesTogether(options, fileWithEncryptedChanges);
+	    long endTime = System.currentTimeMillis();
+
+		long totalTime = endTime - startTime;
+
+		logger.severe("Time spend:\t"+totalTime+"ms");
 	     
 	    TransactionalChange transactionalChange = VitruviusChangeFactory.getInstance().createTransactionalChange(decryptedChange);
 	    ResourceSet newResourceSet = new ResourceSetImpl();
@@ -236,8 +255,14 @@ public class TestEncryptChangesSymmetricallyTogether {
 		creationUtil.createInsertEAttributeValueChange(changes, set);
 	    
 	     
+		long startTime = System.currentTimeMillis();
 	    encryptionScheme.encryptDeltaChangesTogether(options, changes, fileWithEncryptedChanges);
 	    List<EChange> decryptedChange = encryptionScheme.decryptDeltaChangesTogether(options, fileWithEncryptedChanges);
+	    long endTime = System.currentTimeMillis();
+
+		long totalTime = endTime - startTime;
+
+		logger.severe("Time spend:\t"+totalTime+"ms");
 	     
 	    TransactionalChange transactionalChange = VitruviusChangeFactory.getInstance().createTransactionalChange(decryptedChange);
 	    ResourceSet newResourceSet = new ResourceSetImpl();
@@ -266,8 +291,14 @@ public class TestEncryptChangesSymmetricallyTogether {
 		creationUtil.createInsertReferenceChange(changes, set);
 	    
 	     
+		long startTime = System.currentTimeMillis();
 	    encryptionScheme.encryptDeltaChangesTogether(options, changes, fileWithEncryptedChanges);
 	    List<EChange> decryptedChange = encryptionScheme.decryptDeltaChangesTogether(options, fileWithEncryptedChanges);
+	    long endTime = System.currentTimeMillis();
+
+		long totalTime = endTime - startTime;
+
+		logger.severe("Time spend:\t"+totalTime+"ms");
 	     
 	    TransactionalChange transactionalChange = VitruviusChangeFactory.getInstance().createTransactionalChange(decryptedChange);
 	    ResourceSet newResourceSet = new ResourceSetImpl();
@@ -281,6 +312,95 @@ public class TestEncryptChangesSymmetricallyTogether {
 	
 	
 	
+	
+	@Test
+	public void testSaveAndLoadCreate10Members() throws NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, IOException, ClassNotFoundException {
+		Map options = getEncryptionDetailsMap();
+		List<EChange> changes = new ArrayList<>();
+		ResourceSet set = new ResourceSetImpl();
+		creationUtil.createCreateMemberChangeSequence(changes, set,10);
+	    
+		long startTime = System.currentTimeMillis();
+	    encryptionScheme.encryptDeltaChangesTogether(options, changes, fileWithEncryptedChanges);
+	    List<EChange> decryptedChange = encryptionScheme.decryptDeltaChangesTogether(options, fileWithEncryptedChanges);
+	    long endTime = System.currentTimeMillis();
+
+		long totalTime = endTime - startTime;
+
+		logger.severe("Time spend:\t"+totalTime+"ms");
+	    TransactionalChange transactionalChange = VitruviusChangeFactory.getInstance().createTransactionalChange(decryptedChange);
+	    ResourceSet newResourceSet = new ResourceSetImpl();
+	    creationUtil.withFactories(newResourceSet);
+	    transactionalChange.resolveAndApply(IdResolver.create(newResourceSet));
+
+	    assertTrue(new EcoreUtil.EqualityHelper().equals(set.getResources().get(0).getContents(), newResourceSet.getResources().get(0).getContents()));   
+	}
+	@Test
+	public void testSaveAndLoadCreate100Members() throws NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, IOException, ClassNotFoundException {
+		Map options = getEncryptionDetailsMap();
+		List<EChange> changes = new ArrayList<>();
+		ResourceSet set = new ResourceSetImpl();
+		creationUtil.createCreateMemberChangeSequence(changes, set,100);
+	    
+		long startTime = System.currentTimeMillis();
+	    encryptionScheme.encryptDeltaChangesTogether(options, changes, fileWithEncryptedChanges);
+	    List<EChange> decryptedChange = encryptionScheme.decryptDeltaChangesTogether(options, fileWithEncryptedChanges);
+	    long endTime = System.currentTimeMillis();
+
+		long totalTime = endTime - startTime;
+
+		logger.severe("Time spend:\t"+totalTime+"ms");
+	    TransactionalChange transactionalChange = VitruviusChangeFactory.getInstance().createTransactionalChange(decryptedChange);
+	    ResourceSet newResourceSet = new ResourceSetImpl();
+	    creationUtil.withFactories(newResourceSet);
+	    transactionalChange.resolveAndApply(IdResolver.create(newResourceSet));
+
+	    assertTrue(new EcoreUtil.EqualityHelper().equals(set.getResources().get(0).getContents(), newResourceSet.getResources().get(0).getContents()));   
+	}
+	@Test
+	public void testSaveAndLoadCreate1000Members() throws NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, IOException, ClassNotFoundException {
+		Map options = getEncryptionDetailsMap();
+		List<EChange> changes = new ArrayList<>();
+		ResourceSet set = new ResourceSetImpl();
+		creationUtil.createCreateMemberChangeSequence(changes, set,1000);
+	    
+		long startTime = System.currentTimeMillis();
+	    encryptionScheme.encryptDeltaChangesTogether(options, changes, fileWithEncryptedChanges);
+	    List<EChange> decryptedChange = encryptionScheme.decryptDeltaChangesTogether(options, fileWithEncryptedChanges);
+	    long endTime = System.currentTimeMillis();
+
+		long totalTime = endTime - startTime;
+
+		logger.severe("Time spend:\t"+totalTime+"ms");
+	    TransactionalChange transactionalChange = VitruviusChangeFactory.getInstance().createTransactionalChange(decryptedChange);
+	    ResourceSet newResourceSet = new ResourceSetImpl();
+	    creationUtil.withFactories(newResourceSet);
+	    transactionalChange.resolveAndApply(IdResolver.create(newResourceSet));
+
+	    assertTrue(new EcoreUtil.EqualityHelper().equals(set.getResources().get(0).getContents(), newResourceSet.getResources().get(0).getContents()));   
+	}
+	@Test
+	public void testSaveAndLoadCreate10000Members() throws NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, IOException, ClassNotFoundException {
+		Map options = getEncryptionDetailsMap();
+		List<EChange> changes = new ArrayList<>();
+		ResourceSet set = new ResourceSetImpl();
+		creationUtil.createCreateMemberChangeSequence(changes, set,10000);
+	    
+		long startTime = System.currentTimeMillis();
+	    encryptionScheme.encryptDeltaChangesTogether(options, changes, fileWithEncryptedChanges);
+	    List<EChange> decryptedChange = encryptionScheme.decryptDeltaChangesTogether(options, fileWithEncryptedChanges);
+	    long endTime = System.currentTimeMillis();
+
+		long totalTime = endTime - startTime;
+
+		logger.severe("Time spend:\t"+totalTime+"ms");
+	    TransactionalChange transactionalChange = VitruviusChangeFactory.getInstance().createTransactionalChange(decryptedChange);
+	    ResourceSet newResourceSet = new ResourceSetImpl();
+	    creationUtil.withFactories(newResourceSet);
+	    transactionalChange.resolveAndApply(IdResolver.create(newResourceSet));
+
+	    assertTrue(new EcoreUtil.EqualityHelper().equals(set.getResources().get(0).getContents(), newResourceSet.getResources().get(0).getContents()));   
+	}
 	
 	
 	//HELPER

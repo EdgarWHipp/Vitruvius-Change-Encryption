@@ -2,6 +2,7 @@ package tools.vitruv.change.encryption.tests.util;
 
 import java.io.File;
 import java.util.List;
+import java.util.stream.IntStream;
 
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
@@ -43,7 +44,7 @@ public class EChangeCreationUtility {
 	public void withFactories(ResourceSet set) {
 		set.getResourceFactoryRegistry().getExtensionToFactoryMap().put("ecore", new EcoreResourceFactoryImpl());
 	}
-	private Member getMember() {
+	public Member getMember() {
 		Member member = FamiliesFactory.eINSTANCE.createMember();
 		member.setFirstName("Clara");
 		return member;
@@ -139,7 +140,7 @@ public class EChangeCreationUtility {
 	public void createReplaceSingleAttributeChange(List<EChange> changes, ResourceSet set) {
 		Member member = getMember();
 	    ReplaceSingleValuedEAttribute<Member,String> changeAttribute = TypeInferringAtomicEChangeFactory.getInstance().createReplaceSingleAttributeChange(member, member.eClass().getEAttributes().get(0), "Clara", "Greta");
-
+	    
 		
 		withFactories(set);
 		Resource memberResource = set.createResource(MEMBER_URI);
@@ -154,13 +155,19 @@ public class EChangeCreationUtility {
 	/**
 	 * Adds the CreateEObject, CreateRootEObject and the CreateEAttribute change to a resource and uses addAll() to add all changes of the resource to the List<EChange>.
 	 */
-	public void createCreateMemberChangeSequence(List<EChange> changes, ResourceSet set) {
-		Member member = getMember();
+	public void createCreateMemberChangeSequence(List<EChange> changes, ResourceSet set,int amount) {
+		
 		withFactories(set);
 	    Resource memberResource = set.createResource(MEMBER_URI);
-	    memberResource.getContents().add(member);
+	    
+	    
+	    IntStream.range(0, amount)
+        .forEach(index -> memberResource.getContents().add(getMember()));
 		changes.addAll(new DefaultStateBasedChangeResolutionStrategy().getChangeSequenceForCreated(memberResource).getEChanges());
+		
 
 	}
+	
+	
 	
 }
