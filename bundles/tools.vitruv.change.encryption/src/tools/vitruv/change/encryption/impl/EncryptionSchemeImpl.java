@@ -61,6 +61,7 @@ import tools.vitruv.change.encryption.utils.EncryptionUtils;
  */
 public class EncryptionSchemeImpl implements EncryptionScheme{
 	private static final Logger logger = Logger.getLogger(EncryptionSchemeImpl.class.getName());
+	private final EncryptionUtils encryptionUtils = EncryptionUtils.getInstance();
 	public EncryptionSchemeImpl() {
 	
 	}
@@ -78,7 +79,6 @@ public class EncryptionSchemeImpl implements EncryptionScheme{
 	 * 
 	 */
 	public void encryptDeltaChangeAlone(Map<?,?> encryptionOption,EChange change,File encryptedChangesFile) throws IOException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
-		Cipher cipher = EncryptionUtils.getInstance().initCipherMode(encryptionOption,1);
 
 
 
@@ -93,7 +93,8 @@ public class EncryptionSchemeImpl implements EncryptionScheme{
 	    
 	    resource.save(byteArrayOutputStream,Collections.EMPTY_MAP);
 	    FileOutputStream fileOutputStream = new FileOutputStream(encryptedChangesFile);
-	    byte[] encryptedData = cipher.doFinal(byteArrayOutputStream.toByteArray());
+	    
+	    byte[] encryptedData = encryptionUtils.cryptographicFunction(encryptionOption,1,byteArrayOutputStream.toByteArray());
 	    fileOutputStream.write(encryptedData);
 	    byteArrayOutputStream.close();
 	    fileOutputStream.close();
@@ -105,12 +106,30 @@ public class EncryptionSchemeImpl implements EncryptionScheme{
 	 * @throws NoSuchPaddingException 
 	 * @throws NoSuchAlgorithmException 
 	 * @throws InvalidKeyException 
+	 * @throws IOException 
+	 * @throws BadPaddingException 
+	 * @throws IllegalBlockSizeException 
 	 * 
 	 */
-	public EChange decryptDeltaChangeAlone(Map<?,?> decryptionOption,String encryptedEChange) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException {
-		Cipher cipher = EncryptionUtils.getInstance().initCipherMode(decryptionOption,2);
+	public EChange decryptDeltaChangeAlone(Map<?,?> decryptionOption,File encryptedChangesFile) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IOException, IllegalBlockSizeException, BadPaddingException {
 		
-		return null;
+		
+		FileInputStream fileInputStream = new FileInputStream(encryptedChangesFile);
+		
+        byte[] encryptedData = fileInputStream.readAllBytes();
+
+        byte[] decryptedData = encryptionUtils.cryptographicFunction(decryptionOption,2,encryptedData);
+
+        ByteArrayInputStream decryptedStream = new ByteArrayInputStream(decryptedData);
+       
+        ResourceSet resourceSet = new ResourceSetImpl();
+        resourceSet.getResourceFactoryRegistry().getExtensionToFactoryMap().put( "ecore", new EcoreResourceFactoryImpl());
+        Resource resource = resourceSet.createResource(URI.createFileURI(new File("").getAbsolutePath() + "/decrypted.ecore"));
+        resource.load(decryptedStream,Collections.EMPTY_MAP);
+        EChange decryptedChange = (EChange) resource.getContents().get(0);
+        return decryptedChange;
+		
+		
 	}
 	
 	/**
@@ -127,8 +146,6 @@ public class EncryptionSchemeImpl implements EncryptionScheme{
 	 * @throws InvalidAlgorithmParameterException 
 	 */
 	public void encryptDeltaChangesTogether(Map<?,?> encryptionMap, List<EChange> changes,File encryptedChangesFile) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IOException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException {
-		// 1 = ENCRYPT_MODE
-		Cipher cipher = EncryptionUtils.getInstance().initCipherMode(encryptionMap,1);
 		
         
 		 ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
@@ -140,7 +157,7 @@ public class EncryptionSchemeImpl implements EncryptionScheme{
 
 		    
 		    try {
-		        byte[] encryptedData = cipher.doFinal(byteArrayOutputStream.toByteArray());
+		        byte[] encryptedData = encryptionUtils.cryptographicFunction(encryptionMap,1,byteArrayOutputStream.toByteArray());
 		        FileOutputStream fileOutputStream = new FileOutputStream(encryptedChangesFile);
 		        try {
 		            fileOutputStream.write(encryptedData);
@@ -172,14 +189,13 @@ public class EncryptionSchemeImpl implements EncryptionScheme{
 	 */
 
 	public  List<EChange> decryptDeltaChangesTogether(Map<?,?> decryptionMap, File encryptedChangesFile) throws IOException, ClassNotFoundException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException{
-		// 2 = DECRYPT_MODE
-		Cipher cipher = EncryptionUtils.getInstance().initCipherMode(decryptionMap,2);
 
 		FileInputStream fileInputStream = new FileInputStream(encryptedChangesFile);
 		
         byte[] encryptedData = fileInputStream.readAllBytes();
 
-        byte[] decryptedData = cipher.doFinal(encryptedData);
+        byte[] decryptedData = encryptionUtils.cryptographicFunction(decryptionMap,2,encryptedData);
+
         ByteArrayInputStream decryptedStream = new ByteArrayInputStream(decryptedData);
        
         ResourceSet resourceSet = new ResourceSetImpl();

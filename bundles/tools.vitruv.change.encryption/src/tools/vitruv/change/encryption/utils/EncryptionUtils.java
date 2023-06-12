@@ -32,46 +32,14 @@ public final class EncryptionUtils {
 	        
 	        return INSTANCE;
 	    }
-	 /**
-	  * Encrypts a given byte[] with a given secret key and algorithm.
-	  * @param clearTextBytes
-	  * @param key
-	  * @param algorithm
-	  * @return byte[]
-	  * @throws NoSuchAlgorithmException
-	  * @throws NoSuchPaddingException
-	  * @throws InvalidKeyException
-	  * @throws IllegalBlockSizeException
-	  * @throws BadPaddingException
-	  */
-	public byte[] encryptBytes (byte[] clearTextBytes,SecretKey key, String algorithm) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
-		  Cipher cipher = Cipher.getInstance(algorithm);
-	        cipher.init(Cipher.ENCRYPT_MODE, key);
-	        return cipher.doFinal(clearTextBytes);
-	}
-	/**
-	 * Decrypts a given byte[] with a given secret key and algorithm.
-	 * @param encryptedBytes
-	 * @param key
-	 * @param algorithm
-	 * @return byte[]
-	 * @throws IllegalBlockSizeException
-	 * @throws BadPaddingException
-	 * @throws InvalidKeyException
-	 * @throws NoSuchAlgorithmException
-	 * @throws NoSuchPaddingException
-	 */
-	public byte[] decryptBytes (byte[] encryptedBytes,SecretKey key,String algorithm) throws IllegalBlockSizeException, BadPaddingException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException {
-		 Cipher cipher = Cipher.getInstance(algorithm);
-		 cipher.init(Cipher.DECRYPT_MODE, key);
-		 return cipher.doFinal(encryptedBytes);
-	}
-	public Cipher initCipherMode(Map<?,?> options,int opMode) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException{
+	 
+	public byte[] cryptographicFunction(Map<?,?> options,int opMode,byte[] bytes) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException{
 		SecretKey secretKey = (SecretKey) options.get("secretKey");
 		String algorithm =  (String) options.get("algorithm");
 		Cipher cipher = Cipher.getInstance(algorithm);
 		cipher.init(opMode, secretKey);
-		return cipher;
+		byte[] result= cipher.doFinal(bytes);
+		return result;
 	 	
 	}
 	

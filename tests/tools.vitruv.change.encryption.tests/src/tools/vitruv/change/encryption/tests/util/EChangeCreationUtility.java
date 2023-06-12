@@ -1,15 +1,23 @@
 package tools.vitruv.change.encryption.tests.util;
 
 import java.io.File;
+import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.IntStream;
+
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
 
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
+import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.emf.ecore.xmi.impl.EcoreResourceFactoryImpl;
 
+import edu.kit.ipd.sdq.commons.util.java.Pair;
 import edu.kit.ipd.sdq.metamodels.families.FamiliesFactory;
 import edu.kit.ipd.sdq.metamodels.families.Family;
 import edu.kit.ipd.sdq.metamodels.families.Member;
@@ -25,7 +33,8 @@ import tools.vitruv.change.changederivation.DefaultStateBasedChangeResolutionStr
 
 public class EChangeCreationUtility {
 	private static EChangeCreationUtility util;
-    
+	private URI MEMBER_URI = URI.createFileURI(new File("").getAbsolutePath() + "/member.ecore");
+	private URI FAMILY_URI = URI.createFileURI(new File("").getAbsolutePath() + "/family.ecore");
 	   private EChangeCreationUtility() {
 	      // constructor of the SingletonExample class
 	   }
@@ -38,17 +47,37 @@ public class EChangeCreationUtility {
 		       // returns the singleton object
 		       return util;
 	   }
-	private URI MEMBER_URI = URI.createFileURI(new File("").getAbsolutePath() + "/member.ecore");
 
 	// Helper Functions
 	public void withFactories(ResourceSet set) {
 		set.getResourceFactoryRegistry().getExtensionToFactoryMap().put("ecore", new EcoreResourceFactoryImpl());
 	}
-	public Member getMember() {
+	private Member getMember() {
 		Member member = FamiliesFactory.eINSTANCE.createMember();
 		member.setFirstName("Clara");
+		
 		return member;
 	}
+	public Member createCompleteMember() {
+		Member member = getMember();
+		ResourceSet set = new ResourceSetImpl();
+	    withFactories(set);
+		Resource memberResource = set.createResource(MEMBER_URI);
+	    memberResource.getContents().add(member);
+	    return member;
+	}
+	public Pair<Family,Member> createFamily() {
+			
+			Member member = getMember();
+			Family family = FamiliesFactory.eINSTANCE.createFamily();
+			family.setMother(member);
+			ResourceSet familySet = new ResourceSetImpl();
+		    withFactories(familySet);
+			Resource familyResource = familySet.createResource(FAMILY_URI);
+			familyResource.getContents().add(member);
+			familyResource.getContents().add(family);		
+			return new Pair<>(family,member);
+		}
 	
 	/**
 	 * Adds a InsertEReference change to a resource and uses addAll() to add all changes of the resource to the List<EChange>.
@@ -147,7 +176,6 @@ public class EChangeCreationUtility {
 	    memberResource.getContents().add(member);
 	    memberResource.getContents().add(changeAttribute);
 		changes.addAll(new DefaultStateBasedChangeResolutionStrategy().getChangeSequenceForCreated(memberResource).getEChanges());
-		System.out.println(changes);
 		
 	}
 	
@@ -167,6 +195,76 @@ public class EChangeCreationUtility {
 		
 
 	}
+	public List<HashMap<String,Object>> getAllEncryptionMaps() throws NoSuchAlgorithmException{
+		List<HashMap<String,Object>> maps = new ArrayList<>();
+		maps.add(getEncryptionDetailsMapAES());
+		maps.add(getEncryptionDetailsMapDES());
+		maps.add(getEncryptionDetailsMapDESede());
+		maps.add(getEncryptionDetailsMapARCFOUR());
+		maps.add(getEncryptionDetailsMapBlowfish());
+		
+		return maps;
+		}
+	
+	private HashMap<String,Object> getEncryptionDetailsMapAES() throws NoSuchAlgorithmException{
+		KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
+		keyGenerator.init(128);
+		
+		// Create map of encryptionOptions
+		SecretKey secretKey = keyGenerator.generateKey();
+		HashMap <String,Object> map = new HashMap<String, Object>();
+		map.put("secretKey", secretKey);
+		map.put("algorithm", "AES");
+		return map;
+	}
+	private HashMap<String,Object> getEncryptionDetailsMapDES() throws NoSuchAlgorithmException{
+		KeyGenerator keyGenerator = KeyGenerator.getInstance("DES");
+		keyGenerator.init(56);
+		
+		// Create map of encryptionOptions
+		SecretKey secretKey = keyGenerator.generateKey();
+		HashMap <String,Object> map = new HashMap<String, Object>();
+		map.put("secretKey", secretKey);
+		map.put("algorithm", "DES");
+		return map;
+	}
+	private HashMap<String,Object> getEncryptionDetailsMapDESede() throws NoSuchAlgorithmException{
+		KeyGenerator keyGenerator = KeyGenerator.getInstance("DESede");
+		keyGenerator.init(168);
+		
+		// Create map of encryptionOptions
+		SecretKey secretKey = keyGenerator.generateKey();
+		HashMap <String,Object> map = new HashMap<String, Object>();
+		map.put("secretKey", secretKey);
+		map.put("algorithm", "DESede");
+		return map;
+	}
+	private HashMap<String,Object> getEncryptionDetailsMapARCFOUR() throws NoSuchAlgorithmException{
+		KeyGenerator keyGenerator = KeyGenerator.getInstance("ARCFOUR");
+		keyGenerator.init(256);
+		
+		// Create map of encryptionOptions
+		SecretKey secretKey = keyGenerator.generateKey();
+		HashMap <String,Object> map = new HashMap<String, Object>();
+		map.put("secretKey", secretKey);
+		map.put("algorithm", "ARCFOUR");
+		return map;
+	}
+	private HashMap<String,Object> getEncryptionDetailsMapBlowfish() throws NoSuchAlgorithmException{
+		KeyGenerator keyGenerator = KeyGenerator.getInstance("Blowfish");
+		keyGenerator.init(256);
+		
+		// Create map of encryptionOptions
+		SecretKey secretKey = keyGenerator.generateKey();
+		HashMap <String,Object> map = new HashMap<String, Object>();
+		map.put("secretKey", secretKey);
+		map.put("algorithm", "Blowfish");
+		return map;
+	}
+	
+	
+	
+	
 	
 	
 	
