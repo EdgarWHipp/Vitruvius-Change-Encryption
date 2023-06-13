@@ -41,8 +41,8 @@ import tools.vitruv.change.encryption.tests.util.EChangeCreationUtility;
  *
  */
 
-public class TestEncryptChangesWithDifferentKeysWithAES {
-	private static final Logger logger = Logger.getLogger(TestEncryptChangesWithDifferentKeysWithAES.class.getName());
+public class TestEncryptChangesWithDifferentKeys {
+	private static final Logger logger = Logger.getLogger(TestEncryptChangesWithDifferentKeys.class.getName());
 	private final File fileWithEncryptedChanges = new File(new File("").getAbsolutePath() +"/encrypted_changes");
 	private EncryptionSchemeImpl encryptionScheme = new EncryptionSchemeImpl();
 	private final EChangeCreationUtility creationUtil= EChangeCreationUtility.getInstance();

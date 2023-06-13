@@ -90,7 +90,6 @@ public class EncryptionSchemeImpl implements EncryptionScheme{
 	    resource.getContents().add(change);
 	    
 	    
-	    
 	    resource.save(byteArrayOutputStream,Collections.EMPTY_MAP);
 	    FileOutputStream fileOutputStream = new FileOutputStream(encryptedChangesFile);
 	    

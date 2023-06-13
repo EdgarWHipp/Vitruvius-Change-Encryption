@@ -32,6 +32,7 @@ import tools.vitruv.change.changederivation.DefaultStateBasedChangeResolutionStr
 import tools.vitruv.change.encryption.EncryptionScheme;
 import tools.vitruv.change.encryption.impl.EncryptionSchemeImpl;
 import tools.vitruv.change.encryption.tests.util.EChangeCreationUtility;
+import tools.vitruv.change.encryption.tests.util.EncryptionUtility;
 import tools.vitruv.change.composite.description.TransactionalChange;
 import tools.vitruv.change.composite.description.VitruviusChangeFactory;
 
@@ -44,12 +45,12 @@ import tools.vitruv.change.composite.description.VitruviusChangeFactory;
  */
 
 
-public class TestEncryptChangesSymmetricallyTogetherWithAES {
-	private static final Logger logger = Logger.getLogger(TestEncryptChangesSymmetricallyTogetherWithAES.class.getName());
+public class TestEncryptChangesSymmetricallyTogether {
+	private static final Logger logger = Logger.getLogger(TestEncryptChangesSymmetricallyTogether.class.getName());
 	private final File fileWithEncryptedChanges = new File(new File("").getAbsolutePath() +"/encrypted_changes");
 	private EncryptionSchemeImpl encryptionScheme = new EncryptionSchemeImpl();
 	private final EChangeCreationUtility creationUtil= EChangeCreationUtility.getInstance();
-	
+	private final EncryptionUtility encryptionUtil= EncryptionUtility.getInstance();
 	
 	
 	
@@ -67,7 +68,8 @@ public class TestEncryptChangesSymmetricallyTogetherWithAES {
 	 */
 	@Test 
 	public void testSaveAndLoadCreateReplaceSingleAttributeChange() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, IOException, ClassNotFoundException {
-		for (Map map : creationUtil.getAllEncryptionMaps()) {
+		List<String> times = new ArrayList<>();
+		for (Map map : encryptionUtil.getAllEncryptionMapsSymmetric()) {
 
 			List<EChange> changes = new ArrayList<>();
 			ResourceSet set = new ResourceSetImpl();
@@ -88,11 +90,15 @@ public class TestEncryptChangesSymmetricallyTogetherWithAES {
 	
 			long totalTime = endTime - startTime;
 	
-			logger.severe("Time spend:\t"+totalTime+"ms");
+			times.add("Time spent with "+map.get("algorithm")+":"+totalTime+"ms");
 			
 			
 		    assertTrue(new EcoreUtil.EqualityHelper().equals(set.getResources().get(0).getContents(), newResourceSet.getResources().get(0).getContents()));  
 		}
+		String result = times.stream()
+                .reduce((a, b) -> a + ", " + b)
+                .orElse("");
+		logger.severe(result);
 	    
 	}
 	/**
@@ -108,7 +114,8 @@ public class TestEncryptChangesSymmetricallyTogetherWithAES {
 	 */
 	@Test
 	public void testSaveAndLoadMemberCreation() throws NoSuchAlgorithmException, InvalidKeyException, ClassNotFoundException, IllegalBlockSizeException, BadPaddingException, NoSuchPaddingException, IOException, InvalidAlgorithmParameterException {
-		for (Map map : creationUtil.getAllEncryptionMaps()) {		
+		List<String> times = new ArrayList<>();
+		for (Map map : encryptionUtil.getAllEncryptionMapsSymmetric()) {		
 			List<EChange> changes = new ArrayList<>();
 			ResourceSet set = new ResourceSetImpl();
 			creationUtil.createCreateMemberChangeSequence(changes, set,1);
@@ -125,9 +132,13 @@ public class TestEncryptChangesSymmetricallyTogetherWithAES {
 	
 			long totalTime = endTime - startTime;
 	
-			logger.severe("Time spend:\t"+totalTime+"ms");
+			times.add("Time spent with "+map.get("algorithm")+":"+totalTime+"ms");
 		    assertTrue(new EcoreUtil.EqualityHelper().equals(set.getResources().get(0).getContents(), newResourceSet.getResources().get(0).getContents()));    
 		}
+		String result = times.stream()
+                .reduce((a, b) -> a + ", " + b)
+                .orElse("");
+		logger.severe(result);
 	}
 	/**
 	 * Test the Encryption and Decryption of the DeleteEObject change; 
@@ -142,7 +153,8 @@ public class TestEncryptChangesSymmetricallyTogetherWithAES {
 	 */
 	@Test 
 	public void testSaveAndLoadcreateDeleteEObjectChange() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, IOException, ClassNotFoundException {
-		for (Map map : creationUtil.getAllEncryptionMaps()) {		
+		List<String> times = new ArrayList<>();
+		for (Map map : encryptionUtil.getAllEncryptionMapsSymmetric()) {		
 			List<EChange> changes = new ArrayList<>();
 			ResourceSet set = new ResourceSetImpl();
 			creationUtil.createDeleteEObjectChange(changes, set);
@@ -161,9 +173,13 @@ public class TestEncryptChangesSymmetricallyTogetherWithAES {
 	
 			long totalTime = endTime - startTime;
 	
-			logger.severe("Time spend:\t"+totalTime+"ms");
+			times.add("Time spent with "+map.get("algorithm")+":"+totalTime+"ms");
 		    assertTrue(new EcoreUtil.EqualityHelper().equals(set.getResources().get(0).getContents(), newResourceSet.getResources().get(0).getContents()));    
 		}
+		String result = times.stream()
+                .reduce((a, b) -> a + ", " + b)
+                .orElse("");
+		logger.severe(result);
 	}
 	/**
 	 * Test the Encryption and Decryption of the RemoveEAttributeValue change;
@@ -178,7 +194,8 @@ public class TestEncryptChangesSymmetricallyTogetherWithAES {
 	 */
 	@Test
 	public void testSaveAndLoadcreateRemoveAttributeChange() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, IOException, ClassNotFoundException {
-		for (Map map : creationUtil.getAllEncryptionMaps()) {		
+		List<String> times = new ArrayList<>();
+		for (Map map : encryptionUtil.getAllEncryptionMapsSymmetric()) {		
 			List<EChange> changes = new ArrayList<>();
 		
 			ResourceSet set = new ResourceSetImpl();
@@ -198,9 +215,13 @@ public class TestEncryptChangesSymmetricallyTogetherWithAES {
 	
 			long totalTime = endTime - startTime;
 	
-			logger.severe("Time spend:\t"+totalTime+"ms");
+			times.add("Time spent with "+map.get("algorithm")+":"+totalTime+"ms");
 		    assertTrue(new EcoreUtil.EqualityHelper().equals(set.getResources().get(0).getContents(), newResourceSet.getResources().get(0).getContents()));   
 		}
+		String result = times.stream()
+                .reduce((a, b) -> a + ", " + b)
+                .orElse("");
+		logger.severe(result);
 	}
 	/**
 	 * Test the Encryption and Decryption of the DeleteRootEObject change;
@@ -215,7 +236,8 @@ public class TestEncryptChangesSymmetricallyTogetherWithAES {
 	 */
 	@Test
 	public void testSaveAndLoadDeleteRootEObjectChange() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, IOException, ClassNotFoundException {
-		for (Map map : creationUtil.getAllEncryptionMaps()) {
+		List<String> times = new ArrayList<>();
+		for (Map map : encryptionUtil.getAllEncryptionMapsSymmetric()) {
 			List<EChange> changes = new ArrayList<>();
 			ResourceSet set = new ResourceSetImpl();
 			creationUtil.createDeleteRootEObjectChange(changes, set);
@@ -234,9 +256,13 @@ public class TestEncryptChangesSymmetricallyTogetherWithAES {
 	
 			long totalTime = endTime - startTime;
 	
-			logger.severe("Time spend:\t"+totalTime+"ms");
+			times.add("Time spent with "+map.get("algorithm")+":"+totalTime+"ms");
 		    assertTrue(new EcoreUtil.EqualityHelper().equals(set.getResources().get(0).getContents(), newResourceSet.getResources().get(0).getContents()));    
 		}
+		String result = times.stream()
+                .reduce((a, b) -> a + ", " + b)
+                .orElse("");
+		logger.severe(result);
 	}
 	/**
 	 * Test the Encryption and Decryption of the InsertEAttributeValue change;
@@ -251,7 +277,8 @@ public class TestEncryptChangesSymmetricallyTogetherWithAES {
 	 */
 	@Test
 	public void testSaveAndLoadInsertEAttributeValueChange() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, IOException, ClassNotFoundException {
-		for (Map map : creationUtil.getAllEncryptionMaps()) {
+		List<String> times = new ArrayList<>();
+		for (Map map : encryptionUtil.getAllEncryptionMapsSymmetric()) {
 			List<EChange> changes = new ArrayList<>();
 			ResourceSet set = new ResourceSetImpl();
 			creationUtil.createInsertEAttributeValueChange(changes, set);
@@ -270,9 +297,13 @@ public class TestEncryptChangesSymmetricallyTogetherWithAES {
 	
 			long totalTime = endTime - startTime;
 	
-			logger.severe("Time spend:\t"+totalTime+"ms");
+			times.add("Time spent with "+map.get("algorithm")+":"+totalTime+"ms");
 		    assertTrue(new EcoreUtil.EqualityHelper().equals(set.getResources().get(0).getContents(), newResourceSet.getResources().get(0).getContents()));    
 		}
+		String result = times.stream()
+                .reduce((a, b) -> a + ", " + b)
+                .orElse("");
+		logger.severe(result);
 	}
 	/**
 	 * 
@@ -287,7 +318,8 @@ public class TestEncryptChangesSymmetricallyTogetherWithAES {
 	 */
 	@Test
 	public void testSaveAndLoadcreateInsertReferenceChange() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, IOException, ClassNotFoundException {
-		for (Map map : creationUtil.getAllEncryptionMaps()) {
+		List<String> times = new ArrayList<>();
+		for (Map map : encryptionUtil.getAllEncryptionMapsSymmetric()) {
 
 			List<EChange> changes = new ArrayList<>();
 			ResourceSet set = new ResourceSetImpl();
@@ -307,9 +339,13 @@ public class TestEncryptChangesSymmetricallyTogetherWithAES {
 	
 			long totalTime = endTime - startTime;
 	
-			logger.severe("Time spend:\t"+totalTime+"ms");
+			times.add("Time spent with "+map.get("algorithm")+":"+totalTime+"ms");
 		    assertTrue(new EcoreUtil.EqualityHelper().equals(set.getResources().get(0).getContents(), newResourceSet.getResources().get(0).getContents()));   
 		}
+		String result = times.stream()
+                .reduce((a, b) -> a + ", " + b)
+                .orElse("");
+		logger.severe(result);
 	}
 	
 
@@ -319,7 +355,9 @@ public class TestEncryptChangesSymmetricallyTogetherWithAES {
 	
 	@Test
 	public void testSaveAndLoadCreate10Members() throws NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, IOException, ClassNotFoundException {
-		for (Map map : creationUtil.getAllEncryptionMaps()) {		List<EChange> changes = new ArrayList<>();
+		List<String> times = new ArrayList<>();
+		for (Map map : encryptionUtil.getAllEncryptionMapsSymmetric()) {		
+			List<EChange> changes = new ArrayList<>();
 			ResourceSet set = new ResourceSetImpl();
 			creationUtil.createCreateMemberChangeSequence(changes, set,10);
 		    
@@ -335,13 +373,18 @@ public class TestEncryptChangesSymmetricallyTogetherWithAES {
 	
 			long totalTime = endTime - startTime;
 	
-			logger.severe("Time spend:\t"+totalTime+"ms");
+			times.add("Time spent with "+map.get("algorithm")+":"+totalTime+"ms");
 		    assertTrue(new EcoreUtil.EqualityHelper().equals(set.getResources().get(0).getContents(), newResourceSet.getResources().get(0).getContents()));   
 		}
+		String result = times.stream()
+                .reduce((a, b) -> a + ", " + b)
+                .orElse("");
+		logger.severe(result);
 	}
 	@Test
 	public void testSaveAndLoadCreate100Members() throws NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, IOException, ClassNotFoundException {
-		for (Map map : creationUtil.getAllEncryptionMaps()) {
+		List<String> times = new ArrayList<>();
+		for (Map map : encryptionUtil.getAllEncryptionMapsSymmetric()) {
 			List<EChange> changes = new ArrayList<>();
 			ResourceSet set = new ResourceSetImpl();
 			creationUtil.createCreateMemberChangeSequence(changes, set,100);
@@ -358,13 +401,18 @@ public class TestEncryptChangesSymmetricallyTogetherWithAES {
 	
 			long totalTime = endTime - startTime;
 	
-			logger.severe("Time spend:\t"+totalTime+"ms");
+			times.add("Time spent with "+map.get("algorithm")+":"+totalTime+"ms");
 		    assertTrue(new EcoreUtil.EqualityHelper().equals(set.getResources().get(0).getContents(), newResourceSet.getResources().get(0).getContents()));  
 		}
+		String result = times.stream()
+                .reduce((a, b) -> a + ", " + b)
+                .orElse("");
+		logger.severe(result);
 	}
 	@Test
 	public void testSaveAndLoadCreate1000Members() throws NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, IOException, ClassNotFoundException {
-		for (Map map : creationUtil.getAllEncryptionMaps()) {
+		List<String> times = new ArrayList<>();
+		for (Map map : encryptionUtil.getAllEncryptionMapsSymmetric()) {
 			List<EChange> changes = new ArrayList<>();
 			ResourceSet set = new ResourceSetImpl();
 			creationUtil.createCreateMemberChangeSequence(changes, set,1000);
@@ -381,13 +429,18 @@ public class TestEncryptChangesSymmetricallyTogetherWithAES {
 	
 	  		long totalTime = endTime - startTime;
 	
-	  		logger.severe("Time spend:\t"+totalTime+"ms");
+	  		times.add("Time spent with "+map.get("algorithm")+":"+totalTime+"ms");
 		    assertTrue(new EcoreUtil.EqualityHelper().equals(set.getResources().get(0).getContents(), newResourceSet.getResources().get(0).getContents()));   
 		}
+		String result = times.stream()
+                .reduce((a, b) -> a + ", " + b)
+                .orElse("");
+		logger.severe(result);
 	}
 	@Test
 	public void testSaveAndLoadCreate10000Members() throws NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, IOException, ClassNotFoundException {
-		for (Map map : creationUtil.getAllEncryptionMaps()) {
+		List<String> times = new ArrayList<>();
+		for (Map map : encryptionUtil.getAllEncryptionMapsSymmetric()) {
 			
 			List<EChange> changes = new ArrayList<>();
 			ResourceSet set = new ResourceSetImpl();
@@ -405,10 +458,13 @@ public class TestEncryptChangesSymmetricallyTogetherWithAES {
 
 			long totalTime = endTime - startTime;
 
-			logger.severe("Time spend with "+map.get("algorithm")+":\t"+totalTime+"ms");
+			times.add("Time spent with "+map.get("algorithm")+":"+totalTime+"ms");
 		    assertTrue(new EcoreUtil.EqualityHelper().equals(set.getResources().get(0).getContents(), newResourceSet.getResources().get(0).getContents()));   
 		}
-		
+		 String result = times.stream()
+	                .reduce((a, b) -> a + ", " + b)
+	                .orElse("");
+		logger.severe(result);
 	}
 	
 	
