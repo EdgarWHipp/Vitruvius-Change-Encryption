@@ -1,6 +1,7 @@
 package tools.vitruv.change.encryption.tests.util;
 
 import java.security.KeyPair;
+
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -11,7 +12,6 @@ import java.util.List;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 
-import tools.vitruv.change.encryption.impl.Key;
 
 public class EncryptionUtility {
 	private static EncryptionUtility instance;

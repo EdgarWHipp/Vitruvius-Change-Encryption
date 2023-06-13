@@ -4,7 +4,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.security.KeyPair;
+import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -31,13 +33,35 @@ public class TestEncrypChangesAsymmetrically {
 	private final EChangeCreationUtility creationUtil= EChangeCreationUtility.getInstance();
 	private final EncryptionUtility encryptionUtil = EncryptionUtility.getInstance();
 	private final KeyPair keys=null;
-	private void initSetup() {
-		KeyPair PublicAndPrivateKey = encryptionUtil.generateRSAKkeyPair();
-		String keys = DatatypeConverter.printHexBinary(
-				PublicAndPrivateKey.getPublic().getEncoded());
+	
+	@Test
+	public void testAsymmetric() throws NoSuchAlgorithmException {
+		SecureRandom secureRandom
+        = new SecureRandom();
+
+    KeyPairGenerator keyPairGenerator
+        = KeyPairGenerator.getInstance("RSA");
+
+    keyPairGenerator.initialize(
+        2048, secureRandom);
+
+    KeyPair keypair = keyPairGenerator.generateKeyPair();
+		// check for keys
+     System.out.println(
+         "Public Key is: "
+         + 
+               keypair.getPublic().getEncoded());
+
+     System.out.println(
+         "Private Key is: "
+         + 
+               keypair.getPrivate().getEncoded());
 	}
+	
 	@Test
 	public void testAsymmetrically() throws NoSuchAlgorithmException {
+		// PUBLIC KEY IS GIVEN
+		// DECRYPT WITH PRIVATE KEY (PASSING CRITERIA = read/write access, otherwise only read access)
 		Map map = encryptionUtil.getEncryptionDetailsMap();
 		List<EChange> changes = new ArrayList<>();
 		ResourceSet set = new ResourceSetImpl();
@@ -48,5 +72,11 @@ public class TestEncrypChangesAsymmetrically {
 		CreateEObjectImpl<Member> decryptedChange =  (CreateEObjectImpl<Member>) encryptionScheme.decryptDeltaChangeAlone(map, fileWithEncryptedChanges);
 		
 		assertTrue(new EcoreUtil.EqualityHelper().equals(change, decryptedChange));   
+	}
+	private void getPassingUserAttributes() {
+		
+	}
+	private void getFailingUserAttributes() {
+		
 	}
 }
