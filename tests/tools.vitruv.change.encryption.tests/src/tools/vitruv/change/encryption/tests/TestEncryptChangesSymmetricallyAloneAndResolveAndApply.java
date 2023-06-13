@@ -83,10 +83,10 @@ public class TestEncryptChangesSymmetricallyAloneAndResolveAndApply {
 		InsertRootEObjectImpl<Member> decryptedChange =  (InsertRootEObjectImpl<Member>) encryptionScheme.decryptDeltaChangeAlone(map, fileWithEncryptedChanges);
 		ArrayList<EChange> changeInList = new ArrayList<EChange>();
 
-		changeInList.add(decryptedChange);
+		
 		changeInList.add(changes.get(0));
 		changeInList.add(changes.get(2));
-
+		changeInList.add(decryptedChange);
 		TransactionalChange transactionalChange = VitruviusChangeFactory.getInstance().createTransactionalChange(changeInList);
 	    ResourceSet newResourceSet = new ResourceSetImpl();
 	    creationUtil.withFactories(newResourceSet);
@@ -105,9 +105,9 @@ public class TestEncryptChangesSymmetricallyAloneAndResolveAndApply {
 		ReplaceSingleValuedEAttributeImpl<Member,String> decryptedChange =  (ReplaceSingleValuedEAttributeImpl<Member, String>) encryptionScheme.decryptDeltaChangeAlone(map, fileWithEncryptedChanges);
 		ArrayList<EChange> changeInList = new ArrayList<EChange>();
 
-		changeInList.add(decryptedChange);
 		changeInList.add(changes.get(0));
 		changeInList.add(changes.get(1));
+		changeInList.add(decryptedChange);
 
 		TransactionalChange transactionalChange = VitruviusChangeFactory.getInstance().createTransactionalChange(changeInList);
 	    ResourceSet newResourceSet = new ResourceSetImpl();
@@ -127,12 +127,13 @@ public class TestEncryptChangesSymmetricallyAloneAndResolveAndApply {
 		DeleteEObject<Member> decryptedChange = (DeleteEObject<Member>) encryptionScheme.decryptDeltaChangeAlone(map, fileWithEncryptedChanges);
 		ArrayList<EChange> changeInList = new ArrayList<EChange>();
 
-		changeInList.add(decryptedChange);
+		
 		changeInList.add(changes.get(0));
 		changeInList.add(changes.get(0));
 
 		changeInList.add(changes.get(1));
 		changeInList.add(changes.get(2));
+		changeInList.add(decryptedChange);
 
 		TransactionalChange transactionalChange = VitruviusChangeFactory.getInstance().createTransactionalChange(changeInList);
 	    ResourceSet newResourceSet = new ResourceSetImpl();
@@ -186,42 +187,67 @@ public class TestEncryptChangesSymmetricallyAloneAndResolveAndApply {
 	@Test
 	public void testInsertEReferenceChangeEncryption() throws NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException {
 		Map map = encryptionUtil.getEncryptionDetailsMap();
-		Member member = creationUtil.createCompleteMember();
+		Resource memberResource = creationUtil.createCompleteMember();
+		Member member = (Member) memberResource.getContents().get(0);
 
-		Pair<Family,Member> familyAndMother = creationUtil.createFamily();
+		Resource family = creationUtil.createFamily();
+		Family familyImpl = (Family) family.getContents().get(0);
+		Member motherImpl = (Member) family.getContents().get(1);
+		Member daughterimpl =(Member) family.getContents().get(2);
+		EReference daughtersReference = familyImpl.eClass().getEAllReferences().get(1);
+		List<EChange> allChanges = new DefaultStateBasedChangeResolutionStrategy().getChangeSequenceForCreated(family).getEChanges();
+
 		InsertEReference<Family,EObject> change =TypeInferringAtomicEChangeFactory.getInstance()
-				.createInsertReferenceChange(familyAndMother.getFirst(),familyAndMother.getFirst().eClass().getEAllReferences().get(3),member,0);
+				.createInsertReferenceChange(familyImpl,daughtersReference,member,2);
 		encryptionScheme.encryptDeltaChangeAlone(map,change,fileWithEncryptedChanges);
 		InsertEReference<Family,EObject>  decryptedChange = (InsertEReference<Family,EObject>) encryptionScheme.decryptDeltaChangeAlone(map, fileWithEncryptedChanges);
-		
+		ArrayList<EChange> changeInList = new ArrayList<EChange>();
+		changeInList.add(decryptedChange);
+		changeInList.addAll(allChanges);
+		TransactionalChange transactionalChange = VitruviusChangeFactory.getInstance().createTransactionalChange(changeInList);
+	    ResourceSet newResourceSet = new ResourceSetImpl();
+	    creationUtil.withFactories(newResourceSet);
+	    transactionalChange.resolveAndApply(IdResolver.create(newResourceSet));
 		assertTrue(new EcoreUtil.EqualityHelper().equals(change,decryptedChange)); 
 	}
 	@Test
 	public void testcreateRemoveReferenceChangeEncryption() throws NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException {
 		Map map = encryptionUtil.getEncryptionDetailsMap();
-		Pair<Family,Member> familyAndMother = creationUtil.createFamily();
-		
+		Resource family = creationUtil.createFamily();
+		Family familyImpl = (Family) family.getContents().get(0);
+		Member motherImpl = (Member) family.getContents().get(1);
+		Member daughterimpl =(Member) family.getContents().get(2);
+		EReference daughtersReference = familyImpl.eClass().getEAllReferences().get(1);
+		List<EChange> allChanges = new DefaultStateBasedChangeResolutionStrategy().getChangeSequenceForCreated(family).getEChanges();
+
 		RemoveEReference<EObject, EObject> change =TypeInferringAtomicEChangeFactory.getInstance()
-				.createRemoveReferenceChange(familyAndMother.getFirst(), familyAndMother.getFirst().eClass().getEAllReferences().get(3), familyAndMother.getSecond(), 0);
+				.createRemoveReferenceChange(familyImpl, daughtersReference, daughterimpl, 0);
 		encryptionScheme.encryptDeltaChangeAlone(map,change,fileWithEncryptedChanges);
 		RemoveEReference<EObject, EObject>  decryptedChange = (RemoveEReference<EObject, EObject>) encryptionScheme.decryptDeltaChangeAlone(map, fileWithEncryptedChanges);
-		
+		ArrayList<EChange> changeInList = new ArrayList<EChange>();
+		changeInList.add(decryptedChange);
+		changeInList.addAll(allChanges);
+		TransactionalChange transactionalChange = VitruviusChangeFactory.getInstance().createTransactionalChange(changeInList);
+	    ResourceSet newResourceSet = new ResourceSetImpl();
+	    creationUtil.withFactories(newResourceSet);
+	    transactionalChange.resolveAndApply(IdResolver.create(newResourceSet));
 		assertTrue(new EcoreUtil.EqualityHelper().equals(change,decryptedChange)); 
 		
 	}
 	@Test
 	public void testcreateReplaceSingleReferenceChangeEncryption() throws NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException {
 		Map map = encryptionUtil.getEncryptionDetailsMap();
-		Member member = creationUtil.createCompleteMember();
-	
+		Resource memberResource = creationUtil.createCompleteMember();
+		Member member = (Member) memberResource.getContents().get(0);
 		
 		Resource family = creationUtil.createFamily();
 		Family familyImpl = (Family) family.getContents().get(0);
 		Member motherImpl = (Member) family.getContents().get(1);
+		Member daughterimpl =(Member) family.getContents().get(2);
 		EReference daughtersReference = familyImpl.eClass().getEAllReferences().get(1);
 		List<EChange> allChanges = new DefaultStateBasedChangeResolutionStrategy().getChangeSequenceForCreated(family).getEChanges();
 		ReplaceSingleValuedEReference<Family, Member>  change = TypeInferringAtomicEChangeFactory.getInstance()
-				.createReplaceSingleReferenceChange(familyImpl, daughtersReference, motherImpl, member);
+				.createReplaceSingleReferenceChange(familyImpl, daughtersReference, daughterimpl, member);
 		change.setAffectedEObjectID("EObject dummy ID");
 		encryptionScheme.encryptDeltaChangeAlone(map,change,fileWithEncryptedChanges);
 		ReplaceSingleValuedEReference<Member, Member>  decryptedChange = (ReplaceSingleValuedEReference<Member, Member>) encryptionScheme.decryptDeltaChangeAlone(map, fileWithEncryptedChanges);

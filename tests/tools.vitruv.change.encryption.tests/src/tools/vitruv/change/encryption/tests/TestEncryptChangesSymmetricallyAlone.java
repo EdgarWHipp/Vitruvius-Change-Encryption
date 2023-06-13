@@ -272,6 +272,7 @@ public class TestEncryptChangesSymmetricallyAlone {
 	}
 	@Test
 	public void testcreateReplaceSingleReferenceChangeEncryption() throws NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException {
+		List<String> times = new ArrayList<>();
 		for (Map map : encryptionUtil.getAllEncryptionMapsSymmetric()) {
 			Resource memberResource = creationUtil.createCompleteMember();
 			Member member = (Member) memberResource.getContents().get(0);
