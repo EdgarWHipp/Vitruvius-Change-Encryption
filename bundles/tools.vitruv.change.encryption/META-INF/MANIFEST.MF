@@ -17,8 +17,10 @@ Require-Bundle: org.apache.log4j,
  org.eclipse.emf.ecore.xmi,
  org.apache.xml.resolver;bundle-version="1.2.0",
  junit-jupiter-api,
- org.eclipse.emf.common
+ org.eclipse.emf.common,
+ org.eclipse.xtend.lib.macro
 Export-Package: tools.vitruv.change.encryption,
  tools.vitruv.change.encryption.impl,
+ tools.vitruv.change.encryption.junwei.cpabe.cpabe,
  tools.vitruv.change.serialization
 Bundle-Vendor: vitruv.tools

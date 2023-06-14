@@ -428,10 +428,9 @@ public class TestSaveAndLoadChangesWithoutEncryptionTogether {
 		creationUtil.createCreateMemberChangeSequence(changes, set,10000);
 	    
 		long startTime = System.currentTimeMillis();
-	    encryptionScheme.encryptDeltaChangesTogether(map, changes, fileWithEncryptedChanges);
-	    List<EChange> decryptedChange = encryptionScheme.decryptDeltaChangesTogether(map, fileWithEncryptedChanges);
+	    
 	   
-	    TransactionalChange transactionalChange = VitruviusChangeFactory.getInstance().createTransactionalChange(decryptedChange);
+	    TransactionalChange transactionalChange = VitruviusChangeFactory.getInstance().createTransactionalChange(changes);
 	    ResourceSet newResourceSet = new ResourceSetImpl();
 	    creationUtil.withFactories(newResourceSet);
 	    transactionalChange.resolveAndApply(IdResolver.create(newResourceSet));

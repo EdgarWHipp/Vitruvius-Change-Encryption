@@ -11,8 +11,6 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
-	<classpathentry kind="lib" path="/tools.vitruv.change.encryption/jackson/jackson-annotations-2.15.1(1).jar"/>
-	<classpathentry kind="lib" path="/tools.vitruv.change.encryption/jackson/jackson-core-2.15.1(1).jar"/>
-	<classpathentry kind="lib" path="/tools.vitruv.change.encryption/jackson/jackson-databind-2.15.1(1).jar"/>
+	<classpathentry kind="lib" path="/cpabe/cpabe-api/src" sourcepath="/cpabe/cpabe-api/src"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
