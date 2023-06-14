@@ -1,4 +1,4 @@
-package tools.vitruv.change.encryption.tests;
+package tools.vitruv.change.encryption.tests.symmetric;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -31,6 +31,7 @@ import tools.vitruv.change.atomic.id.IdResolver;
 import tools.vitruv.change.changederivation.DefaultStateBasedChangeResolutionStrategy;
 import tools.vitruv.change.encryption.EncryptionScheme;
 import tools.vitruv.change.encryption.impl.EncryptionSchemeImpl;
+import tools.vitruv.change.encryption.tests.TestChangeEncryption;
 import tools.vitruv.change.encryption.tests.util.EChangeCreationUtility;
 import tools.vitruv.change.encryption.tests.util.EncryptionUtility;
 import tools.vitruv.change.composite.description.TransactionalChange;
@@ -45,7 +46,7 @@ import tools.vitruv.change.composite.description.VitruviusChangeFactory;
  */
 
 
-public class TestEncryptChangesSymmetricallyTogether {
+public class TestEncryptChangesSymmetricallyTogether extends TestChangeEncryption{
 	private static final Logger logger = Logger.getLogger(TestEncryptChangesSymmetricallyTogether.class.getName());
 	private final File fileWithEncryptedChanges = new File(new File("").getAbsolutePath() +"/encrypted_changes");
 	private EncryptionSchemeImpl encryptionScheme = new EncryptionSchemeImpl();

@@ -3,6 +3,7 @@ package tools.vitruv.change.encryption.tests;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
+
 import java.io.File;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -18,15 +19,17 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.junit.jupiter.api.Test;
 
 import edu.kit.ipd.sdq.metamodels.families.Member;
+import junwei.cpabe.junwei.cpabe.Cpabe;
 import tools.vitruv.change.atomic.EChange;
 import tools.vitruv.change.atomic.eobject.impl.CreateEObjectImpl;
 import tools.vitruv.change.encryption.impl.AsymmetricEncryptionSchemeImpl;
 import tools.vitruv.change.encryption.impl.EncryptionSchemeImpl;
+import tools.vitruv.change.encryption.tests.symmetric.TestEncryptChangesSymmetricallyAlone;
 import tools.vitruv.change.encryption.tests.util.EChangeCreationUtility;
 import tools.vitruv.change.encryption.tests.util.EncryptionUtility;
-import tools.vitruv.change.encryption.junwei.cpabe.cpabe.*;
-public class TestEncrypChangesAsymmetrically {
-	private static final Logger logger = Logger.getLogger(TestEncryptChangesSymmetricallyAlone.class.getName());
+
+public class TestEncrypChangesAsymmetricallyWithCPABE {
+	private static final Logger logger = Logger.getLogger(TestEncrypChangesAsymmetricallyWithCPABE.class.getName());
 	private final File fileWithEncryptedChanges = new File(new File("").getAbsolutePath() +"/encrypted_changes");
 	private AsymmetricEncryptionSchemeImpl encryptionScheme= new AsymmetricEncryptionSchemeImpl();
 	private final EChangeCreationUtility creationUtil= EChangeCreationUtility.getInstance();
@@ -36,15 +39,15 @@ public class TestEncrypChangesAsymmetrically {
 	private final String privateKeyPath = new File("").getAbsolutePath() +"/private_key";
 	
 	private final String inputFile = new File("").getAbsolutePath() +"/input.pdf";
-	private final String encryptedFile = new File("").getAbsolutePath() +"/encrypted.pdf";
-	private final String decryptedFile = new File("").getAbsolutePath() +"/decrypted.pdf";
+	private final String encryptedFilePath = new File("").getAbsolutePath() +"/encrypted.pdf";
+	private final String decryptedFilePath = new File("").getAbsolutePath() +"/decrypted.pdf";
 	
 	/**
 	 * Encrypts a set of valid changes and opens the decryptedChanges in read-only mode.
 	 */
 	@Test
 	public void testFailingFileAccess() throws Exception {
-		String failingUserAttributes = getPassingUserAttributes();
+		String failingUserAttributes = getFailingUserAttributes();
 		String policy = getPolicy();
 		Cpabe test = new Cpabe();
 		System.out.println("//start to setup");
@@ -56,12 +59,15 @@ public class TestEncrypChangesAsymmetrically {
 		System.out.println("//end to keygen");
 
 		System.out.println("//start to enc");
-		test.enc(publicKeyPath, policy, inputFile, encryptedFile);
+		test.enc(publicKeyPath, policy, inputFile, encryptedFilePath);
 		System.out.println("//end to enc");
 
 		System.out.println("//start to dec");
-		test.dec(publicKeyPath, privateKeyPath, encryptedFile, decryptedFile);
+		test.dec(publicKeyPath, privateKeyPath, encryptedFilePath, decryptedFilePath);
 		System.out.println("//end to dec");
+		File checkFile = new File(decryptedFilePath);
+		assert checkFile.canWrite() == false;
+		assert checkFile.canRead() == true;
 	}
 	/**
 	 * Encrypts a set of valid changes and opens the decryptedChanges in read/write mode.
@@ -74,7 +80,7 @@ public class TestEncrypChangesAsymmetrically {
 		
 		
 		
-		String passingUserAttributes = getFailingUserAttributes();
+		String passingUserAttributes = getPassingUserAttributes();
 		String policy = getPolicy();
 
 		Cpabe test = new Cpabe();
@@ -87,12 +93,17 @@ public class TestEncrypChangesAsymmetrically {
 		System.out.println("//end to keygen");
 
 		System.out.println("//start to enc");
-		test.enc(publicKeyPath, policy, inputFile, encryptedFile);
+		test.enc(publicKeyPath, policy, inputFile, encryptedFilePath);
 		System.out.println("//end to enc");
 
 		System.out.println("//start to dec");
-		test.dec(publicKeyPath, privateKeyPath, encryptedFile, decryptedFile);
+		test.dec(publicKeyPath, privateKeyPath, encryptedFilePath, decryptedFilePath);
 		System.out.println("//end to dec");
+		
+		File checkFile = new File(decryptedFilePath);
+		assert checkFile.canWrite() == true;
+		assert checkFile.canRead() == true;
+		
 	}
 	
 	private String getPassingUserAttributes() {

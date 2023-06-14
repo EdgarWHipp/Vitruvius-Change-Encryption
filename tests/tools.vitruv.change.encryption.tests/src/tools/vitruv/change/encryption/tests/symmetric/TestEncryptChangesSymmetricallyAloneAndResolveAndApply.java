@@ -1,4 +1,4 @@
-package tools.vitruv.change.encryption.tests;
+package tools.vitruv.change.encryption.tests.symmetric;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -43,6 +43,7 @@ import tools.vitruv.change.changederivation.DefaultStateBasedChangeResolutionStr
 import tools.vitruv.change.composite.description.TransactionalChange;
 import tools.vitruv.change.composite.description.VitruviusChangeFactory;
 import tools.vitruv.change.encryption.impl.EncryptionSchemeImpl;
+import tools.vitruv.change.encryption.tests.TestChangeEncryption;
 import tools.vitruv.change.encryption.tests.util.EChangeCreationUtility;
 import tools.vitruv.change.encryption.tests.util.EncryptionUtility;
 

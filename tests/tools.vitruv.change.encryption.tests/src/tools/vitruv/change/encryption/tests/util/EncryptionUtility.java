@@ -4,6 +4,8 @@ import java.security.KeyPair;
 
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -102,28 +104,27 @@ public class EncryptionUtility {
 		return map;
 	}
 	
-	public KeyPair generateRSAKkeyPair()
-	        
-	    {
-	        SecureRandom secureRandom
-	            = new SecureRandom();
-	 
-	        KeyPairGenerator keyPairGenerator;
-			try {
-				keyPairGenerator = KeyPairGenerator.getInstance("RSA");
+	
+	public HashMap<String,Object> getEncryptionDetailsMapAsymmetricRSA() throws NoSuchAlgorithmException{
+		HashMap <String,Object> map = new HashMap<String, Object>();
+	
+		SecureRandom secureRandom= new SecureRandom();
 
-		        keyPairGenerator.initialize(
-		            2048, secureRandom);
-		 
-		        return keyPairGenerator
-		            .generateKeyPair();
-			} catch (NoSuchAlgorithmException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			return null;
-	 
-	    }
+	    KeyPairGenerator keyPairGenerator;
+		
+		keyPairGenerator = KeyPairGenerator.getInstance("RSA");
+
+        keyPairGenerator.initialize(
+            2048, secureRandom);
+ 
+        KeyPair pair =  keyPairGenerator.generateKeyPair();
+        PrivateKey privateKey = pair.getPrivate();
+        PublicKey publicKey = pair.getPublic();
+		map.put("privateKey", privateKey);
+		map.put("publicKey", publicKey);
+		map.put("algorithm","RSA");
+		return map;
+	}
 	
 	
 }

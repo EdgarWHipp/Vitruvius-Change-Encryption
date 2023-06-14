@@ -2,6 +2,8 @@ package tools.vitruv.change.encryption.utils;
 
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.util.Map;
 
 import javax.crypto.BadPaddingException;
@@ -33,7 +35,7 @@ public final class EncryptionUtils {
 	        return INSTANCE;
 	    }
 	 
-	public byte[] cryptographicFunction(Map<?,?> options,int opMode,byte[] bytes) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException{
+	public byte[] cryptographicFunctionSymmetric(Map<?,?> options,int opMode,byte[] bytes) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException{
 		SecretKey secretKey = (SecretKey) options.get("secretKey");
 		String algorithm =  (String) options.get("algorithm");
 		Cipher cipher = Cipher.getInstance(algorithm);
@@ -42,6 +44,26 @@ public final class EncryptionUtils {
 		return result;
 	 	
 	}
+	public byte[] cryptographicFunctionAsymmetric(Map<?,?> options,int opMode,byte[] bytes) throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, NoSuchPaddingException {
+		PublicKey publicKey = (PublicKey) options.get("publicKey");
+		PrivateKey privateKey = (PrivateKey) options.get("publicKey");
+		String algorithm =  (String) options.get("algorithm");
+		Cipher cipher = Cipher.getInstance(algorithm);
+		if (opMode==Cipher.ENCRYPT_MODE) {
+			cipher.init(Cipher.ENCRYPT_MODE, publicKey);
+			byte[] encryptedBytes = cipher.doFinal(bytes);
+			return encryptedBytes;
+		}
+			if (opMode==Cipher.DECRYPT_MODE) {
+			cipher.init(Cipher.DECRYPT_MODE, publicKey);
+			byte[] decryptedBytes = cipher.doFinal(bytes);
+			return decryptedBytes;
+		}
+			System.out.println("no correct option has been found");
+			return null;
+	}
+	
+	
 	 
 	
 	

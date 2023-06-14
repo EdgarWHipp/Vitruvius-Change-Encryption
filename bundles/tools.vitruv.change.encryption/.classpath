@@ -14,8 +14,7 @@
 			<accessrule kind="accessible" pattern="*"/>
 		</accessrules>
 	</classpathentry>
-	<classpathentry kind="lib" path="jackson/jackson-annotations-2.15.1(1).jar"/>
-	<classpathentry kind="lib" path="jackson/jackson-core-2.15.1(1).jar"/>
-	<classpathentry kind="lib" path="jackson/jackson-databind-2.15.1(1).jar"/>
+	<classpathentry kind="lib" path="C:/Users/Klavi/git/Vitruvius-Change-Encryption/bundles/tools.vitruv.change.encryption/cp-abe/jars/jpbc-api-1.2.1.jar" sourcepath="cp-abe/jars/jpbc-api-1.2.1.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Klavi/git/Vitruvius-Change-Encryption/bundles/tools.vitruv.change.encryption/cp-abe/jars/jpbc-plaf-1.2.1.jar" sourcepath="cp-abe/jars/jpbc-plaf-1.2.1.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

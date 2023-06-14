@@ -22,6 +22,8 @@ import java.nio.file.StandardOpenOption;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -52,6 +54,7 @@ import com.google.common.io.Files;
 import edu.kit.ipd.sdq.commons.util.java.Pair;
 import tools.vitruv.change.atomic.EChange;
 import tools.vitruv.change.encryption.EncryptionScheme;
+import tools.vitruv.change.encryption.tests.TestChangeEncryption;
 import tools.vitruv.change.encryption.utils.EncryptionUtils;
 
 /**
@@ -64,6 +67,43 @@ public class EncryptionSchemeImpl implements EncryptionScheme{
 	private final EncryptionUtils encryptionUtils = EncryptionUtils.getInstance();
 	public EncryptionSchemeImpl() {
 	
+	}
+	public void encryptDeltaChangeAloneAsymmetrically(Map<?,?> encryptionOption,EChange change,File encryptedChangesFile) throws IOException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, NoSuchPaddingException {
+		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+		ResourceSet resourceSet = new ResourceSetImpl();
+	    resourceSet.getResourceFactoryRegistry().getExtensionToFactoryMap().put("ecore", new EcoreResourceFactoryImpl());
+	    
+	    Resource resource = resourceSet.createResource(URI.createFileURI(new File("").getAbsolutePath() + "/dummy.ecore"));
+	    resource.getContents().add(change);
+	    
+	    
+	    resource.save(byteArrayOutputStream,Collections.EMPTY_MAP);
+	    FileOutputStream fileOutputStream = new FileOutputStream(encryptedChangesFile);
+	    
+	    byte[] encryptedData = encryptionUtils.cryptographicFunctionAsymmetric(encryptionOption,Cipher.ENCRYPT_MODE,byteArrayOutputStream.toByteArray());
+	    fileOutputStream.write(encryptedData);
+	    byteArrayOutputStream.close();
+	    fileOutputStream.close();
+		
+		
+		
+	}
+	
+	public EChange decryptDeltaChangeAloneAsymmetrically(Map<?,?> decryptionOption,File encryptedChangesFile) throws IOException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, NoSuchPaddingException {
+		FileInputStream fileInputStream = new FileInputStream(encryptedChangesFile);
+		
+        byte[] encryptedData = fileInputStream.readAllBytes();
+
+        byte[] decryptedData = encryptionUtils.cryptographicFunctionAsymmetric(decryptionOption,Cipher.DECRYPT_MODE,encryptedData);
+
+        ByteArrayInputStream decryptedStream = new ByteArrayInputStream(decryptedData);
+       
+        ResourceSet resourceSet = new ResourceSetImpl();
+        resourceSet.getResourceFactoryRegistry().getExtensionToFactoryMap().put( "ecore", new EcoreResourceFactoryImpl());
+        Resource resource = resourceSet.createResource(URI.createFileURI(new File("").getAbsolutePath() + "/decrypted.ecore"));
+        resource.load(decryptedStream,Collections.EMPTY_MAP);
+        EChange decryptedChange = (EChange) resource.getContents().get(0);
+        return decryptedChange;
 	}
 	
 	public void encryptDeltasCustomKeys(Map<EChange,Pair<SecretKey,String>> options,File encryptedChangesFile) {
@@ -93,7 +133,7 @@ public class EncryptionSchemeImpl implements EncryptionScheme{
 	    resource.save(byteArrayOutputStream,Collections.EMPTY_MAP);
 	    FileOutputStream fileOutputStream = new FileOutputStream(encryptedChangesFile);
 	    
-	    byte[] encryptedData = encryptionUtils.cryptographicFunction(encryptionOption,1,byteArrayOutputStream.toByteArray());
+	    byte[] encryptedData = encryptionUtils.cryptographicFunctionSymmetric(encryptionOption,Cipher.ENCRYPT_MODE,byteArrayOutputStream.toByteArray());
 	    fileOutputStream.write(encryptedData);
 	    byteArrayOutputStream.close();
 	    fileOutputStream.close();
@@ -117,7 +157,7 @@ public class EncryptionSchemeImpl implements EncryptionScheme{
 		
         byte[] encryptedData = fileInputStream.readAllBytes();
 
-        byte[] decryptedData = encryptionUtils.cryptographicFunction(decryptionOption,2,encryptedData);
+        byte[] decryptedData = encryptionUtils.cryptographicFunctionSymmetric(decryptionOption,Cipher.DECRYPT_MODE,encryptedData);
 
         ByteArrayInputStream decryptedStream = new ByteArrayInputStream(decryptedData);
        
@@ -156,7 +196,7 @@ public class EncryptionSchemeImpl implements EncryptionScheme{
 
 		    
 		    try {
-		        byte[] encryptedData = encryptionUtils.cryptographicFunction(encryptionMap,1,byteArrayOutputStream.toByteArray());
+		        byte[] encryptedData = encryptionUtils.cryptographicFunctionSymmetric(encryptionMap,Cipher.ENCRYPT_MODE,byteArrayOutputStream.toByteArray());
 		        FileOutputStream fileOutputStream = new FileOutputStream(encryptedChangesFile);
 		        try {
 		            fileOutputStream.write(encryptedData);
@@ -193,7 +233,7 @@ public class EncryptionSchemeImpl implements EncryptionScheme{
 		
         byte[] encryptedData = fileInputStream.readAllBytes();
 
-        byte[] decryptedData = encryptionUtils.cryptographicFunction(decryptionMap,2,encryptedData);
+        byte[] decryptedData = encryptionUtils.cryptographicFunctionSymmetric(decryptionMap,Cipher.DECRYPT_MODE,encryptedData);
 
         ByteArrayInputStream decryptedStream = new ByteArrayInputStream(decryptedData);
        
