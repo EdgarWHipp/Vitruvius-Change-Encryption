@@ -55,7 +55,10 @@ public class TestEncryptChangesSymmetricallyTogether extends TestChangeEncryptio
 	
 	
 	
-
+	@Test
+	public void ALL() {
+		
+	}
 	/**
 	 * Test the Encryption and Decryption of the ReplaceSingleAttribute change; 
 	 * @throws InvalidKeyException
@@ -69,6 +72,7 @@ public class TestEncryptChangesSymmetricallyTogether extends TestChangeEncryptio
 	 */
 	@Test 
 	public void testSaveAndLoadCreateReplaceSingleAttributeChange() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, IOException, ClassNotFoundException {
+		
 		List<String> times = new ArrayList<>();
 		for (Map map : encryptionUtil.getAllEncryptionMapsSymmetric()) {
 
@@ -76,16 +80,23 @@ public class TestEncryptChangesSymmetricallyTogether extends TestChangeEncryptio
 			ResourceSet set = new ResourceSetImpl();
 			creationUtil.createReplaceSingleAttributeChange(changes, set);
 	
-		 
+			TransactionalChange transactionalChange2 = VitruviusChangeFactory.getInstance().createTransactionalChange(changes);
+		    transactionalChange2.unresolve();
+		    ResourceSet newResourceSet2 = new ResourceSetImpl();
+		    creationUtil.withFactories(newResourceSet2);
+		    transactionalChange2.resolveAndApply(IdResolver.create(newResourceSet2));
+
 			long startTime = System.currentTimeMillis();
 		    encryptionScheme.encryptDeltaChangesTogether(map, changes, fileWithEncryptedChanges);
 		    List<EChange> decryptedChange = encryptionScheme.decryptDeltaChangesTogether(map, fileWithEncryptedChanges);
 		   
 		     
 		    TransactionalChange transactionalChange = VitruviusChangeFactory.getInstance().createTransactionalChange(decryptedChange);
+		    transactionalChange.unresolve();
 		    ResourceSet newResourceSet = new ResourceSetImpl();
 		    creationUtil.withFactories(newResourceSet);
-		    transactionalChange.resolveAndApply(IdResolver.create(newResourceSet));
+		    
+		    transactionalChange2.resolveAndApply(IdResolver.create(newResourceSet));
 	
 		    long endTime = System.currentTimeMillis();
 	

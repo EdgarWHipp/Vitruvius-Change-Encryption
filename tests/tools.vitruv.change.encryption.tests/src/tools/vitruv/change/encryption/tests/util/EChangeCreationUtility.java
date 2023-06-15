@@ -32,6 +32,8 @@ import tools.vitruv.change.atomic.feature.attribute.ReplaceSingleValuedEAttribut
 import tools.vitruv.change.atomic.feature.reference.InsertEReference;
 import tools.vitruv.change.atomic.root.RemoveRootEObject;
 import tools.vitruv.change.changederivation.DefaultStateBasedChangeResolutionStrategy;
+import tools.vitruv.change.composite.description.TransactionalChange;
+import tools.vitruv.change.composite.description.VitruviusChangeFactory;
 
 public class EChangeCreationUtility {
 	private static EChangeCreationUtility util;
@@ -179,8 +181,9 @@ public class EChangeCreationUtility {
 		Resource memberResource = set.createResource(MEMBER_URI);
 		DeleteEObject<Member> change = TypeInferringAtomicEChangeFactory.getInstance().createDeleteEObjectChange(member);
 		memberResource.getContents().add(member);
-	    memberResource.getContents().add(change);
 		changes.addAll(new DefaultStateBasedChangeResolutionStrategy().getChangeSequenceForCreated(memberResource).getEChanges());
+		changes.add(change);
+		
 		
 	}
 	
@@ -191,14 +194,14 @@ public class EChangeCreationUtility {
 	 */
 	public void createReplaceSingleAttributeChange(List<EChange> changes, ResourceSet set) {
 		Member member = getMember();
-	    ReplaceSingleValuedEAttribute<Member,String> changeAttribute = TypeInferringAtomicEChangeFactory.getInstance().createReplaceSingleAttributeChange(member, member.eClass().getEAttributes().get(0), "Clara", "Greta");
-	    
-		
-		withFactories(set);
+	    withFactories(set);
 		Resource memberResource = set.createResource(MEMBER_URI);
 	    memberResource.getContents().add(member);
-	    memberResource.getContents().add(changeAttribute);
-		changes.addAll(new DefaultStateBasedChangeResolutionStrategy().getChangeSequenceForCreated(memberResource).getEChanges());
+	    changes.addAll(new DefaultStateBasedChangeResolutionStrategy().getChangeSequenceForCreated(memberResource).getEChanges());
+	    ReplaceSingleValuedEAttribute<Member,String> changeAttribute = TypeInferringAtomicEChangeFactory.getInstance().createReplaceSingleAttributeChange(member, member.eClass().getEAttributes().get(0), "Clara", "Greta");
+	    
+	    
+		changes.add(changeAttribute);
 		
 	}
 	

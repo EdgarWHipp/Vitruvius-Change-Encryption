@@ -2,26 +2,34 @@ package tools.vitruv.change.encryption.tests.symmetric;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
-
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
+
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.emf.ecore.util.EcoreUtil;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+
+import edu.kit.ipd.sdq.commons.util.java.Pair;
 import edu.kit.ipd.sdq.metamodels.families.Family;
 import edu.kit.ipd.sdq.metamodels.families.Member;
 import tools.vitruv.change.atomic.EChange;
@@ -37,15 +45,33 @@ import tools.vitruv.change.atomic.feature.reference.ReplaceSingleValuedEReferenc
 import tools.vitruv.change.atomic.root.RemoveRootEObject;
 import tools.vitruv.change.atomic.root.impl.InsertRootEObjectImpl;
 import tools.vitruv.change.encryption.tests.TestChangeEncryption;
+import java.io.FileWriter;
+import au.com.bytecode.opencsv.CSVWriter;
 /**
  * In this test class the symmetric encryption of each Atomic EChange is tested.
  * @author Edgar Hipp
  *
  */
 public class TestEncryptChangesSymmetricallyAlone extends TestChangeEncryption{
+	private final static File csvFile = new File(new File("").getAbsolutePath() + File.separator + "mainSymmetricAlone.csv");
+	private final java.net.URI fileURI = csvFile.toURI();
 	
 	
-
+	public void ALL(String change,Map<String,Pair<String,Long>> map) throws IOException {
+		
+		Pair<String,Long> results = (Pair<String,Long>) map.get("result");
+		String csvLine = new String(change+","+results.getFirst()+","+results.getSecond()+"\n");
+		
+		 
+		 try (BufferedWriter writer = new BufferedWriter(new FileWriter(csvFile, true))) {
+	            writer.write(csvLine);
+	        } catch (IOException e) {
+	            e.printStackTrace();
+	        }
+	     
+	}
+	
+	
 	
 	@Test
 	public void testCreateEObjectChangeEncryption() throws NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException {
@@ -174,27 +200,38 @@ public class TestEncryptChangesSymmetricallyAlone extends TestChangeEncryption{
 	}
 	@Test
 	public void testInsertEAttributeValueChangeEncryption() throws NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException {
-		List<String> times = new ArrayList<>();
+		Map<String,Pair<String,Long>> mainMap = new HashMap<String,Pair<String,Long>>();
+		long[] timeArray = new long[10];
 		for (Map map : TestChangeEncryption.ENCRYPTIONUTIL.getAllEncryptionMapsSymmetric()) {
-			Resource memberResource = TestChangeEncryption.CREATIONUTIL.createCompleteMember();
-			Member member = (Member) memberResource.getContents().get(0);
-			
-
-		    InsertEAttributeValue<Member, String> change = TypeInferringAtomicEChangeFactory.getInstance().createInsertAttributeChange(member, member.eClass().getEAllAttributes().get(0), 0, "test");
-		    long startTime = System.currentTimeMillis();
-			//
-		    TestChangeEncryption.ENCRYPTIONSCHEME.encryptDeltaChangeAlone(map,change,TestChangeEncryption.FILE);
-			InsertEAttributeValue<Member, String>  decryptedChange = (InsertEAttributeValueImpl<Member,String>) TestChangeEncryption.ENCRYPTIONSCHEME.decryptDeltaChangeAlone(map, TestChangeEncryption.FILE);
-			//
-			long endTime = System.currentTimeMillis();
-			
-			long totalTime = endTime - startTime;
-			times.add("Time spent with "+map.get("algorithm")+":"+totalTime+"ms");
-			assertTrue(new EcoreUtil.EqualityHelper().equals(change,decryptedChange)); 
+			for (int i=0;i<10;i++) {
+				Resource memberResource = TestChangeEncryption.CREATIONUTIL.createCompleteMember();
+				Member member = (Member) memberResource.getContents().get(0);
+				
+	
+			    InsertEAttributeValue<Member, String> change = TypeInferringAtomicEChangeFactory.getInstance().createInsertAttributeChange(member, member.eClass().getEAllAttributes().get(0), 0, "test");
+			    long startTime = System.currentTimeMillis();
+				//
+			    TestChangeEncryption.ENCRYPTIONSCHEME.encryptDeltaChangeAlone(map,change,TestChangeEncryption.FILE);
+				InsertEAttributeValue<Member, String>  decryptedChange = (InsertEAttributeValueImpl<Member,String>) TestChangeEncryption.ENCRYPTIONSCHEME.decryptDeltaChangeAlone(map, TestChangeEncryption.FILE);
+				//
+				long endTime = System.currentTimeMillis();
+				
+				long totalTime = endTime - startTime;
+				timeArray[i]=totalTime;
+				assertTrue(new EcoreUtil.EqualityHelper().equals(change,decryptedChange)); 
+			}
+		
+			long mean;
+			long sum=0;
+			for (int i=0;i<10;i++) {
+				sum+=timeArray[i];
+			}
+		mean=sum/10;
+		mainMap.put("result",new Pair((String)map.get("algorithm"),mean));
+		this.ALL("InsertEAttributeValueChange",mainMap);
 		}
-		String result = times.stream()
-                .reduce((a, b) -> a + ", " + b)
-                .orElse("");
+		
+		
 		
 	}
 	@Test
@@ -228,29 +265,45 @@ public class TestEncryptChangesSymmetricallyAlone extends TestChangeEncryption{
 	}
 	@Test
 	public void testcreateRemoveReferenceChangeEncryption() throws NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException {
-		List<String> times = new ArrayList<>();
+		Map<String,Pair<String,Long>> mainMap = new HashMap<String,Pair<String,Long>>();
+		long[] timeArray = new long[10];
 		for (Map map : TestChangeEncryption.ENCRYPTIONUTIL.getAllEncryptionMapsSymmetric()) {
-			Resource family = TestChangeEncryption.CREATIONUTIL.createFamily();
-			Family familyImpl = (Family) family.getContents().get(0);
 			
-			Member daughter1Impl = (Member) family.getContents().get(2);
-			
-			RemoveEReference<EObject, EObject> change =TypeInferringAtomicEChangeFactory.getInstance()
-					.createRemoveReferenceChange(familyImpl, familyImpl.eClass().getEAllReferences().get(3), daughter1Impl, 0);
-			long startTime = System.currentTimeMillis();
-			//
-			TestChangeEncryption.ENCRYPTIONSCHEME.encryptDeltaChangeAlone(map,change,TestChangeEncryption.FILE);
-			RemoveEReference<EObject, EObject>  decryptedChange = (RemoveEReference<EObject, EObject>) TestChangeEncryption.ENCRYPTIONSCHEME.decryptDeltaChangeAlone(map, TestChangeEncryption.FILE);
-			//
-			long endTime = System.currentTimeMillis();
+			for (int i=0;i<10;i++) {
+				Resource family = TestChangeEncryption.CREATIONUTIL.createFamily();
+				Family familyImpl = (Family) family.getContents().get(0);
 				
-			long totalTime = endTime - startTime;
-			times.add("Time spent with "+map.get("algorithm")+":"+totalTime+"ms");
-			assertTrue(new EcoreUtil.EqualityHelper().equals(change,decryptedChange)); 
+				Member daughter1Impl = (Member) family.getContents().get(2);
+				
+				RemoveEReference<EObject, EObject> change =TypeInferringAtomicEChangeFactory.getInstance()
+						.createRemoveReferenceChange(familyImpl, familyImpl.eClass().getEAllReferences().get(3), daughter1Impl, 0);
+				change.setOldValue(null);
+				
+				
+				long startTime = System.currentTimeMillis();
+				//
+				TestChangeEncryption.ENCRYPTIONSCHEME.encryptDeltaChangeAlone(map,change,TestChangeEncryption.FILE);
+				RemoveEReference<EObject, EObject>  decryptedChange = (RemoveEReference<EObject, EObject>) TestChangeEncryption.ENCRYPTIONSCHEME.decryptDeltaChangeAlone(map, TestChangeEncryption.FILE);
+				//
+				long endTime = System.currentTimeMillis();
+					
+				long totalTime = endTime - startTime;
+				timeArray[i]=totalTime;
+			
+				assertTrue(new EcoreUtil.EqualityHelper().equals(change,decryptedChange)); 
+			}
+			long mean;
+			long sum=0;
+			for (int i=0;i<10;i++) {
+				sum+=timeArray[i];
+			}
+			mean=sum/10;
+			mainMap.put("result", new Pair((String)map.get("algorithm"),mean));
+			this.ALL("RemoveEReferenceChange",mainMap);
 		}
-		String result = times.stream()
-                .reduce((a, b) -> a + ", " + b)
-                .orElse("");
+		
+		
+		
 	
 		
 	}
@@ -264,10 +317,9 @@ public class TestEncryptChangesSymmetricallyAlone extends TestChangeEncryption{
 			Resource family = TestChangeEncryption.CREATIONUTIL.createFamily();
 			Family familyImpl = (Family) family.getContents().get(0);
 			Member motherImpl = (Member) family.getContents().get(1);
-			EReference daugtersReference = familyImpl.eClass().getEAllReferences().get(1);
-			
+			EReference mothersreference = familyImpl.eClass().getEAllReferences().get(3);
 			ReplaceSingleValuedEReference<Family, Member>  change = TypeInferringAtomicEChangeFactory.getInstance()
-					.createReplaceSingleReferenceChange(familyImpl, daugtersReference, motherImpl, member);
+					.createReplaceSingleReferenceChange(familyImpl, mothersreference, motherImpl, member);
 			long startTime = System.currentTimeMillis();
 			//
 			TestChangeEncryption.ENCRYPTIONSCHEME.encryptDeltaChangeAlone(map,change,TestChangeEncryption.FILE);
@@ -277,6 +329,7 @@ public class TestEncryptChangesSymmetricallyAlone extends TestChangeEncryption{
 			
 			long totalTime = endTime - startTime;
 			times.add("Time spent with "+map.get("algorithm")+":"+totalTime+"ms");
+			
 			assertTrue(new EcoreUtil.EqualityHelper().equals(change,decryptedChange)); 
 		}
 		String result = times.stream()

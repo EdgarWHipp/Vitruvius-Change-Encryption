@@ -19,6 +19,8 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.emf.compare,
  org.eclipse.emf.edit,
  edu.kit.ipd.sdq.metamodels.persons,
- org.eclipse.emf.ecore
+ org.eclipse.emf.ecore,
+ org.junit,
+ junit-jupiter-api
 Import-Package: edu.kit.ipd.sdq.commons.util.java
 
