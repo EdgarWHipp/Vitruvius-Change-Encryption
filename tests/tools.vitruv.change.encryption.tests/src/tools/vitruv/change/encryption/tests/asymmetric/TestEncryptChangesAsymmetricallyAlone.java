@@ -1,4 +1,4 @@
-package tools.vitruv.change.encryption.tests.symmetric;
+package tools.vitruv.change.encryption.tests.asymmetric;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -6,9 +6,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -25,8 +22,6 @@ import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.emf.ecore.util.EcoreUtil;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import edu.kit.ipd.sdq.commons.util.java.Pair;
@@ -37,7 +32,6 @@ import tools.vitruv.change.atomic.TypeInferringAtomicEChangeFactory;
 import tools.vitruv.change.atomic.eobject.DeleteEObject;
 import tools.vitruv.change.atomic.eobject.impl.CreateEObjectImpl;
 import tools.vitruv.change.atomic.feature.attribute.InsertEAttributeValue;
-import tools.vitruv.change.atomic.feature.attribute.impl.InsertEAttributeValueImpl;
 import tools.vitruv.change.atomic.feature.attribute.impl.ReplaceSingleValuedEAttributeImpl;
 import tools.vitruv.change.atomic.feature.reference.InsertEReference;
 import tools.vitruv.change.atomic.feature.reference.RemoveEReference;
@@ -45,18 +39,11 @@ import tools.vitruv.change.atomic.feature.reference.ReplaceSingleValuedEReferenc
 import tools.vitruv.change.atomic.root.RemoveRootEObject;
 import tools.vitruv.change.atomic.root.impl.InsertRootEObjectImpl;
 import tools.vitruv.change.encryption.tests.TestChangeEncryption;
-import java.io.FileWriter;
-import au.com.bytecode.opencsv.CSVWriter;
-/**
- * In this test class the symmetric encryption of each Atomic EChange is tested.
- * @author Edgar Hipp
- *
- */
-public class TestEncryptChangesSymmetricallyAlone extends TestChangeEncryption{
-	private final static File csvFile = new File(new File("").getAbsolutePath() + File.separator + "mainSymmetricAlone.csv");
-	
-	
-	private void writeToCsv(String change,Map<String,Pair<String,long[]>> map) throws IOException {
+
+public class TestEncryptChangesAsymmetricallyAlone extends TestChangeEncryption{
+	private final static File csvFile = new File(new File("").getAbsolutePath() + File.separator + "mainAsymmetricAlone.csv");
+
+private void writeToCsv(String change,Map<String,Pair<String,long[]>> map) throws IOException {
 		
 		Pair<String,long[]> results = (Pair<String,long[]>) map.get("result");
 		String csvLine = new String(change+","+results.getFirst()+","+results.getSecond()[0]+","+results.getSecond()[1]+","+results.getSecond()[2]+"\n");
@@ -69,19 +56,18 @@ public class TestEncryptChangesSymmetricallyAlone extends TestChangeEncryption{
 	        }
 	     
 	}
-	
 	private void testChangeAlone(EChange change) throws IOException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
 		Map<String,Pair<String,long[]>> mainMap = new HashMap<String,Pair<String,long[]>>();
 		long[][] timeArray = new long[10][3];
-		for (Map map : TestChangeEncryption.ENCRYPTIONUTIL.getAllEncryptionMapsSymmetric()) {
+		for (Map map : TestChangeEncryption.ENCRYPTIONUTIL.getAllEncryptionMapsAsymmetric()) {
 			for (int i=0;i<10;i++) {
 				
 
 			    long startTime = System.currentTimeMillis();
 				//
-			    TestChangeEncryption.ENCRYPTIONSCHEME.encryptDeltaChangeAlone(map,change,TestChangeEncryption.FILE);
+			    TestChangeEncryption.ENCRYPTIONSCHEME.encryptDeltaChangeAloneAsymmetrically(map, change,TestChangeEncryption.FILE);
 			    long betweenTime = System.currentTimeMillis();
-				EChange decryptedChange = TestChangeEncryption.ENCRYPTIONSCHEME.decryptDeltaChangeAlone(map, TestChangeEncryption.FILE);
+				EChange decryptedChange = TestChangeEncryption.ENCRYPTIONSCHEME.decryptDeltaChangeAloneAsymmetrically(map, TestChangeEncryption.FILE);
 				//
 				long endTime = System.currentTimeMillis();
 				
@@ -105,13 +91,13 @@ public class TestEncryptChangesSymmetricallyAlone extends TestChangeEncryption{
 		}
 	
 	}
-	
 	@Test
 	public void testCreateEObjectChangeEncryption() throws NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException {
 		List<EChange> changes = new ArrayList<>();
 		ResourceSet set = new ResourceSetImpl();
 		TestChangeEncryption.CREATIONUTIL.createCreateMemberChangeSequence(changes, set,1);
 		CreateEObjectImpl<Member> change = (CreateEObjectImpl<Member>) changes.get(0);
+		
 		try {
 			this.testChangeAlone(change);
 		}catch(Exception e) {
@@ -119,6 +105,8 @@ public class TestEncryptChangesSymmetricallyAlone extends TestChangeEncryption{
 			assert false;
 		}
 		assert true;
+		// implement this later
+		//this.checkAsymmetricFunctionality();
 		
 		
 	}
@@ -136,6 +124,7 @@ public class TestEncryptChangesSymmetricallyAlone extends TestChangeEncryption{
 			assert false;
 		}
 		assert true;
+		
 	}
 	@Test
 	public void testReplaceSingleValuedEAttributeChangeEncryption() throws NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException {
@@ -225,6 +214,7 @@ public class TestEncryptChangesSymmetricallyAlone extends TestChangeEncryption{
 		}
 		assert true;
 		
+		
 	}
 	@Test
 	public void testcreateRemoveReferenceChangeEncryption() throws NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException {
@@ -270,5 +260,4 @@ public class TestEncryptChangesSymmetricallyAlone extends TestChangeEncryption{
 	}
 	
 	
-
 }

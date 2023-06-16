@@ -23,6 +23,7 @@ import junwei.cpabe.junwei.cpabe.Cpabe;
 import tools.vitruv.change.atomic.EChange;
 import tools.vitruv.change.atomic.eobject.impl.CreateEObjectImpl;
 import tools.vitruv.change.encryption.impl.AsymmetricEncryptionSchemeImpl;
+import tools.vitruv.change.encryption.impl.CpabeAdapterImpl;
 import tools.vitruv.change.encryption.impl.EncryptionSchemeImpl;
 import tools.vitruv.change.encryption.tests.symmetric.TestEncryptChangesSymmetricallyAlone;
 import tools.vitruv.change.encryption.tests.util.EChangeCreationUtility;
@@ -50,6 +51,7 @@ public class TestEncrypChangesAsymmetricallyWithCPABE {
 		String failingUserAttributes = getFailingUserAttributes();
 		String policy = getPolicy();
 		Cpabe test = new Cpabe();
+		CpabeAdapterImpl adapter = new CpabeAdapterImpl();
 		System.out.println("//start to setup");
 		test.setup(publicKeyPath, masterKeyPath);
 		System.out.println("//end to setup");
@@ -66,6 +68,7 @@ public class TestEncrypChangesAsymmetricallyWithCPABE {
 		test.dec(publicKeyPath, privateKeyPath, encryptedFilePath, decryptedFilePath);
 		System.out.println("//end to dec");
 		File checkFile = new File(decryptedFilePath);
+		
 		assert checkFile.canWrite() == false;
 		assert checkFile.canRead() == true;
 	}

@@ -104,6 +104,11 @@ public class EncryptionUtility {
 		return map;
 	}
 	
+	public List<HashMap<String,Object>> getAllEncryptionMapsAsymmetric() throws NoSuchAlgorithmException{
+		List<HashMap<String,Object>> maps = new ArrayList<>();
+		maps.add(getEncryptionDetailsMapAsymmetricRSA());
+		return maps;
+	}
 	
 	public HashMap<String,Object> getEncryptionDetailsMapAsymmetricRSA() throws NoSuchAlgorithmException{
 		HashMap <String,Object> map = new HashMap<String, Object>();
@@ -115,7 +120,7 @@ public class EncryptionUtility {
 		keyPairGenerator = KeyPairGenerator.getInstance("RSA");
 
         keyPairGenerator.initialize(
-            2048, secureRandom);
+        		4500, secureRandom);
  
         KeyPair pair =  keyPairGenerator.generateKeyPair();
         PrivateKey privateKey = pair.getPrivate();

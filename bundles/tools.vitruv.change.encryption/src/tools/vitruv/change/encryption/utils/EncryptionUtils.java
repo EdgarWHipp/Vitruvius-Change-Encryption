@@ -46,7 +46,7 @@ public final class EncryptionUtils {
 	}
 	public byte[] cryptographicFunctionAsymmetric(Map<?,?> options,int opMode,byte[] bytes) throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, NoSuchPaddingException {
 		PublicKey publicKey = (PublicKey) options.get("publicKey");
-		PrivateKey privateKey = (PrivateKey) options.get("publicKey");
+		PrivateKey privateKey = (PrivateKey) options.get("privateKey");
 		String algorithm =  (String) options.get("algorithm");
 		Cipher cipher = Cipher.getInstance(algorithm);
 		if (opMode==Cipher.ENCRYPT_MODE) {
@@ -55,7 +55,7 @@ public final class EncryptionUtils {
 			return encryptedBytes;
 		}
 			if (opMode==Cipher.DECRYPT_MODE) {
-			cipher.init(Cipher.DECRYPT_MODE, publicKey);
+			cipher.init(Cipher.DECRYPT_MODE, privateKey);
 			byte[] decryptedBytes = cipher.doFinal(bytes);
 			return decryptedBytes;
 		}
