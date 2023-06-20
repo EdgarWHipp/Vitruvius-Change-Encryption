@@ -43,19 +43,42 @@ import tools.vitruv.change.encryption.tests.TestChangeEncryption;
 public class TestEncryptChangesAsymmetricallyAlone extends TestChangeEncryption{
 	private final static File csvFile = new File(new File("").getAbsolutePath() + File.separator + "mainAsymmetricAlone.csv");
 
-private void writeToCsv(String change,Map<String,Pair<String,long[]>> map) throws IOException {
+
 		
-		Pair<String,long[]> results = (Pair<String,long[]>) map.get("result");
-		String csvLine = new String(change+","+results.getFirst()+","+results.getSecond()[0]+","+results.getSecond()[1]+","+results.getSecond()[2]+"\n");
+	private void testChangeAlone(EChange change, String csvFile) throws IOException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
+		Map<String,Pair<String,long[]>> mainMap = new HashMap<String,Pair<String,long[]>>();
+		long[][] timeArray = new long[10][3];
+		for (Map map : TestChangeEncryption.ENCRYPTIONUTIL.getAllEncryptionMapsAsymmetric()) {
+			for (int i=0;i<10;i++) {
+				
+
+			    long startTime = System.currentTimeMillis();
+				//
+			    TestChangeEncryption.ENCRYPTIONSCHEME.encryptDeltaChangeAlone(map, change,TestChangeEncryption.FILE);
+			    long betweenTime = System.currentTimeMillis();
+				EChange decryptedChange = TestChangeEncryption.ENCRYPTIONSCHEME.decryptDeltaChangeAlone(map, TestChangeEncryption.FILE);
+				//
+				long endTime = System.currentTimeMillis();
+				
+				long totalTime = endTime - startTime;
+				long decryptionTime = endTime - betweenTime;
+				long encryptionTime = betweenTime - startTime;
+				timeArray[i]= new long[] {encryptionTime,decryptionTime,totalTime};
+				assertTrue(new EcoreUtil.EqualityHelper().equals(change,decryptedChange)); 
+			}
 		
-		 
-		 try (BufferedWriter writer = new BufferedWriter(new FileWriter(csvFile, true))) {
-	            writer.write(csvLine);
-	        } catch (IOException e) {
-	            e.printStackTrace();
-	        }
-	     
-	}
+			long[] mean=new long[3];
+			long sum=0;
+			for (int j = 0;j<3;j++) {
+				for (int i=0;i<10;i++) {
+					sum+=timeArray[i][j];
+				}
+				mean[j]=sum/3;
+			}
+		mainMap.put("result",new Pair<String, long[]>((String)map.get("algorithm"),mean));
+		TestChangeEncryption.WRITER.writeToCsv(change.getClass().getSimpleName(),mainMap,csvFile);
+		
+		}
 	
 	@Test
 	public void testCreateEObjectChangeEncryption() throws NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException {

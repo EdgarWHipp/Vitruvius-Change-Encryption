@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -32,6 +33,7 @@ import tools.vitruv.change.changederivation.DefaultStateBasedChangeResolutionStr
 import tools.vitruv.change.encryption.TestChangeEncryption.ENCRYPTIONSCHEME;
 import tools.vitruv.change.encryption.impl.TestChangeEncryption.ENCRYPTIONSCHEMEImpl;
 import tools.vitruv.change.encryption.tests.TestChangeEncryption;
+import tools.vitruv.change.encryption.tests.util.Pair;
 import tools.vitruv.change.encryption.tests.util.EChangeTestChangeEncryption.CREATIONUTILity;
 import tools.vitruv.change.encryption.tests.util.TestChangeEncryption.ENCRYPTIONUTILity;
 import tools.vitruv.change.composite.description.TransactionalChange;
@@ -53,7 +55,43 @@ public class TestEncryptChangesSymmetricallyTogether extends TestChangeEncryptio
 	
 	
 	
-	
+	private void testChangesTogether(List<EChange> changes, String csvFile) throws IOException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
+		Map<String,Pair<String,long[]>> mainMap = new HashMap<String,Pair<String,long[]>>();
+		long[][] timeArray = new long[10][3];
+		for (Map map : TestChangeEncryption.ENCRYPTIONUTIL.getAllEncryptionMapsSymmetric()) {
+			for (int i=0;i<10;i++) {
+				
+
+			    long startTime = System.currentTimeMillis();
+				//
+			    TestChangeEncryption.ENCRYPTIONSCHEME.encryptDeltaChangesTogether(map,changes,TestChangeEncryption.FILE);
+			    long betweenTime = System.currentTimeMillis();
+				List<EChange> decryptedChanges = TestChangeEncryption.ENCRYPTIONSCHEME.decryptDeltaChangesTogether(map, TestChangeEncryption.FILE);
+				//
+				long endTime = System.currentTimeMillis();
+				
+				long totalTime = endTime - startTime;
+				long decryptionTime = endTime - betweenTime;
+				long encryptionTime = betweenTime - startTime;
+				timeArray[i]= new long[] {encryptionTime,decryptionTime,totalTime};
+				assertTrue(new EcoreUtil.EqualityHelper().equals(changes,decryptedChanges)); 
+			}
+		
+			long[] mean=new long[3];
+			long sum=0;
+			for (int j = 0;j<3;j++) {
+				for (int i=0;i<10;i++) {
+					sum+=timeArray[i][j];
+				}
+				mean[j]=sum/3;
+			}
+		mainMap.put("result",new Pair<String, long[]>((String)map.get("algorithm"),mean));
+		String concatenatedClassNames = changes.stream()
+		        .map(change -> change.getClass().getSimpleName())
+		        .collect(Collectors.joining());
+		TestChangeEncryption.WRITER.writeToCsv(concatenatedClassNames,mainMap, csvFile);
+		}
+}
 	/**
 	 * Test the Encryption and Decryption of the ReplaceSingleAttribute change; 
 	 * @throws InvalidKeyException

@@ -1,4 +1,4 @@
-package tools.vitruv.change.encryption.tests;
+package tools.vitruv.change.encryption.tests.attributebased;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -29,7 +29,7 @@ import tools.vitruv.change.encryption.tests.symmetric.TestEncryptChangesSymmetri
 import tools.vitruv.change.encryption.tests.util.EChangeCreationUtility;
 import tools.vitruv.change.encryption.tests.util.EncryptionUtility;
 
-public class TestEncrypChangesAsymmetricallyWithCPABE {
+public class TestEncryptChangesAsymmetricallyWithCPABE {
 	private static final Logger logger = Logger.getLogger(TestEncrypChangesAsymmetricallyWithCPABE.class.getName());
 	private final File fileWithEncryptedChanges = new File(new File("").getAbsolutePath() +"/encrypted_changes");
 	private AsymmetricEncryptionSchemeImpl encryptionScheme= new AsymmetricEncryptionSchemeImpl();
