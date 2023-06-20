@@ -1,10 +1,23 @@
 package tools.vitruv.change.encryption.impl;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.util.Collections;
+
+import javax.crypto.Cipher;
+
+import org.eclipse.emf.common.util.URI;
+import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.emf.ecore.resource.ResourceSet;
+import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
+import org.eclipse.emf.ecore.xmi.impl.EcoreResourceFactoryImpl;
 
 import junwei.cpabe.junwei.cpabe.Cpabe;
 import tools.vitruv.change.atomic.EChange;
-
+/**
+ * Adapter for the CPABE implementation provided by Junwei.
+ */
 public class CpabeAdapterImpl {
 	private final String privateKeyPath;
 	private final String publicKeyPath;
@@ -21,7 +34,23 @@ public class CpabeAdapterImpl {
 		this.decryptedFilePath = decryptedFilePath;
 		
 	}
-	public void encrypt(String attributes,String policy) throws Exception {
+	public void encrypt(String attributes,String policy,EChange change) throws Exception {
+		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+		ResourceSet resourceSet = new ResourceSetImpl();
+	    resourceSet.getResourceFactoryRegistry().getExtensionToFactoryMap().put("ecore", new EcoreResourceFactoryImpl());
+	    
+	    Resource resource = resourceSet.createResource(URI.createFileURI(new File("").getAbsolutePath() + "/dummy.ecore"));
+	    resource.getContents().add(change);
+	    
+	    
+	    resource.save(byteArrayOutputStream,Collections.EMPTY_MAP);
+	    String inputFile = "InputForCPABEEncryption";
+	    FileOutputStream fileOutputStream = new FileOutputStream(inputFile);
+	    
+	 
+	    fileOutputStream.write(byteArrayOutputStream.toByteArray());
+	    byteArrayOutputStream.close();
+	    fileOutputStream.close();
 		System.out.println("//start to setup");
 		instance.setup(publicKeyPath, masterKeyPath);
 		System.out.println("//end to setup");
@@ -32,9 +61,9 @@ public class CpabeAdapterImpl {
 
 		System.out.println("//start to enc");
 		// create a file with the content of a change;
-		String inputFile = "";
+		
 		instance.enc(publicKeyPath, policy, inputFile, encryptedFilePath);
-		System.out.println("//end to enc");
+		
 	}
 	public EChange decrypt() throws Exception {
 		System.out.println("//start to dec");

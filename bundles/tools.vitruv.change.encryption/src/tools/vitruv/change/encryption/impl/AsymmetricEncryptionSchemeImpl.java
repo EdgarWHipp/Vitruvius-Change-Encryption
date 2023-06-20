@@ -26,9 +26,11 @@ import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.emf.ecore.xmi.impl.EcoreResourceFactoryImpl;
 
+import tools.vitruv.change.atomic.EChange;
+import tools.vitruv.change.encryption.EncryptionScheme;
 import tools.vitruv.change.encryption.utils.EncryptionUtils;
 
-public class AsymmetricEncryptionSchemeImpl {
+public class AsymmetricEncryptionSchemeImpl implements EncryptionScheme{
 	private static final Logger logger = Logger.getLogger(EncryptionSchemeImpl.class.getName());
 	private final EncryptionUtils encryptionUtils = EncryptionUtils.getInstance();
 	

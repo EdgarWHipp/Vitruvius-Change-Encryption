@@ -1,5 +1,7 @@
 package tools.vitruv.change.encryption.tests.util;
 
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
 import java.security.KeyPair;
 
 import java.security.KeyPairGenerator;
@@ -7,6 +9,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
+import java.security.SignatureException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -104,13 +107,16 @@ public class EncryptionUtility {
 		return map;
 	}
 	
-	public List<HashMap<String,Object>> getAllEncryptionMapsAsymmetric() throws NoSuchAlgorithmException{
+	public List<HashMap<String,Object>> getAllEncryptionMapsAsymmetric() throws NoSuchAlgorithmException, InvalidKeyException, InvalidAlgorithmParameterException, SignatureException{
 		List<HashMap<String,Object>> maps = new ArrayList<>();
 		maps.add(getEncryptionDetailsMapAsymmetricRSA());
+		maps.add(getEncryptionDetailsMapAsymmetricDSA());
+		maps.add(getEncryptionDetailsMapAsymmetricDiffieHellman());
+
 		return maps;
 	}
 	
-	public HashMap<String,Object> getEncryptionDetailsMapAsymmetricRSA() throws NoSuchAlgorithmException{
+	private HashMap<String,Object> getEncryptionDetailsMapAsymmetricRSA() throws NoSuchAlgorithmException{
 		HashMap <String,Object> map = new HashMap<String, Object>();
 	
 		SecureRandom secureRandom= new SecureRandom();
@@ -128,6 +134,46 @@ public class EncryptionUtility {
 		map.put("privateKey", privateKey);
 		map.put("publicKey", publicKey);
 		map.put("algorithm","RSA");
+		return map;
+	}
+	private HashMap<String,Object> getEncryptionDetailsMapAsymmetricDSA() throws NoSuchAlgorithmException, InvalidAlgorithmParameterException, InvalidKeyException, SignatureException{
+		HashMap <String,Object> map = new HashMap<String, Object>();
+		
+		SecureRandom secureRandom= new SecureRandom();
+
+	    KeyPairGenerator keyPairGenerator;
+		
+		keyPairGenerator = KeyPairGenerator.getInstance("DSA");
+
+        keyPairGenerator.initialize(
+        		1024, secureRandom);
+ 
+        KeyPair pair =  keyPairGenerator.generateKeyPair();
+        PrivateKey privateKey = pair.getPrivate();
+        PublicKey publicKey = pair.getPublic();
+		map.put("privateKey", privateKey);
+		map.put("publicKey", publicKey);
+		map.put("algorithm","DSA");
+		return map;
+	}
+	private HashMap<String,Object> getEncryptionDetailsMapAsymmetricDiffieHellman() throws NoSuchAlgorithmException, InvalidAlgorithmParameterException, InvalidKeyException, SignatureException{
+		HashMap <String,Object> map = new HashMap<String, Object>();
+		
+		SecureRandom secureRandom= new SecureRandom();
+
+	    KeyPairGenerator keyPairGenerator;
+		
+		keyPairGenerator = KeyPairGenerator.getInstance("DiffieHellman");
+
+        keyPairGenerator.initialize(
+        		1024, secureRandom);
+ 
+        KeyPair pair =  keyPairGenerator.generateKeyPair();
+        PrivateKey privateKey = pair.getPrivate();
+        PublicKey publicKey = pair.getPublic();
+		map.put("privateKey", privateKey);
+		map.put("publicKey", publicKey);
+		map.put("algorithm","DiffieHellman");
 		return map;
 	}
 	

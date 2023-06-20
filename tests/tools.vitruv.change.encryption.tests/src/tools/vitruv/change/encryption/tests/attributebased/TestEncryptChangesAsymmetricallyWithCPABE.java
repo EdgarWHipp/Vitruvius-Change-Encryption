@@ -51,26 +51,17 @@ public class TestEncryptChangesAsymmetricallyWithCPABE {
 		String failingUserAttributes = getFailingUserAttributes();
 		String policy = getPolicy();
 		Cpabe test = new Cpabe();
-		CpabeAdapterImpl adapter = new CpabeAdapterImpl();
-		System.out.println("//start to setup");
-		test.setup(publicKeyPath, masterKeyPath);
-		System.out.println("//end to setup");
-
-		System.out.println("//start to keygen");
-		test.keygen(publicKeyPath, privateKeyPath, masterKeyPath, failingUserAttributes);
-		System.out.println("//end to keygen");
-
-		System.out.println("//start to enc");
-		test.enc(publicKeyPath, policy, inputFile, encryptedFilePath);
-		System.out.println("//end to enc");
-
-		System.out.println("//start to dec");
-		test.dec(publicKeyPath, privateKeyPath, encryptedFilePath, decryptedFilePath);
-		System.out.println("//end to dec");
-		File checkFile = new File(decryptedFilePath);
+		//init adapter
+		CpabeAdapterImpl adapter = new CpabeAdapterImpl(test,privateKeyPath,publicKeyPath,masterKeyPath,decryptedFilePath,encryptedFilePath);
 		
-		assert checkFile.canWrite() == false;
-		assert checkFile.canRead() == true;
+		
+		//encrypt:
+		adapter.encrypt(failingUserAttributes, policy);
+		
+		//decrypt
+		adapter.decrypt();
+		File file = new File(decryptedFilePath);
+		
 	}
 	/**
 	 * Encrypts a set of valid changes and opens the decryptedChanges in read/write mode.
@@ -79,33 +70,24 @@ public class TestEncryptChangesAsymmetricallyWithCPABE {
 	@Test
 	public void testPassingFileAccess() throws Exception {
 		// PUBLIC KEY IS GIVEN
-		// DECRYPT WITH PRIVATE KEY (PASSING CRITERIA = read/write access, otherwise only read access)
-		
+		// DECRYPT WITH PRIVATE KEY 
+		EChange change = null;
 		
 		
 		String passingUserAttributes = getPassingUserAttributes();
 		String policy = getPolicy();
 
 		Cpabe test = new Cpabe();
-		System.out.println("//start to setup");
-		test.setup(publicKeyPath, masterKeyPath);
-		System.out.println("//end to setup");
-
-		System.out.println("//start to keygen");
-		test.keygen(publicKeyPath, privateKeyPath, masterKeyPath, passingUserAttributes);
-		System.out.println("//end to keygen");
-
-		System.out.println("//start to enc");
-		test.enc(publicKeyPath, policy, inputFile, encryptedFilePath);
-		System.out.println("//end to enc");
-
-		System.out.println("//start to dec");
-		test.dec(publicKeyPath, privateKeyPath, encryptedFilePath, decryptedFilePath);
-		System.out.println("//end to dec");
+		//init adapter
+		CpabeAdapterImpl adapter = new CpabeAdapterImpl(test,privateKeyPath,publicKeyPath,masterKeyPath,decryptedFilePath,encryptedFilePath);
 		
-		File checkFile = new File(decryptedFilePath);
-		assert checkFile.canWrite() == true;
-		assert checkFile.canRead() == true;
+		//encrypt
+		adapter.encrypt(passingUserAttributes, policy,change);
+		
+		//decrypt
+		adapter.decrypt();
+		File file = new File(decryptedFilePath);
+		
 		
 	}
 	

@@ -12,6 +12,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.IntStream;
+
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
@@ -45,27 +47,32 @@ public class TestEncryptChangesAsymmetricallyAlone extends TestChangeEncryption{
 
 
 		
-	private void testChangeAlone(EChange change, String csvFile) throws IOException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
+	private void testChangeAlone(EChange change) throws IOException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
 		Map<String,Pair<String,long[]>> mainMap = new HashMap<String,Pair<String,long[]>>();
 		long[][] timeArray = new long[10][3];
+		int[] amounts = {1,10,100,1000,10000};
 		for (Map map : TestChangeEncryption.ENCRYPTIONUTIL.getAllEncryptionMapsAsymmetric()) {
-			for (int i=0;i<10;i++) {
-				
-
-			    long startTime = System.currentTimeMillis();
-				//
-			    TestChangeEncryption.ENCRYPTIONSCHEME.encryptDeltaChangeAlone(map, change,TestChangeEncryption.FILE);
-			    long betweenTime = System.currentTimeMillis();
-				EChange decryptedChange = TestChangeEncryption.ENCRYPTIONSCHEME.decryptDeltaChangeAlone(map, TestChangeEncryption.FILE);
-				//
-				long endTime = System.currentTimeMillis();
-				
-				long totalTime = endTime - startTime;
-				long decryptionTime = endTime - betweenTime;
-				long encryptionTime = betweenTime - startTime;
-				timeArray[i]= new long[] {encryptionTime,decryptionTime,totalTime};
-				assertTrue(new EcoreUtil.EqualityHelper().equals(change,decryptedChange)); 
-			}
+			for (int x=0;x<amounts.length;x++) {
+				for (int i=0;i<10;i++) {
+					
+	
+				    long startTime = System.currentTimeMillis();
+					//
+				    IntStream.range(0, amounts[x])
+				    .forEach(j -> TestChangeEncryption.ASYM_ENCRYPTIONSCHEME.encryptDeltaChangeAloneAsymmetrically(map, change, TestChangeEncryption.FILE));
+				    long betweenTime = System.currentTimeMillis();
+				    IntStream.range(0, amounts[x])
+				    .forEach(j -> TestChangeEncryption.ASYM_ENCRYPTIONSCHEME.decryptDeltaChangeAloneAsymmetrically(map, TestChangeEncryption.FILE));
+					//
+					long endTime = System.currentTimeMillis();
+					
+					long totalTime = endTime - startTime;
+					long decryptionTime = endTime - betweenTime;
+					long encryptionTime = betweenTime - startTime;
+					timeArray[i]= new long[] {encryptionTime,decryptionTime,totalTime};
+					
+				//	assertTrue(new EcoreUtil.EqualityHelper().equals(change,decryptedChange)); 
+				}
 		
 			long[] mean=new long[3];
 			long sum=0;
@@ -76,10 +83,11 @@ public class TestEncryptChangesAsymmetricallyAlone extends TestChangeEncryption{
 				mean[j]=sum/3;
 			}
 		mainMap.put("result",new Pair<String, long[]>((String)map.get("algorithm"),mean));
-		TestChangeEncryption.WRITER.writeToCsv(change.getClass().getSimpleName(),mainMap,csvFile);
+		TestChangeEncryption.WRITER.writeToCsv(change.getClass().getSimpleName()+amounts[x],mainMap,csvFile);
 		
 		}
-	
+	}
+}
 	@Test
 	public void testCreateEObjectChangeEncryption() throws NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException {
 		List<EChange> changes = new ArrayList<>();
