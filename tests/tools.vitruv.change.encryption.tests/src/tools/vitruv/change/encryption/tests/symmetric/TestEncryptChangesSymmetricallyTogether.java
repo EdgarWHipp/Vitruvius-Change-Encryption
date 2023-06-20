@@ -29,11 +29,11 @@ import org.junit.jupiter.api.Test;
 import tools.vitruv.change.atomic.EChange;
 import tools.vitruv.change.atomic.id.IdResolver;
 import tools.vitruv.change.changederivation.DefaultStateBasedChangeResolutionStrategy;
-import tools.vitruv.change.encryption.EncryptionScheme;
-import tools.vitruv.change.encryption.impl.EncryptionSchemeImpl;
+import tools.vitruv.change.encryption.TestChangeEncryption.ENCRYPTIONSCHEME;
+import tools.vitruv.change.encryption.impl.TestChangeEncryption.ENCRYPTIONSCHEMEImpl;
 import tools.vitruv.change.encryption.tests.TestChangeEncryption;
-import tools.vitruv.change.encryption.tests.util.EChangeCreationUtility;
-import tools.vitruv.change.encryption.tests.util.EncryptionUtility;
+import tools.vitruv.change.encryption.tests.util.EChangeTestChangeEncryption.CREATIONUTILity;
+import tools.vitruv.change.encryption.tests.util.TestChangeEncryption.ENCRYPTIONUTILity;
 import tools.vitruv.change.composite.description.TransactionalChange;
 import tools.vitruv.change.composite.description.VitruviusChangeFactory;
 
@@ -49,16 +49,11 @@ import tools.vitruv.change.composite.description.VitruviusChangeFactory;
 public class TestEncryptChangesSymmetricallyTogether extends TestChangeEncryption{
 	private static final Logger logger = Logger.getLogger(TestEncryptChangesSymmetricallyTogether.class.getName());
 	private final File fileWithEncryptedChanges = new File(new File("").getAbsolutePath() +"/encrypted_changes");
-	private EncryptionSchemeImpl encryptionScheme = new EncryptionSchemeImpl();
-	private final EChangeCreationUtility creationUtil= EChangeCreationUtility.getInstance();
-	private final EncryptionUtility encryptionUtil= EncryptionUtility.getInstance();
+	private final static File csvFile = new File(new File("").getAbsolutePath() + File.separator + "SymmetricEncryptionTogether.csv");
 	
 	
 	
-	@Test
-	public void ALL() {
-		
-	}
+	
 	/**
 	 * Test the Encryption and Decryption of the ReplaceSingleAttribute change; 
 	 * @throws InvalidKeyException
@@ -73,44 +68,21 @@ public class TestEncryptChangesSymmetricallyTogether extends TestChangeEncryptio
 	@Test 
 	public void testSaveAndLoadCreateReplaceSingleAttributeChange() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, IOException, ClassNotFoundException {
 		
-		List<String> times = new ArrayList<>();
-		for (Map map : encryptionUtil.getAllEncryptionMapsSymmetric()) {
+		
 
-			List<EChange> changes = new ArrayList<>();
-			ResourceSet set = new ResourceSetImpl();
-			creationUtil.createReplaceSingleAttributeChange(changes, set);
-	
-			TransactionalChange transactionalChange2 = VitruviusChangeFactory.getInstance().createTransactionalChange(changes);
-		    transactionalChange2.unresolve();
-		    ResourceSet newResourceSet2 = new ResourceSetImpl();
-		    creationUtil.withFactories(newResourceSet2);
-		    transactionalChange2.resolveAndApply(IdResolver.create(newResourceSet2));
+		List<EChange> changes = new ArrayList<>();
+		ResourceSet set = new ResourceSetImpl();
+		TestChangeEncryption.CREATIONUTIL.createReplaceSingleAttributeChange(changes, set);
 
-			long startTime = System.currentTimeMillis();
-		    encryptionScheme.encryptDeltaChangesTogether(map, changes, fileWithEncryptedChanges);
-		    List<EChange> decryptedChange = encryptionScheme.decryptDeltaChangesTogether(map, fileWithEncryptedChanges);
-		   
-		     
-		    TransactionalChange transactionalChange = VitruviusChangeFactory.getInstance().createTransactionalChange(decryptedChange);
-		    transactionalChange.unresolve();
-		    ResourceSet newResourceSet = new ResourceSetImpl();
-		    creationUtil.withFactories(newResourceSet);
-		    
-		    transactionalChange2.resolveAndApply(IdResolver.create(newResourceSet));
-	
-		    long endTime = System.currentTimeMillis();
-	
-			long totalTime = endTime - startTime;
-	
-			times.add("Time spent with "+map.get("algorithm")+":"+totalTime+"ms");
-			
-			
-		    assertTrue(new EcoreUtil.EqualityHelper().equals(set.getResources().get(0).getContents(), newResourceSet.getResources().get(0).getContents()));  
+		try {
+			TestChangeEncryption.WRITER.testChangesTogether(changes,csvFile);
+		}catch(Exception e) {
+			System.out.println(e+":\t"+e.getMessage());
+			assert false;
 		}
-		String result = times.stream()
-                .reduce((a, b) -> a + ", " + b)
-                .orElse("");
-		logger.severe(result);
+		assert true;
+
+		
 	    
 	}
 	/**
@@ -126,31 +98,17 @@ public class TestEncryptChangesSymmetricallyTogether extends TestChangeEncryptio
 	 */
 	@Test
 	public void testSaveAndLoadMemberCreation() throws NoSuchAlgorithmException, InvalidKeyException, ClassNotFoundException, IllegalBlockSizeException, BadPaddingException, NoSuchPaddingException, IOException, InvalidAlgorithmParameterException {
-		List<String> times = new ArrayList<>();
-		for (Map map : encryptionUtil.getAllEncryptionMapsSymmetric()) {		
+			
 			List<EChange> changes = new ArrayList<>();
 			ResourceSet set = new ResourceSetImpl();
-			creationUtil.createCreateMemberChangeSequence(changes, set,1);
-		    
-			long startTime = System.currentTimeMillis();
-		    encryptionScheme.encryptDeltaChangesTogether(map, changes, fileWithEncryptedChanges);
-		    List<EChange> decryptedChange = encryptionScheme.decryptDeltaChangesTogether(map, fileWithEncryptedChanges);
-		    
-		    TransactionalChange transactionalChange = VitruviusChangeFactory.getInstance().createTransactionalChange(decryptedChange);
-		    ResourceSet newResourceSet = new ResourceSetImpl();
-		    creationUtil.withFactories(newResourceSet);
-		    transactionalChange.resolveAndApply(IdResolver.create(newResourceSet));
-		    long endTime = System.currentTimeMillis();
-	
-			long totalTime = endTime - startTime;
-	
-			times.add("Time spent with "+map.get("algorithm")+":"+totalTime+"ms");
-		    assertTrue(new EcoreUtil.EqualityHelper().equals(set.getResources().get(0).getContents(), newResourceSet.getResources().get(0).getContents()));    
-		}
-		String result = times.stream()
-                .reduce((a, b) -> a + ", " + b)
-                .orElse("");
-		logger.severe(result);
+			TestChangeEncryption.CREATIONUTIL.createCreateMemberChangeSequence(changes, set,1);
+			try {
+				TestChangeEncryption.WRITER.testChangesTogether(changes,csvFile);
+			}catch(Exception e) {
+				System.out.println(e+":\t"+e.getMessage());
+				assert false;
+			}
+			assert true;
 	}
 	/**
 	 * Test the Encryption and Decryption of the DeleteEObject change; 
@@ -165,33 +123,19 @@ public class TestEncryptChangesSymmetricallyTogether extends TestChangeEncryptio
 	 */
 	@Test 
 	public void testSaveAndLoadcreateDeleteEObjectChange() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, IOException, ClassNotFoundException {
-		List<String> times = new ArrayList<>();
-		for (Map map : encryptionUtil.getAllEncryptionMapsSymmetric()) {		
-			List<EChange> changes = new ArrayList<>();
-			ResourceSet set = new ResourceSetImpl();
-			creationUtil.createDeleteEObjectChange(changes, set);
-		    
-		     
-			long startTime = System.currentTimeMillis();
-		    encryptionScheme.encryptDeltaChangesTogether(map, changes, fileWithEncryptedChanges);
-		    List<EChange> decryptedChange = encryptionScheme.decryptDeltaChangesTogether(map, fileWithEncryptedChanges);
-		   
-		     
-		    TransactionalChange transactionalChange = VitruviusChangeFactory.getInstance().createTransactionalChange(decryptedChange);
-		    ResourceSet newResourceSet = new ResourceSetImpl();
-		    creationUtil.withFactories(newResourceSet);
-		    transactionalChange.resolveAndApply(IdResolver.create(newResourceSet));
-		    long endTime = System.currentTimeMillis();
-	
-			long totalTime = endTime - startTime;
-	
-			times.add("Time spent with "+map.get("algorithm")+":"+totalTime+"ms");
-		    assertTrue(new EcoreUtil.EqualityHelper().equals(set.getResources().get(0).getContents(), newResourceSet.getResources().get(0).getContents()));    
+		
+		List<EChange> changes = new ArrayList<>();
+		ResourceSet set = new ResourceSetImpl();
+		TestChangeEncryption.CREATIONUTIL.createDeleteEObjectChange(changes, set);
+	    
+	     
+		try {
+			TestChangeEncryption.WRITER.testChangesTogether(changes,csvFile);
+		}catch(Exception e) {
+			System.out.println(e+":\t"+e.getMessage());
+			assert false;
 		}
-		String result = times.stream()
-                .reduce((a, b) -> a + ", " + b)
-                .orElse("");
-		logger.severe(result);
+		assert true;
 	}
 	/**
 	 * Test the Encryption and Decryption of the RemoveEAttributeValue change;
@@ -206,34 +150,18 @@ public class TestEncryptChangesSymmetricallyTogether extends TestChangeEncryptio
 	 */
 	@Test
 	public void testSaveAndLoadcreateRemoveAttributeChange() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, IOException, ClassNotFoundException {
-		List<String> times = new ArrayList<>();
-		for (Map map : encryptionUtil.getAllEncryptionMapsSymmetric()) {		
-			List<EChange> changes = new ArrayList<>();
 		
-			ResourceSet set = new ResourceSetImpl();
-			creationUtil.createRemoveAttributeChange(changes, set);
-		    
-		     
-			long startTime = System.currentTimeMillis();
-		    encryptionScheme.encryptDeltaChangesTogether(map, changes, fileWithEncryptedChanges);
-		    List<EChange> decryptedChange = encryptionScheme.decryptDeltaChangesTogether(map, fileWithEncryptedChanges);
-		    
-		     
-		    TransactionalChange transactionalChange = VitruviusChangeFactory.getInstance().createTransactionalChange(decryptedChange);
-		    ResourceSet newResourceSet = new ResourceSetImpl();
-		    creationUtil.withFactories(newResourceSet);
-		    transactionalChange.resolveAndApply(IdResolver.create(newResourceSet));
-		    long endTime = System.currentTimeMillis();
-	
-			long totalTime = endTime - startTime;
-	
-			times.add("Time spent with "+map.get("algorithm")+":"+totalTime+"ms");
-		    assertTrue(new EcoreUtil.EqualityHelper().equals(set.getResources().get(0).getContents(), newResourceSet.getResources().get(0).getContents()));   
+		List<EChange> changes = new ArrayList<>();
+		ResourceSet set = new ResourceSetImpl();
+		TestChangeEncryption.CREATIONUTIL.createRemoveAttributeChange(changes, set);	    
+	     
+	    try {
+			TestChangeEncryption.WRITER.testChangesTogether(changes,csvFile);
+		}catch(Exception e) {
+			System.out.println(e+":\t"+e.getMessage());
+			assert false;
 		}
-		String result = times.stream()
-                .reduce((a, b) -> a + ", " + b)
-                .orElse("");
-		logger.severe(result);
+		assert true;
 	}
 	/**
 	 * Test the Encryption and Decryption of the DeleteRootEObject change;
@@ -248,33 +176,20 @@ public class TestEncryptChangesSymmetricallyTogether extends TestChangeEncryptio
 	 */
 	@Test
 	public void testSaveAndLoadDeleteRootEObjectChange() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, IOException, ClassNotFoundException {
-		List<String> times = new ArrayList<>();
-		for (Map map : encryptionUtil.getAllEncryptionMapsSymmetric()) {
+		
 			List<EChange> changes = new ArrayList<>();
 			ResourceSet set = new ResourceSetImpl();
-			creationUtil.createDeleteRootEObjectChange(changes, set);
-		    
+			TestChangeEncryption.CREATIONUTIL.createDeleteRootEObjectChange(changes, set);
+			
+			try {
+				TestChangeEncryption.WRITER.testChangesTogether(changes,csvFile);
+			}catch(Exception e) {
+				System.out.println(e+":\t"+e.getMessage());
+				assert false;
+			}
+			assert true;
 		     
-			long startTime = System.currentTimeMillis();
-		    encryptionScheme.encryptDeltaChangesTogether(map, changes, fileWithEncryptedChanges);
-		    List<EChange> decryptedChange = encryptionScheme.decryptDeltaChangesTogether(map, fileWithEncryptedChanges);
-		   
-		     
-		    TransactionalChange transactionalChange = VitruviusChangeFactory.getInstance().createTransactionalChange(decryptedChange);
-		    ResourceSet newResourceSet = new ResourceSetImpl();
-		    creationUtil.withFactories(newResourceSet);
-		    transactionalChange.resolveAndApply(IdResolver.create(newResourceSet));
-		    long endTime = System.currentTimeMillis();
-	
-			long totalTime = endTime - startTime;
-	
-			times.add("Time spent with "+map.get("algorithm")+":"+totalTime+"ms");
-		    assertTrue(new EcoreUtil.EqualityHelper().equals(set.getResources().get(0).getContents(), newResourceSet.getResources().get(0).getContents()));    
-		}
-		String result = times.stream()
-                .reduce((a, b) -> a + ", " + b)
-                .orElse("");
-		logger.severe(result);
+		
 	}
 	/**
 	 * Test the Encryption and Decryption of the InsertEAttributeValue change;
@@ -289,33 +204,18 @@ public class TestEncryptChangesSymmetricallyTogether extends TestChangeEncryptio
 	 */
 	@Test
 	public void testSaveAndLoadInsertEAttributeValueChange() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, IOException, ClassNotFoundException {
-		List<String> times = new ArrayList<>();
-		for (Map map : encryptionUtil.getAllEncryptionMapsSymmetric()) {
-			List<EChange> changes = new ArrayList<>();
-			ResourceSet set = new ResourceSetImpl();
-			creationUtil.createInsertEAttributeValueChange(changes, set);
-		    
-		     
-			long startTime = System.currentTimeMillis();
-		    encryptionScheme.encryptDeltaChangesTogether(map, changes, fileWithEncryptedChanges);
-		    List<EChange> decryptedChange = encryptionScheme.decryptDeltaChangesTogether(map, fileWithEncryptedChanges);
-		   
-		     
-		    TransactionalChange transactionalChange = VitruviusChangeFactory.getInstance().createTransactionalChange(decryptedChange);
-		    ResourceSet newResourceSet = new ResourceSetImpl();
-		    creationUtil.withFactories(newResourceSet);
-		    transactionalChange.resolveAndApply(IdResolver.create(newResourceSet));
-		    long endTime = System.currentTimeMillis();
-	
-			long totalTime = endTime - startTime;
-	
-			times.add("Time spent with "+map.get("algorithm")+":"+totalTime+"ms");
-		    assertTrue(new EcoreUtil.EqualityHelper().equals(set.getResources().get(0).getContents(), newResourceSet.getResources().get(0).getContents()));    
+		
+		List<EChange> changes = new ArrayList<>();
+		ResourceSet set = new ResourceSetImpl();
+		TestChangeEncryption.CREATIONUTIL.createInsertEAttributeValueChange(changes, set);
+		
+		try {
+			TestChangeEncryption.WRITER.testChangesTogether(changes,csvFile);
+		}catch(Exception e) {
+			System.out.println(e+":\t"+e.getMessage());
+			assert false;
 		}
-		String result = times.stream()
-                .reduce((a, b) -> a + ", " + b)
-                .orElse("");
-		logger.severe(result);
+		assert true;
 	}
 	/**
 	 * 
@@ -330,34 +230,18 @@ public class TestEncryptChangesSymmetricallyTogether extends TestChangeEncryptio
 	 */
 	@Test
 	public void testSaveAndLoadcreateInsertReferenceChange() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, IOException, ClassNotFoundException {
-		List<String> times = new ArrayList<>();
-		for (Map map : encryptionUtil.getAllEncryptionMapsSymmetric()) {
-
-			List<EChange> changes = new ArrayList<>();
-			ResourceSet set = new ResourceSetImpl();
-			creationUtil.createInsertReferenceChange(changes, set);
-		    
-		     
-			long startTime = System.currentTimeMillis();
-		    encryptionScheme.encryptDeltaChangesTogether(map, changes, fileWithEncryptedChanges);
-		    List<EChange> decryptedChange = encryptionScheme.decryptDeltaChangesTogether(map, fileWithEncryptedChanges);
-		    
-		     
-		    TransactionalChange transactionalChange = VitruviusChangeFactory.getInstance().createTransactionalChange(decryptedChange);
-		    ResourceSet newResourceSet = new ResourceSetImpl();
-		    creationUtil.withFactories(newResourceSet);
-		    transactionalChange.resolveAndApply(IdResolver.create(newResourceSet));
-		    long endTime = System.currentTimeMillis();
-	
-			long totalTime = endTime - startTime;
-	
-			times.add("Time spent with "+map.get("algorithm")+":"+totalTime+"ms");
-		    assertTrue(new EcoreUtil.EqualityHelper().equals(set.getResources().get(0).getContents(), newResourceSet.getResources().get(0).getContents()));   
+		
+		List<EChange> changes = new ArrayList<>();
+		ResourceSet set = new ResourceSetImpl();
+		TestChangeEncryption.CREATIONUTIL.createInsertReferenceChange(changes, set);
+	   
+		try {
+			TestChangeEncryption.WRITER.testChangesTogether(changes,csvFile);
+		}catch(Exception e) {
+			System.out.println(e+":\t"+e.getMessage());
+			assert false;
 		}
-		String result = times.stream()
-                .reduce((a, b) -> a + ", " + b)
-                .orElse("");
-		logger.severe(result);
+		assert true;
 	}
 	
 
@@ -367,120 +251,68 @@ public class TestEncryptChangesSymmetricallyTogether extends TestChangeEncryptio
 	
 	@Test
 	public void testSaveAndLoadCreate10Members() throws NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, IOException, ClassNotFoundException {
-		List<String> times = new ArrayList<>();
-		for (Map map : encryptionUtil.getAllEncryptionMapsSymmetric()) {		
-			List<EChange> changes = new ArrayList<>();
-			ResourceSet set = new ResourceSetImpl();
-			creationUtil.createCreateMemberChangeSequence(changes, set,10);
-		    
-			long startTime = System.currentTimeMillis();
-		    encryptionScheme.encryptDeltaChangesTogether(map, changes, fileWithEncryptedChanges);
-		    List<EChange> decryptedChange = encryptionScheme.decryptDeltaChangesTogether(map, fileWithEncryptedChanges);
-		   
-		    TransactionalChange transactionalChange = VitruviusChangeFactory.getInstance().createTransactionalChange(decryptedChange);
-		    ResourceSet newResourceSet = new ResourceSetImpl();
-		    creationUtil.withFactories(newResourceSet);
-		    transactionalChange.resolveAndApply(IdResolver.create(newResourceSet));
-		    long endTime = System.currentTimeMillis();
-	
-			long totalTime = endTime - startTime;
-	
-			times.add("Time spent with "+map.get("algorithm")+":"+totalTime+"ms");
-		    assertTrue(new EcoreUtil.EqualityHelper().equals(set.getResources().get(0).getContents(), newResourceSet.getResources().get(0).getContents()));   
+			
+		List<EChange> changes = new ArrayList<>();
+		ResourceSet set = new ResourceSetImpl();
+		TestChangeEncryption.CREATIONUTIL.createCreateMemberChangeSequence(changes, set,10);
+	    
+		try {
+			TestChangeEncryption.WRITER.testChangesTogether(changes,csvFile);
+		}catch(Exception e) {
+			System.out.println(e+":\t"+e.getMessage());
+			assert false;
 		}
-		String result = times.stream()
-                .reduce((a, b) -> a + ", " + b)
-                .orElse("");
-		logger.severe(result);
+		assert true;
 	}
 	@Test
 	public void testSaveAndLoadCreate100Members() throws NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, IOException, ClassNotFoundException {
-		List<String> times = new ArrayList<>();
-		for (Map map : encryptionUtil.getAllEncryptionMapsSymmetric()) {
-			List<EChange> changes = new ArrayList<>();
-			ResourceSet set = new ResourceSetImpl();
-			creationUtil.createCreateMemberChangeSequence(changes, set,100);
-		    
-			long startTime = System.currentTimeMillis();
-		    encryptionScheme.encryptDeltaChangesTogether(map, changes, fileWithEncryptedChanges);
-		    List<EChange> decryptedChange = encryptionScheme.decryptDeltaChangesTogether(map, fileWithEncryptedChanges);
-		   
-		    TransactionalChange transactionalChange = VitruviusChangeFactory.getInstance().createTransactionalChange(decryptedChange);
-		    ResourceSet newResourceSet = new ResourceSetImpl();
-		    creationUtil.withFactories(newResourceSet);
-		    transactionalChange.resolveAndApply(IdResolver.create(newResourceSet));
-		    long endTime = System.currentTimeMillis();
-	
-			long totalTime = endTime - startTime;
-	
-			times.add("Time spent with "+map.get("algorithm")+":"+totalTime+"ms");
-		    assertTrue(new EcoreUtil.EqualityHelper().equals(set.getResources().get(0).getContents(), newResourceSet.getResources().get(0).getContents()));  
+		
+		List<EChange> changes = new ArrayList<>();
+		ResourceSet set = new ResourceSetImpl();
+		TestChangeEncryption.CREATIONUTIL.createCreateMemberChangeSequence(changes, set,100);
+	    
+		try {
+			TestChangeEncryption.WRITER.testChangesTogether(changes,csvFile);
+		}catch(Exception e) {
+			System.out.println(e+":\t"+e.getMessage());
+			assert false;
 		}
-		String result = times.stream()
-                .reduce((a, b) -> a + ", " + b)
-                .orElse("");
-		logger.severe(result);
+		assert true;
 	}
 	@Test
 	public void testSaveAndLoadCreate1000Members() throws NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, IOException, ClassNotFoundException {
-		List<String> times = new ArrayList<>();
-		for (Map map : encryptionUtil.getAllEncryptionMapsSymmetric()) {
-			List<EChange> changes = new ArrayList<>();
-			ResourceSet set = new ResourceSetImpl();
-			creationUtil.createCreateMemberChangeSequence(changes, set,1000);
-		    
-			long startTime = System.currentTimeMillis();
-		    encryptionScheme.encryptDeltaChangesTogether(map, changes, fileWithEncryptedChanges);
-		    List<EChange> decryptedChange = encryptionScheme.decryptDeltaChangesTogether(map, fileWithEncryptedChanges);
-		  
-		    TransactionalChange transactionalChange = VitruviusChangeFactory.getInstance().createTransactionalChange(decryptedChange);
-		    ResourceSet newResourceSet = new ResourceSetImpl();
-		    creationUtil.withFactories(newResourceSet);
-		    transactionalChange.resolveAndApply(IdResolver.create(newResourceSet));
-		    long endTime = System.currentTimeMillis();
-	
-	  		long totalTime = endTime - startTime;
-	
-	  		times.add("Time spent with "+map.get("algorithm")+":"+totalTime+"ms");
-		    assertTrue(new EcoreUtil.EqualityHelper().equals(set.getResources().get(0).getContents(), newResourceSet.getResources().get(0).getContents()));   
+		
+		List<EChange> changes = new ArrayList<>();
+		ResourceSet set = new ResourceSetImpl();
+		TestChangeEncryption.CREATIONUTIL.createCreateMemberChangeSequence(changes, set,1000);
+	    
+		try {
+			TestChangeEncryption.WRITER.testChangesTogether(changes,csvFile);
+		}catch(Exception e) {
+			System.out.println(e+":\t"+e.getMessage());
+			assert false;
 		}
-		String result = times.stream()
-                .reduce((a, b) -> a + ", " + b)
-                .orElse("");
-		logger.severe(result);
+		assert true;
 	}
 	@Test
 	public void testSaveAndLoadCreate10000Members() throws NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, IOException, ClassNotFoundException {
-		List<String> times = new ArrayList<>();
-		for (Map map : encryptionUtil.getAllEncryptionMapsSymmetric()) {
+		
 			
-			List<EChange> changes = new ArrayList<>();
-			ResourceSet set = new ResourceSetImpl();
-			creationUtil.createCreateMemberChangeSequence(changes, set,10000);
-		    
-			long startTime = System.currentTimeMillis();
-		    encryptionScheme.encryptDeltaChangesTogether(map, changes, fileWithEncryptedChanges);
-		    List<EChange> decryptedChange = encryptionScheme.decryptDeltaChangesTogether(map, fileWithEncryptedChanges);
-		   
-		    TransactionalChange transactionalChange = VitruviusChangeFactory.getInstance().createTransactionalChange(decryptedChange);
-		    ResourceSet newResourceSet = new ResourceSetImpl();
-		    creationUtil.withFactories(newResourceSet);
-		    transactionalChange.resolveAndApply(IdResolver.create(newResourceSet));
-		    long endTime = System.currentTimeMillis();
-
-			long totalTime = endTime - startTime;
-
-			times.add("Time spent with "+map.get("algorithm")+":"+totalTime+"ms");
-		    assertTrue(new EcoreUtil.EqualityHelper().equals(set.getResources().get(0).getContents(), newResourceSet.getResources().get(0).getContents()));   
+		List<EChange> changes = new ArrayList<>();
+		ResourceSet set = new ResourceSetImpl();
+		TestChangeEncryption.CREATIONUTIL.createCreateMemberChangeSequence(changes, set,10000);
+	    
+		try {
+			TestChangeEncryption.WRITER.testChangesTogether(changes,csvFile);
+		}catch(Exception e) {
+			System.out.println(e+":\t"+e.getMessage());
+			assert false;
 		}
-		 String result = times.stream()
-	                .reduce((a, b) -> a + ", " + b)
-	                .orElse("");
-		logger.severe(result);
+		assert true;
 	}
 	
 	
-	//HELPER
+	
 	
 	
 	

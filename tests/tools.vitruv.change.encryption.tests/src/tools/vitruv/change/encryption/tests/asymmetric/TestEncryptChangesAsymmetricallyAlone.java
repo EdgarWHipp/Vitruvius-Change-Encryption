@@ -56,41 +56,7 @@ private void writeToCsv(String change,Map<String,Pair<String,long[]>> map) throw
 	        }
 	     
 	}
-	private void testChangeAlone(EChange change) throws IOException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
-		Map<String,Pair<String,long[]>> mainMap = new HashMap<String,Pair<String,long[]>>();
-		long[][] timeArray = new long[10][3];
-		for (Map map : TestChangeEncryption.ENCRYPTIONUTIL.getAllEncryptionMapsAsymmetric()) {
-			for (int i=0;i<10;i++) {
-				
-
-			    long startTime = System.currentTimeMillis();
-				//
-			    TestChangeEncryption.ENCRYPTIONSCHEME.encryptDeltaChangeAloneAsymmetrically(map, change,TestChangeEncryption.FILE);
-			    long betweenTime = System.currentTimeMillis();
-				EChange decryptedChange = TestChangeEncryption.ENCRYPTIONSCHEME.decryptDeltaChangeAloneAsymmetrically(map, TestChangeEncryption.FILE);
-				//
-				long endTime = System.currentTimeMillis();
-				
-				long totalTime = endTime - startTime;
-				long decryptionTime = endTime - betweenTime;
-				long encryptionTime = betweenTime - startTime;
-				timeArray[i]= new long[] {encryptionTime,decryptionTime,totalTime};
-				assertTrue(new EcoreUtil.EqualityHelper().equals(change,decryptedChange)); 
-			}
-		
-			long[] mean=new long[3];
-			long sum=0;
-			for (int j = 0;j<3;j++) {
-				for (int i=0;i<10;i++) {
-					sum+=timeArray[i][j];
-				}
-				mean[j]=sum/3;
-			}
-		mainMap.put("result",new Pair<String, long[]>((String)map.get("algorithm"),mean));
-		this.writeToCsv(change.getClass().getSimpleName(),mainMap);
-		}
 	
-	}
 	@Test
 	public void testCreateEObjectChangeEncryption() throws NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException {
 		List<EChange> changes = new ArrayList<>();

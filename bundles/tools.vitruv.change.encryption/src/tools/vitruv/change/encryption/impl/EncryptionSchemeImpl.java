@@ -42,43 +42,7 @@ public class EncryptionSchemeImpl implements EncryptionScheme{
 	public EncryptionSchemeImpl() {
 	
 	}
-	public void encryptDeltaChangeAloneAsymmetrically(Map<?,?> encryptionOption,EChange change,File encryptedChangesFile) throws IOException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, NoSuchPaddingException {
-		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-		ResourceSet resourceSet = new ResourceSetImpl();
-	    resourceSet.getResourceFactoryRegistry().getExtensionToFactoryMap().put("ecore", new EcoreResourceFactoryImpl());
-	    
-	    Resource resource = resourceSet.createResource(URI.createFileURI(new File("").getAbsolutePath() + "/dummy.ecore"));
-	    resource.getContents().add(change);
-	    
-	    
-	    resource.save(byteArrayOutputStream,Collections.EMPTY_MAP);
-	    FileOutputStream fileOutputStream = new FileOutputStream(encryptedChangesFile);
-	    
-	    byte[] encryptedData = encryptionUtils.cryptographicFunctionAsymmetric(encryptionOption,Cipher.ENCRYPT_MODE,byteArrayOutputStream.toByteArray());
-	    fileOutputStream.write(encryptedData);
-	    byteArrayOutputStream.close();
-	    fileOutputStream.close();
-		
-		
-		
-	}
 	
-	public EChange decryptDeltaChangeAloneAsymmetrically(Map<?,?> decryptionOption,File encryptedChangesFile) throws IOException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, NoSuchPaddingException {
-		FileInputStream fileInputStream = new FileInputStream(encryptedChangesFile);
-		
-        byte[] encryptedData = fileInputStream.readAllBytes();
-
-        byte[] decryptedData = encryptionUtils.cryptographicFunctionAsymmetric(decryptionOption,Cipher.DECRYPT_MODE,encryptedData);
-
-        ByteArrayInputStream decryptedStream = new ByteArrayInputStream(decryptedData);
-       
-        ResourceSet resourceSet = new ResourceSetImpl();
-        resourceSet.getResourceFactoryRegistry().getExtensionToFactoryMap().put( "ecore", new EcoreResourceFactoryImpl());
-        Resource resource = resourceSet.createResource(URI.createFileURI(new File("").getAbsolutePath() + "/decrypted.ecore"));
-        resource.load(decryptedStream,Collections.EMPTY_MAP);
-        EChange decryptedChange = (EChange) resource.getContents().get(0);
-        return decryptedChange;
-	}
 	
 	public void encryptDeltasCustomKeys(Map<EChange,Pair<SecretKey,String>> options,File encryptedChangesFile) {
 		
