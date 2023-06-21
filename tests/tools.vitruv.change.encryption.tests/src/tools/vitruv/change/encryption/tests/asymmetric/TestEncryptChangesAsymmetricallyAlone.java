@@ -105,7 +105,7 @@ public class TestEncryptChangesAsymmetricallyAlone extends TestChangeEncryption{
 				mean[j]=sum/3;
 			}
 		mainMap.put("result",new Pair<String, long[]>((String)map.get("algorithm"),mean));
-		TestChangeEncryption.WRITER.writeToCsv(change.getClass().getSimpleName()+amounts[x],mainMap,TestChangeEncryption.ASYM_ENCRYPTIONSCHEME.getCSVFileName());
+		TestChangeEncryption.WRITER.writeToCsv(change.getClass().getSimpleName()+amounts[x],mainMap,TestChangeEncryption.ASYM_ENCRYPTIONSCHEME.getCSVFileNameAlone());
 		
 		}
 	}

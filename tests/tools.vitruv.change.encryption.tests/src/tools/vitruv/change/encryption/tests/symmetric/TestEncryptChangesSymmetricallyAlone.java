@@ -123,7 +123,7 @@ public class TestEncryptChangesSymmetricallyAlone extends TestChangeEncryption{
 					mean[j]=sum/3;
 				}
 			mainMap.put("result",new Pair<String, long[]>((String)map.get("algorithm"),mean));
-			TestChangeEncryption.WRITER.writeToCsv(change.getClass().getSimpleName()+amounts[x],mainMap,TestChangeEncryption.SYM_ENCRYPTIONSCHEME.getCSVFileName());
+			TestChangeEncryption.WRITER.writeToCsv(change.getClass().getSimpleName()+amounts[x],mainMap,TestChangeEncryption.SYM_ENCRYPTIONSCHEME.getCSVFileNameAlone());
 			
 			}
 		}

@@ -71,7 +71,7 @@ public class TestEncryptChangesSymmetricallyTogether extends TestChangeEncryptio
 						try {
 							TestChangeEncryption.SYM_ENCRYPTIONSCHEME.encryptDeltaChangesTogether(map, changes, TestChangeEncryption.FILE);
 						} catch (InvalidKeyException | IllegalBlockSizeException | BadPaddingException
-								| NoSuchAlgorithmException | NoSuchPaddingException | IOException e) {
+								| NoSuchAlgorithmException | NoSuchPaddingException | IOException | InvalidAlgorithmParameterException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
@@ -82,7 +82,7 @@ public class TestEncryptChangesSymmetricallyTogether extends TestChangeEncryptio
 						try {
 							TestChangeEncryption.SYM_ENCRYPTIONSCHEME.decryptDeltaChangesTogether(map, TestChangeEncryption.FILE);
 						} catch (InvalidKeyException | IllegalBlockSizeException | BadPaddingException
-								| NoSuchAlgorithmException | NoSuchPaddingException | IOException e) {
+								| NoSuchAlgorithmException | NoSuchPaddingException | IOException | ClassNotFoundException | InvalidAlgorithmParameterException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
@@ -109,7 +109,7 @@ public class TestEncryptChangesSymmetricallyTogether extends TestChangeEncryptio
 		String concatenatedClassNames = changes.stream()
 		        .map(change -> change.getClass().getSimpleName())
 		        .collect(Collectors.joining());
-		TestChangeEncryption.WRITER.writeToCsv(concatenatedClassNames,mainMap, csvFileName);
+		TestChangeEncryption.WRITER.writeToCsv(concatenatedClassNames,mainMap, TestChangeEncryption.SYM_ENCRYPTIONSCHEME.getCSVFileNameTogether());
 		}
 	}
 }

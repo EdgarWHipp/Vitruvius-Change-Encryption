@@ -87,7 +87,7 @@ public class TestEncryptChangesAsymmetricallyTogether extends TestChangeEncrypti
 		String concatenatedClassNames = changes.stream()
 		        .map(change -> change.getClass().getSimpleName())
 		        .collect(Collectors.joining());
-		TestChangeEncryption.WRITER.writeToCsv(concatenatedClassNames,mainMap, TestChangeEncryption.ASYM_ENCRYPTIONSCHEME.getCSVFileName());
+		TestChangeEncryption.WRITER.writeToCsv(concatenatedClassNames,mainMap, TestChangeEncryption.ASYM_ENCRYPTIONSCHEME.getCSVFileNameTogether());
 		}
 	}
 	/**
