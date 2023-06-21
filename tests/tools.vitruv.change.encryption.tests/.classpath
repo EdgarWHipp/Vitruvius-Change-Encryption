@@ -11,7 +11,5 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
-	<classpathentry kind="lib" path="/cpabe/cpabe-api/src" sourcepath="/cpabe/cpabe-api/src"/>
-	<classpathentry kind="lib" path="C:/Users/Klavi/Downloads/jar_files/opencsv-2.4.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

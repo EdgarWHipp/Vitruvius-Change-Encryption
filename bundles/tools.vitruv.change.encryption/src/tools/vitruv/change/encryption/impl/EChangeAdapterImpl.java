@@ -17,6 +17,7 @@ import tools.vitruv.change.serialization.EChangeSerializer;
  *
  */
 public class EChangeAdapterImpl implements EChangeAdapter {
+	
 	/*
 	 * Returns the Objectmapper with both the EChangeSerializaer() and the EChangeDeserializer() properties.
 	 */
