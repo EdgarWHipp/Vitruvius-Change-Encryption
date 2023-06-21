@@ -1,4 +1,4 @@
-package kpabe;
+package kpabe.kpabe;
 
 import java.security.SecureRandom;
 

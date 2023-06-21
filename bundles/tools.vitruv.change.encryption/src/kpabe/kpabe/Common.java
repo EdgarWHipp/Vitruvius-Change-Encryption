@@ -1,4 +1,4 @@
-package kpabe;
+package kpabe.kpabe;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;

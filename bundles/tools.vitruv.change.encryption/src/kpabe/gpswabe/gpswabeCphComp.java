@@ -1,4 +1,4 @@
-package gpswabe;
+package kpabe.gpswabe;
 
 import it.unisa.dia.gas.jpbc.Element;
 /*one attribute structure in ciphertext key*/

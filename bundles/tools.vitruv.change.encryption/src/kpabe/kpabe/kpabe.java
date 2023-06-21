@@ -1,12 +1,13 @@
-package kpabe;
+package kpabe.kpabe;
 
-import gpswabe.*;
+import kpabe.gpswabe.*;
+
 import it.unisa.dia.gas.jpbc.Element;
 
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 
-import policy.LangPolicy;
+import kpabe.kpabe.policy.LangPolicy;
 
 /**
  * @param args
