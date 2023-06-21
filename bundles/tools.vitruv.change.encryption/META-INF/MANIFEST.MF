@@ -20,11 +20,13 @@ Require-Bundle: org.apache.log4j,
  org.eclipse.emf.common,
  org.eclipse.xtend.lib.macro
 Export-Package: 
- tools.vitruv.change.encryption,
- tools.vitruv.change.encryption.impl,
- tools.vitruv.change.serialization,
  junwei.cpabe.junwei.bswabe,
  junwei.cpabe.junwei.cpabe,
- junwei.cpabe.junwei.cpabe.policy
+ junwei.cpabe.junwei.cpabe.policy,
+ tools.vitruv.change.encryption,
+ tools.vitruv.change.encryption.impl,
+ tools.vitruv.change.encryption.impl.asymmetric,
+ tools.vitruv.change.encryption.impl.symmetric,
+ tools.vitruv.change.serialization
 Bundle-Vendor: vitruv.tools
 

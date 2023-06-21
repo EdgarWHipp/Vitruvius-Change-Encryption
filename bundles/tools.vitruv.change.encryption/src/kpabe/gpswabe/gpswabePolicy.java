@@ -1,4 +1,4 @@
-package gpswabe;
+package kpabe.gpswabe;
 
 import java.util.ArrayList;
 import it.unisa.dia.gas.jpbc.Element;

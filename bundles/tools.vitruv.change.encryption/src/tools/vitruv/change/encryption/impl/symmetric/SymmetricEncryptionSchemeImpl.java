@@ -1,6 +1,7 @@
-package tools.vitruv.change.encryption.impl;
+package tools.vitruv.change.encryption.impl.symmetric;
 
 import java.io.ByteArrayInputStream;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -28,7 +29,6 @@ import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.emf.ecore.xmi.impl.EcoreResourceFactoryImpl;
 import edu.kit.ipd.sdq.commons.util.java.Pair;
 import tools.vitruv.change.atomic.EChange;
-import tools.vitruv.change.encryption.EncryptionScheme;
 import tools.vitruv.change.encryption.utils.EncryptionUtils;
 
 /**
@@ -36,13 +36,21 @@ import tools.vitruv.change.encryption.utils.EncryptionUtils;
  * @author Edgar Hipp
  *	
  */
-public class EncryptionSchemeImpl implements EncryptionScheme{
-	private static final Logger logger = Logger.getLogger(EncryptionSchemeImpl.class.getName());
+public class SymmetricEncryptionSchemeImpl{
+	private static final Logger logger = Logger.getLogger(SymmetricEncryptionSchemeImpl.class.getName());
 	private final EncryptionUtils encryptionUtils = EncryptionUtils.getInstance();
-	public EncryptionSchemeImpl() {
-	
+	private String csvFileNameAlone;
+	private String csvFileNameTogether;
+	public SymmetricEncryptionSchemeImpl(String csvFileNameAlone,String csvFileNameTogether) {
+		this.csvFileNameAlone=csvFileNameAlone;
+		this.csvFileNameTogether =csvFileNameTogether;
 	}
-	
+	public String getCSVFileNameAlone() {
+		return this.csvFileNameAlone;
+	}
+	public String getCSVFileNameTogether() {
+		return this.csvFileNameTogether;
+	}
 	
 	public void encryptDeltasCustomKeys(Map<EChange,Pair<SecretKey,String>> options,File encryptedChangesFile) {
 		
@@ -57,7 +65,6 @@ public class EncryptionSchemeImpl implements EncryptionScheme{
 	 * 
 	 */
 	public void encryptDeltaChangeAlone(Map<?,?> encryptionOption,EChange change,File encryptedChangesFile) throws IOException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
-
 
 
 		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();

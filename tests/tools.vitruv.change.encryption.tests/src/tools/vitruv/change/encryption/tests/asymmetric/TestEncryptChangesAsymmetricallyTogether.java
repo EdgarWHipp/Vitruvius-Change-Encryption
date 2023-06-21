@@ -2,6 +2,7 @@ package tools.vitruv.change.encryption.tests.asymmetric;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -14,6 +15,7 @@ import java.util.stream.Collectors;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.security.SignatureException;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -27,15 +29,13 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.emf.ecore.xmi.impl.EcoreResourceFactoryImpl;
 import org.junit.jupiter.api.Test;
 
+import edu.kit.ipd.sdq.commons.util.java.Pair;
 import tools.vitruv.change.atomic.EChange;
 import tools.vitruv.change.atomic.id.IdResolver;
 import tools.vitruv.change.changederivation.DefaultStateBasedChangeResolutionStrategy;
-import tools.vitruv.change.encryption.TestChangeEncryption.ENCRYPTIONSCHEME;
-import tools.vitruv.change.encryption.impl.TestChangeEncryption.ENCRYPTIONSCHEMEImpl;
+
 import tools.vitruv.change.encryption.tests.TestChangeEncryption;
-import tools.vitruv.change.encryption.tests.symmetric.Pair;
-import tools.vitruv.change.encryption.tests.util.EChangeTestChangeEncryption.CREATIONUTILity;
-import tools.vitruv.change.encryption.tests.util.TestChangeEncryption.ENCRYPTIONUTILity;
+
 import tools.vitruv.change.composite.description.TransactionalChange;
 import tools.vitruv.change.composite.description.VitruviusChangeFactory;
 
@@ -50,23 +50,21 @@ import tools.vitruv.change.composite.description.VitruviusChangeFactory;
 
 public class TestEncryptChangesAsymmetricallyTogether extends TestChangeEncryption{
 	private static final Logger logger = Logger.getLogger(TestEncryptChangesAsymmetricallyTogether.class.getName());
-	private final File fileWithEncryptedChanges = new File(new File("").getAbsolutePath() +"/encrypted_changes");
-	private final static File csvFile = new File(new File("").getAbsolutePath() + File.separator + "AsymmetricEncryptionTogether.csv");
 	
 	
 	
-	private void testChangesTogether(List<EChange> changes) throws IOException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
+	private void testChangesTogether(List<EChange> changes) throws IOException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, SignatureException {
 		Map<String,Pair<String,long[]>> mainMap = new HashMap<String,Pair<String,long[]>>();
 		long[][] timeArray = new long[10][3];
-		for (Map map : TestChangeEncryption.ENCRYPTIONUTIL.getAllEncryptionMapsSymmetric()) {
+		for (Map map : TestChangeEncryption.ENCRYPTIONUTIL.getAllEncryptionMapsAsymmetric()) {
 			for (int i=0;i<10;i++) {
 				
 
 			    long startTime = System.currentTimeMillis();
 				//
-			    TestChangeEncryption.ENCRYPTIONSCHEME.encryptDeltaChangesTogether(map,changes,TestChangeEncryption.FILE);
+			    TestChangeEncryption.ASYM_ENCRYPTIONSCHEME.encryptDeltaChangeTogetherAsymmetrically(map,changes,TestChangeEncryption.FILE);
 			    long betweenTime = System.currentTimeMillis();
-				List<EChange> decryptedChanges = TestChangeEncryption.ENCRYPTIONSCHEME.decryptDeltaChangesTogether(map, TestChangeEncryption.FILE);
+				List<EChange> decryptedChanges = TestChangeEncryption.ASYM_ENCRYPTIONSCHEME.decryptDeltaChangeTogetherAsymmetrically(map, TestChangeEncryption.FILE);
 				//
 				long endTime = System.currentTimeMillis();
 				
@@ -89,7 +87,7 @@ public class TestEncryptChangesAsymmetricallyTogether extends TestChangeEncrypti
 		String concatenatedClassNames = changes.stream()
 		        .map(change -> change.getClass().getSimpleName())
 		        .collect(Collectors.joining());
-		TestChangeEncryption.WRITER.writeToCsv(concatenatedClassNames,mainMap, csvFile);
+		TestChangeEncryption.WRITER.writeToCsv(concatenatedClassNames,mainMap, TestChangeEncryption.ASYM_ENCRYPTIONSCHEME.getCSVFileName());
 		}
 	}
 	/**

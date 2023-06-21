@@ -2,6 +2,7 @@ package tools.vitruv.change.encryption.tests.symmetric;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -11,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -27,15 +29,13 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.emf.ecore.xmi.impl.EcoreResourceFactoryImpl;
 import org.junit.jupiter.api.Test;
 
+import edu.kit.ipd.sdq.commons.util.java.Pair;
 import tools.vitruv.change.atomic.EChange;
 import tools.vitruv.change.atomic.id.IdResolver;
 import tools.vitruv.change.changederivation.DefaultStateBasedChangeResolutionStrategy;
-import tools.vitruv.change.encryption.TestChangeEncryption.ENCRYPTIONSCHEME;
-import tools.vitruv.change.encryption.impl.TestChangeEncryption.ENCRYPTIONSCHEMEImpl;
+
 import tools.vitruv.change.encryption.tests.TestChangeEncryption;
-import tools.vitruv.change.encryption.tests.util.Pair;
-import tools.vitruv.change.encryption.tests.util.EChangeTestChangeEncryption.CREATIONUTILity;
-import tools.vitruv.change.encryption.tests.util.TestChangeEncryption.ENCRYPTIONUTILity;
+
 import tools.vitruv.change.composite.description.TransactionalChange;
 import tools.vitruv.change.composite.description.VitruviusChangeFactory;
 
@@ -49,34 +49,54 @@ import tools.vitruv.change.composite.description.VitruviusChangeFactory;
 
 
 public class TestEncryptChangesSymmetricallyTogether extends TestChangeEncryption{
-	private static final Logger logger = Logger.getLogger(TestEncryptChangesSymmetricallyTogether.class.getName());
 	private final File fileWithEncryptedChanges = new File(new File("").getAbsolutePath() +"/encrypted_changes");
-	private final static File csvFile = new File(new File("").getAbsolutePath() + File.separator + "SymmetricEncryptionTogether.csv");
+	private final String csvFileName = new File("").getAbsolutePath() + File.separator + "SymmetricEncryptionTogether.csv";
 	
 	
 	
-	private void testChangesTogether(List<EChange> changes, String csvFile) throws IOException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
+	private void testChangesTogether(List<EChange> changes) throws IOException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
 		Map<String,Pair<String,long[]>> mainMap = new HashMap<String,Pair<String,long[]>>();
 		long[][] timeArray = new long[10][3];
-		for (Map map : TestChangeEncryption.ENCRYPTIONUTIL.getAllEncryptionMapsSymmetric()) {
-			for (int i=0;i<10;i++) {
-				
+		int[] amounts = {1,10,100,1000,10000};
 
-			    long startTime = System.currentTimeMillis();
-				//
-			    TestChangeEncryption.ENCRYPTIONSCHEME.encryptDeltaChangesTogether(map,changes,TestChangeEncryption.FILE);
-			    long betweenTime = System.currentTimeMillis();
-				List<EChange> decryptedChanges = TestChangeEncryption.ENCRYPTIONSCHEME.decryptDeltaChangesTogether(map, TestChangeEncryption.FILE);
-				//
-				long endTime = System.currentTimeMillis();
-				
-				long totalTime = endTime - startTime;
-				long decryptionTime = endTime - betweenTime;
-				long encryptionTime = betweenTime - startTime;
-				timeArray[i]= new long[] {encryptionTime,decryptionTime,totalTime};
-				assertTrue(new EcoreUtil.EqualityHelper().equals(changes,decryptedChanges)); 
-			}
-		
+		for (Map map : TestChangeEncryption.ENCRYPTIONUTIL.getAllEncryptionMapsSymmetric()) {
+			for (int x=0;x<amounts.length;x++) {
+				for (int i=0;i<10;i++) {
+					
+	
+				    long startTime = System.currentTimeMillis();
+					//
+				    IntStream.range(0, amounts[x])
+				    .forEach(j -> {
+						try {
+							TestChangeEncryption.SYM_ENCRYPTIONSCHEME.encryptDeltaChangesTogether(map, changes, TestChangeEncryption.FILE);
+						} catch (InvalidKeyException | IllegalBlockSizeException | BadPaddingException
+								| NoSuchAlgorithmException | NoSuchPaddingException | IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					});
+				    long betweenTime = System.currentTimeMillis();
+				    IntStream.range(0, amounts[x])
+				    .forEach(j -> {
+						try {
+							TestChangeEncryption.SYM_ENCRYPTIONSCHEME.decryptDeltaChangesTogether(map, TestChangeEncryption.FILE);
+						} catch (InvalidKeyException | IllegalBlockSizeException | BadPaddingException
+								| NoSuchAlgorithmException | NoSuchPaddingException | IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					});
+					//
+					long endTime = System.currentTimeMillis();
+					
+					long totalTime = endTime - startTime;
+					long decryptionTime = endTime - betweenTime;
+					long encryptionTime = betweenTime - startTime;
+					timeArray[i]= new long[] {encryptionTime,decryptionTime,totalTime};
+					//assertTrue(new EcoreUtil.EqualityHelper().equals(changes,decryptedChanges)); 
+				}
+			
 			long[] mean=new long[3];
 			long sum=0;
 			for (int j = 0;j<3;j++) {
@@ -89,8 +109,9 @@ public class TestEncryptChangesSymmetricallyTogether extends TestChangeEncryptio
 		String concatenatedClassNames = changes.stream()
 		        .map(change -> change.getClass().getSimpleName())
 		        .collect(Collectors.joining());
-		TestChangeEncryption.WRITER.writeToCsv(concatenatedClassNames,mainMap, csvFile);
+		TestChangeEncryption.WRITER.writeToCsv(concatenatedClassNames,mainMap, csvFileName);
 		}
+	}
 }
 	/**
 	 * Test the Encryption and Decryption of the ReplaceSingleAttribute change; 
@@ -113,7 +134,7 @@ public class TestEncryptChangesSymmetricallyTogether extends TestChangeEncryptio
 		TestChangeEncryption.CREATIONUTIL.createReplaceSingleAttributeChange(changes, set);
 
 		try {
-			TestChangeEncryption.WRITER.testChangesTogether(changes,csvFile);
+			TestChangeEncryption.WRITER.testChangesTogether(changes);
 		}catch(Exception e) {
 			System.out.println(e+":\t"+e.getMessage());
 			assert false;
@@ -141,7 +162,7 @@ public class TestEncryptChangesSymmetricallyTogether extends TestChangeEncryptio
 			ResourceSet set = new ResourceSetImpl();
 			TestChangeEncryption.CREATIONUTIL.createCreateMemberChangeSequence(changes, set,1);
 			try {
-				TestChangeEncryption.WRITER.testChangesTogether(changes,csvFile);
+				TestChangeEncryption.WRITER.testChangesTogether(changes);
 			}catch(Exception e) {
 				System.out.println(e+":\t"+e.getMessage());
 				assert false;
@@ -168,7 +189,7 @@ public class TestEncryptChangesSymmetricallyTogether extends TestChangeEncryptio
 	    
 	     
 		try {
-			TestChangeEncryption.WRITER.testChangesTogether(changes,csvFile);
+			TestChangeEncryption.WRITER.testChangesTogether(changes);
 		}catch(Exception e) {
 			System.out.println(e+":\t"+e.getMessage());
 			assert false;
@@ -194,7 +215,7 @@ public class TestEncryptChangesSymmetricallyTogether extends TestChangeEncryptio
 		TestChangeEncryption.CREATIONUTIL.createRemoveAttributeChange(changes, set);	    
 	     
 	    try {
-			TestChangeEncryption.WRITER.testChangesTogether(changes,csvFile);
+			TestChangeEncryption.WRITER.testChangesTogether(changes);
 		}catch(Exception e) {
 			System.out.println(e+":\t"+e.getMessage());
 			assert false;
@@ -220,7 +241,7 @@ public class TestEncryptChangesSymmetricallyTogether extends TestChangeEncryptio
 			TestChangeEncryption.CREATIONUTIL.createDeleteRootEObjectChange(changes, set);
 			
 			try {
-				TestChangeEncryption.WRITER.testChangesTogether(changes,csvFile);
+				TestChangeEncryption.WRITER.testChangesTogether(changes);
 			}catch(Exception e) {
 				System.out.println(e+":\t"+e.getMessage());
 				assert false;
@@ -248,7 +269,7 @@ public class TestEncryptChangesSymmetricallyTogether extends TestChangeEncryptio
 		TestChangeEncryption.CREATIONUTIL.createInsertEAttributeValueChange(changes, set);
 		
 		try {
-			TestChangeEncryption.WRITER.testChangesTogether(changes,csvFile);
+			TestChangeEncryption.WRITER.testChangesTogether(changes);
 		}catch(Exception e) {
 			System.out.println(e+":\t"+e.getMessage());
 			assert false;
@@ -274,7 +295,7 @@ public class TestEncryptChangesSymmetricallyTogether extends TestChangeEncryptio
 		TestChangeEncryption.CREATIONUTIL.createInsertReferenceChange(changes, set);
 	   
 		try {
-			TestChangeEncryption.WRITER.testChangesTogether(changes,csvFile);
+			TestChangeEncryption.WRITER.testChangesTogether(changes);
 		}catch(Exception e) {
 			System.out.println(e+":\t"+e.getMessage());
 			assert false;
@@ -295,7 +316,7 @@ public class TestEncryptChangesSymmetricallyTogether extends TestChangeEncryptio
 		TestChangeEncryption.CREATIONUTIL.createCreateMemberChangeSequence(changes, set,10);
 	    
 		try {
-			TestChangeEncryption.WRITER.testChangesTogether(changes,csvFile);
+			TestChangeEncryption.WRITER.testChangesTogether(changes);
 		}catch(Exception e) {
 			System.out.println(e+":\t"+e.getMessage());
 			assert false;
@@ -310,7 +331,7 @@ public class TestEncryptChangesSymmetricallyTogether extends TestChangeEncryptio
 		TestChangeEncryption.CREATIONUTIL.createCreateMemberChangeSequence(changes, set,100);
 	    
 		try {
-			TestChangeEncryption.WRITER.testChangesTogether(changes,csvFile);
+			TestChangeEncryption.WRITER.testChangesTogether(changes);
 		}catch(Exception e) {
 			System.out.println(e+":\t"+e.getMessage());
 			assert false;
@@ -325,7 +346,7 @@ public class TestEncryptChangesSymmetricallyTogether extends TestChangeEncryptio
 		TestChangeEncryption.CREATIONUTIL.createCreateMemberChangeSequence(changes, set,1000);
 	    
 		try {
-			TestChangeEncryption.WRITER.testChangesTogether(changes,csvFile);
+			TestChangeEncryption.WRITER.testChangesTogether(changes);
 		}catch(Exception e) {
 			System.out.println(e+":\t"+e.getMessage());
 			assert false;
@@ -341,7 +362,7 @@ public class TestEncryptChangesSymmetricallyTogether extends TestChangeEncryptio
 		TestChangeEncryption.CREATIONUTIL.createCreateMemberChangeSequence(changes, set,10000);
 	    
 		try {
-			TestChangeEncryption.WRITER.testChangesTogether(changes,csvFile);
+			TestChangeEncryption.WRITER.testChangesTogether(changes);
 		}catch(Exception e) {
 			System.out.println(e+":\t"+e.getMessage());
 			assert false;

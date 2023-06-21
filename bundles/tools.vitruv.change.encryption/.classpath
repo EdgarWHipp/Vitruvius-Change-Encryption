@@ -11,7 +11,7 @@
 	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins">
 		<accessrules>
-			<accessrule kind="accessible" pattern="*"/>
+			<accessrule kind="accessible" pattern="**"/>
 		</accessrules>
 	</classpathentry>
 	<classpathentry kind="lib" path="C:/Users/Klavi/git/Vitruvius-Change-Encryption/bundles/tools.vitruv.change.encryption/cp-abe/jars/jpbc-api-1.2.1.jar" sourcepath="cp-abe/jars/jpbc-api-1.2.1.jar"/>

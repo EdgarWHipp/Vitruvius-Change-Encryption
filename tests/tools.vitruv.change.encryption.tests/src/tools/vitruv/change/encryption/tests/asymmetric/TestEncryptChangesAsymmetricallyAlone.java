@@ -2,12 +2,15 @@ package tools.vitruv.change.encryption.tests.asymmetric;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.security.SignatureException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -43,11 +46,11 @@ import tools.vitruv.change.atomic.root.impl.InsertRootEObjectImpl;
 import tools.vitruv.change.encryption.tests.TestChangeEncryption;
 
 public class TestEncryptChangesAsymmetricallyAlone extends TestChangeEncryption{
-	private final static File csvFile = new File(new File("").getAbsolutePath() + File.separator + "mainAsymmetricAlone.csv");
+	
 
 
 		
-	private void testChangeAlone(EChange change) throws IOException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
+	private void testChangeAlone(EChange change) throws IOException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, SignatureException {
 		Map<String,Pair<String,long[]>> mainMap = new HashMap<String,Pair<String,long[]>>();
 		long[][] timeArray = new long[10][3];
 		int[] amounts = {1,10,100,1000,10000};
@@ -59,10 +62,29 @@ public class TestEncryptChangesAsymmetricallyAlone extends TestChangeEncryption{
 				    long startTime = System.currentTimeMillis();
 					//
 				    IntStream.range(0, amounts[x])
-				    .forEach(j -> TestChangeEncryption.ASYM_ENCRYPTIONSCHEME.encryptDeltaChangeAloneAsymmetrically(map, change, TestChangeEncryption.FILE));
+				    .forEach(j -> {
+						try {
+							TestChangeEncryption.ASYM_ENCRYPTIONSCHEME.encryptDeltaChangeAloneAsymmetrically(map, change, TestChangeEncryption.FILE);
+							
+						} catch (InvalidKeyException | IllegalBlockSizeException | BadPaddingException
+								| NoSuchAlgorithmException | NoSuchPaddingException | IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					});
 				    long betweenTime = System.currentTimeMillis();
 				    IntStream.range(0, amounts[x])
-				    .forEach(j -> TestChangeEncryption.ASYM_ENCRYPTIONSCHEME.decryptDeltaChangeAloneAsymmetrically(map, TestChangeEncryption.FILE));
+				    .forEach(j -> {
+						try {
+							EChange decryptedChange = TestChangeEncryption.ASYM_ENCRYPTIONSCHEME.decryptDeltaChangeAloneAsymmetrically(map, TestChangeEncryption.FILE);
+							//remove assertion on final run.
+							assertTrue(new EcoreUtil.EqualityHelper().equals(change,decryptedChange)); 
+						} catch (InvalidKeyException | IllegalBlockSizeException | BadPaddingException
+								| NoSuchAlgorithmException | NoSuchPaddingException | IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					});
 					//
 					long endTime = System.currentTimeMillis();
 					
@@ -83,7 +105,7 @@ public class TestEncryptChangesAsymmetricallyAlone extends TestChangeEncryption{
 				mean[j]=sum/3;
 			}
 		mainMap.put("result",new Pair<String, long[]>((String)map.get("algorithm"),mean));
-		TestChangeEncryption.WRITER.writeToCsv(change.getClass().getSimpleName()+amounts[x],mainMap,csvFile);
+		TestChangeEncryption.WRITER.writeToCsv(change.getClass().getSimpleName()+amounts[x],mainMap,TestChangeEncryption.ASYM_ENCRYPTIONSCHEME.getCSVFileName());
 		
 		}
 	}

@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
 
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -57,7 +58,7 @@ import au.com.bytecode.opencsv.CSVWriter;
  *
  */
 public class TestEncryptChangesSymmetricallyAlone extends TestChangeEncryption{
-	private final static File  csvFile = new File(new File("").getAbsolutePath() + File.separator + "SymmetricEncryptionAlone.csv");
+	private final String csvFileName = new File("").getAbsolutePath() + File.separator + "SymmetricEncryptionAlone.csv";
 	
 	
 	
@@ -67,7 +68,7 @@ public class TestEncryptChangesSymmetricallyAlone extends TestChangeEncryption{
 		Map<String,Pair<String,long[]>> mainMap = new HashMap<String,Pair<String,long[]>>();
 		long[][] timeArray = new long[10][3];
 		int[] amounts = {1,10,100,1000,10000};
-			for (Map map : TestChangeEncryption.ENCRYPTIONUTIL.getAllEncryptionMapsAsymmetric()) {
+			for (Map map : TestChangeEncryption.ENCRYPTIONUTIL.getAllEncryptionMapsSymmetric()) {
 				for (int x=0;x<amounts.length;x++) {
 					for (int i=0;i<10;i++) {
 						
@@ -75,12 +76,30 @@ public class TestEncryptChangesSymmetricallyAlone extends TestChangeEncryption{
 					    long startTime = System.currentTimeMillis();
 						//
 					    IntStream.range(0, amounts[x])
-					    .forEach(j -> TestChangeEncryption.ENCRYPTIONSCHEME.encryptDeltaChangeAlone(map, change, TestChangeEncryption.FILE));
+					    .forEach(j -> {
+							try {
+								TestChangeEncryption.SYM_ENCRYPTIONSCHEME.encryptDeltaChangeAlone(map, change, TestChangeEncryption.FILE);
+							} catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException
+									| IllegalBlockSizeException | BadPaddingException | IOException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+						});
 
 					   
 					    long betweenTime = System.currentTimeMillis();
 					    IntStream.range(0, amounts[x])
-					    .forEach(j -> TestChangeEncryption.ENCRYPTIONSCHEME.decryptDeltaChangeAlone(map, TestChangeEncryption.FILE));
+					    .forEach(j -> {
+							try {
+								EChange decryptedChange = TestChangeEncryption.SYM_ENCRYPTIONSCHEME.decryptDeltaChangeAlone(map, TestChangeEncryption.FILE);
+								//remove assertion on final run.
+								assertTrue(new EcoreUtil.EqualityHelper().equals(change,decryptedChange)); 
+							} catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException
+									| IllegalBlockSizeException | BadPaddingException | IOException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+						});
 
 						
 						//
@@ -90,12 +109,8 @@ public class TestEncryptChangesSymmetricallyAlone extends TestChangeEncryption{
 						long decryptionTime = endTime - betweenTime;
 						long encryptionTime = betweenTime - startTime;
 						timeArray[i]= new long[] {encryptionTime,decryptionTime,totalTime};
-						// remove assert for final evaluation
-						/*
-						for (int j = 0 ;j<amounts[x];j++) {
-							assertTrue(new EcoreUtil.EqualityHelper().equals(change,decryptedChange)); 
-					    	}  
-					    	*/
+					
+					    	
 						
 					}
 			
@@ -108,7 +123,7 @@ public class TestEncryptChangesSymmetricallyAlone extends TestChangeEncryption{
 					mean[j]=sum/3;
 				}
 			mainMap.put("result",new Pair<String, long[]>((String)map.get("algorithm"),mean));
-			TestChangeEncryption.WRITER.writeToCsv(change.getClass().getSimpleName()+amounts[x],mainMap,csvFile);
+			TestChangeEncryption.WRITER.writeToCsv(change.getClass().getSimpleName()+amounts[x],mainMap,TestChangeEncryption.SYM_ENCRYPTIONSCHEME.getCSVFileName());
 			
 			}
 		}

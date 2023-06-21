@@ -1,4 +1,4 @@
-package tools.vitruv.change.encryption.impl;
+package tools.vitruv.change.encryption.impl.attributebased;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.List;
 
 
+
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
@@ -17,13 +18,15 @@ import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.emf.ecore.xmi.impl.EcoreResourceFactoryImpl;
 
-import junwei.cpabe.junwei.cpabe.Cpabe;
+import kpabe.kpabe.*;
+import kpabe.kpabe.policy.*;
+import kpabe.gpswabe.*;
 import tools.vitruv.change.atomic.EChange;
 import tools.vitruv.change.encryption.utils.EncryptionUtils;
 /**
  * Adapter for the CPABE implementation provided by Junwei.
  */
-public class CpabeAdapterImpl {
+public class KpabeAdapterImpl {
 	private final EncryptionUtils encryptionUtils = EncryptionUtils.getInstance();
 	private final String privateKeyPath;
 	private final String publicKeyPath;
@@ -31,9 +34,9 @@ public class CpabeAdapterImpl {
 	private final String encryptedFilePath;
 	private final String decryptedFilePath;
 	private final String inputFileString;
-	Cpabe instance;
-	public CpabeAdapterImpl(Cpabe cpInstance,String privateKeyPath,String publicKeyPath,String masterKeyPath, String decryptedFilePath, String encryptedFilePath, String inputFileString) {
-		this.instance=cpInstance;
+	kpabe instance;
+	public KpabeAdapterImpl(kpabe kpInstance,String privateKeyPath,String publicKeyPath,String masterKeyPath, String decryptedFilePath, String encryptedFilePath, String inputFileString) {
+		this.instance=kpInstance;
 		this.privateKeyPath=privateKeyPath;
 		this.publicKeyPath=publicKeyPath;
 		this.masterKeyPath=masterKeyPath;
