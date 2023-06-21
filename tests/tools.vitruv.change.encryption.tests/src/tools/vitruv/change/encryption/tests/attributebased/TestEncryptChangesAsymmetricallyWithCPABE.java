@@ -1,5 +1,6 @@
 package tools.vitruv.change.encryption.tests.attributebased;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
@@ -25,12 +26,13 @@ import tools.vitruv.change.atomic.eobject.impl.CreateEObjectImpl;
 import tools.vitruv.change.encryption.impl.AsymmetricEncryptionSchemeImpl;
 import tools.vitruv.change.encryption.impl.CpabeAdapterImpl;
 import tools.vitruv.change.encryption.impl.EncryptionSchemeImpl;
+import tools.vitruv.change.encryption.tests.TestChangeEncryption;
 import tools.vitruv.change.encryption.tests.symmetric.TestEncryptChangesSymmetricallyAlone;
 import tools.vitruv.change.encryption.tests.util.EChangeCreationUtility;
 import tools.vitruv.change.encryption.tests.util.EncryptionUtility;
 
-public class TestEncryptChangesAsymmetricallyWithCPABE {
-	private static final Logger logger = Logger.getLogger(TestEncrypChangesAsymmetricallyWithCPABE.class.getName());
+public class TestEncryptChangesAsymmetricallyWithCPABE extends TestChangeEncryption{
+	private static final Logger logger = Logger.getLogger(TestEncryptChangesAsymmetricallyWithCPABE.class.getName());
 	private final File fileWithEncryptedChanges = new File(new File("").getAbsolutePath() +"/encrypted_changes");
 	private AsymmetricEncryptionSchemeImpl encryptionScheme= new AsymmetricEncryptionSchemeImpl();
 	private final EChangeCreationUtility creationUtil= EChangeCreationUtility.getInstance();
@@ -52,15 +54,17 @@ public class TestEncryptChangesAsymmetricallyWithCPABE {
 		String policy = getPolicy();
 		Cpabe test = new Cpabe();
 		//init adapter
-		CpabeAdapterImpl adapter = new CpabeAdapterImpl(test,privateKeyPath,publicKeyPath,masterKeyPath,decryptedFilePath,encryptedFilePath);
+		CpabeAdapterImpl adapter = 
+				new CpabeAdapterImpl(test,privateKeyPath,publicKeyPath,masterKeyPath,decryptedFilePath,encryptedFilePath,inputFile);
 		
-		
-		//encrypt:
-		adapter.encrypt(failingUserAttributes, policy);
+		EChange change = null;
+		//encrypt
+		adapter.encryptAloneAndGenerateKeys(failingUserAttributes, policy,change);
 		
 		//decrypt
-		adapter.decrypt();
-		File file = new File(decryptedFilePath);
+		EChange decryptedChange = adapter.decryptAlone();
+		assertTrue(new EcoreUtil.EqualityHelper().equals(change,decryptedChange)); 
+		
 		
 	}
 	/**
@@ -82,15 +86,15 @@ public class TestEncryptChangesAsymmetricallyWithCPABE {
 		CpabeAdapterImpl adapter = new CpabeAdapterImpl(test,privateKeyPath,publicKeyPath,masterKeyPath,decryptedFilePath,encryptedFilePath);
 		
 		//encrypt
-		adapter.encrypt(passingUserAttributes, policy,change);
+		adapter.encryptAloneAndGenerateKeys(passingUserAttributes, policy,change);
 		
-		//decrypt
-		adapter.decrypt();
-		File file = new File(decryptedFilePath);
+		//decryption should fail here.
+		EChange decryptedChange = adapter.decryptAlone();
+		assertFalse(new EcoreUtil.EqualityHelper().equals(change,decryptedChange)); 
 		
 		
 	}
-	
+	// These tests should be extended to a wider range of policies and attributes to test the scalability.
 	private String getPassingUserAttributes() {
 		String passing = 
 				"priority:8 name:LaraWeide title:seniorDeveloper";
