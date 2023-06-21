@@ -26,6 +26,7 @@ Export-Package:
  tools.vitruv.change.encryption,
  tools.vitruv.change.encryption.impl,
  tools.vitruv.change.encryption.impl.asymmetric,
+ tools.vitruv.change.encryption.impl.attributebased,
  tools.vitruv.change.encryption.impl.symmetric,
  tools.vitruv.change.serialization
 Bundle-Vendor: vitruv.tools

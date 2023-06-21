@@ -34,7 +34,6 @@ import tools.vitruv.change.encryption.tests.util.EncryptionUtility;
 public class TestEncryptChangesAsymmetricallyWithCPABE extends TestChangeEncryption{
 	private static final Logger logger = Logger.getLogger(TestEncryptChangesAsymmetricallyWithCPABE.class.getName());
 	private final File fileWithEncryptedChanges = new File(new File("").getAbsolutePath() +"/encrypted_changes");
-	private AsymmetricEncryptionSchemeImpl encryptionScheme= new AsymmetricEncryptionSchemeImpl();
 	private final EChangeCreationUtility creationUtil= EChangeCreationUtility.getInstance();
 	private final EncryptionUtility encryptionUtil = EncryptionUtility.getInstance();
 	private final String publicKeyPath = new File("").getAbsolutePath() +"/public_key";
@@ -83,7 +82,7 @@ public class TestEncryptChangesAsymmetricallyWithCPABE extends TestChangeEncrypt
 
 		Cpabe test = new Cpabe();
 		//init adapter
-		CpabeAdapterImpl adapter = new CpabeAdapterImpl(test,privateKeyPath,publicKeyPath,masterKeyPath,decryptedFilePath,encryptedFilePath);
+		CpabeAdapterImpl adapter = new CpabeAdapterImpl(test,privateKeyPath,publicKeyPath,masterKeyPath,decryptedFilePath,encryptedFilePath,inputFile);
 		
 		//encrypt
 		adapter.encryptAloneAndGenerateKeys(passingUserAttributes, policy,change);
