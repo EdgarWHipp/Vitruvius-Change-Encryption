@@ -11,7 +11,7 @@ import tools.vitruv.change.encryption.tests.util.EncryptionUtility;
 
 
 public abstract class TestChangeEncryption {
-	private static final Logger LOGGER = Logger.getLogger(TestChangeEncryption.class.getName());
+	public static final Logger LOGGER = Logger.getLogger(TestChangeEncryption.class.getName());
 	private final static String csvFileNameAloneAsym = new File("").getAbsolutePath() + File.separator + "AsymmetricEncryptionAlone.csv";
 	private final static String csvFileNameTogetherAsym = new File("").getAbsolutePath() + File.separator + "AsymmetricEncryptionTogether.csv";
 

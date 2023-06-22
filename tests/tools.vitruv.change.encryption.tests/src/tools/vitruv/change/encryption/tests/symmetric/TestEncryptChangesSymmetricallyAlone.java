@@ -187,7 +187,7 @@ public class TestEncryptChangesSymmetricallyAlone extends TestChangeEncryption{
 		try {
 			this.testChangeAlone(change);
 		}catch(Exception e) {
-			System.out.println(e+":\t"+e.getMessage());
+			TestChangeEncryption.LOGGER.severe(e+":\t"+e.getMessage());
 			assert false;
 		}
 		assert true;
