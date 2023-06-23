@@ -24,7 +24,7 @@ import kpabe.gpswabe.*;
 import tools.vitruv.change.atomic.EChange;
 import tools.vitruv.change.encryption.utils.EncryptionUtils;
 /**
- * Adapter for the CPABE implementation provided by Junwei.
+ * Adapter for the KPABE implementation provided by ----.
  */
 public class KpabeAdapterImpl {
 	private final EncryptionUtils encryptionUtils = EncryptionUtils.getInstance();
@@ -35,6 +35,7 @@ public class KpabeAdapterImpl {
 	private final String decryptedFilePath;
 	private final String inputFileString;
 	kpabe instance;
+	
 	public KpabeAdapterImpl(kpabe kpInstance,String privateKeyPath,String publicKeyPath,String masterKeyPath, String decryptedFilePath, String encryptedFilePath, String inputFileString) {
 		this.instance=kpInstance;
 		this.privateKeyPath=privateKeyPath;
@@ -46,6 +47,13 @@ public class KpabeAdapterImpl {
 		
 		
 	}
+	/**
+	 * 
+	 * @param attributes
+	 * @param policy
+	 * @param change
+	 * @throws Exception
+	 */
 	public void encryptAloneAndGenerateKeys(String attributes,String policy,EChange change) throws Exception {
 		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 		ResourceSet resourceSet = new ResourceSetImpl();

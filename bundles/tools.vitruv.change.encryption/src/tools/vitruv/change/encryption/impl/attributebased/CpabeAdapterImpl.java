@@ -43,6 +43,14 @@ public class CpabeAdapterImpl {
 		
 		
 	}
+	/**
+	 * Encrypts an EChange and saves it in the encryptedFilePath.
+	 * Also creates appropriate keys based on the user attributes and includes the policy inside the encrypted EChange.
+	 * @param attributes
+	 * @param policy
+	 * @param change
+	 * @throws Exception
+	 */
 	public void encryptAloneAndGenerateKeys(String attributes,String policy,EChange change) throws Exception {
 		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 		ResourceSet resourceSet = new ResourceSetImpl();

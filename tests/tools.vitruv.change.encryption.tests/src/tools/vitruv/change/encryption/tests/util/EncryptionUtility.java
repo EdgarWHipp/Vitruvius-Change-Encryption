@@ -17,7 +17,10 @@ import java.util.List;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 
-
+/**
+ * This singleton class handles the creation of appropriate Hashmaps 
+ * that contain the key and algorithm logic necessary for the tests.
+ */
 public class EncryptionUtility {
 	private static EncryptionUtility instance;
 	private EncryptionUtility() {}
@@ -29,17 +32,7 @@ public class EncryptionUtility {
 		       // returns the singleton object
 		       return instance;
 	   }
-	public HashMap<String,Object> getEncryptionDetailsMap() throws NoSuchAlgorithmException{
-		KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
-		keyGenerator.init(128);
-		
-		// Create map of encryptionOptions
-		SecretKey secretKey = keyGenerator.generateKey();
-		HashMap <String,Object> map = new HashMap<String, Object>();
-		map.put("secretKey", secretKey);
-		map.put("algorithm", "AES");
-		return map;
-	}
+	//----SYMMETRIC
 	public List<HashMap<String,Object>> getAllEncryptionMapsSymmetric() throws NoSuchAlgorithmException{
 		List<HashMap<String,Object>> maps = new ArrayList<>();
 		maps.add(getEncryptionDetailsMapAES());
@@ -106,6 +99,8 @@ public class EncryptionUtility {
 		map.put("algorithm", "Blowfish");
 		return map;
 	}
+	
+	//----ASYMMETRIC
 	
 	public List<HashMap<String,Object>> getAllEncryptionMapsAsymmetric() throws NoSuchAlgorithmException, InvalidKeyException, InvalidAlgorithmParameterException, SignatureException{
 		List<HashMap<String,Object>> maps = new ArrayList<>();

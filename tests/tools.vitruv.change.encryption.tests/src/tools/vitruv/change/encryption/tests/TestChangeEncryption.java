@@ -9,15 +9,17 @@ import tools.vitruv.change.encryption.tests.util.CSVWriter;
 import tools.vitruv.change.encryption.tests.util.EChangeCreationUtility;
 import tools.vitruv.change.encryption.tests.util.EncryptionUtility;
 
-
+/**
+ * This class contains a variety of variables that are used throughout the testing process.
+ */
 public abstract class TestChangeEncryption {
 	public static final Logger LOGGER = Logger.getLogger(TestChangeEncryption.class.getName());
-	private final static String csvFileNameAloneAsym = new File("").getAbsolutePath() + File.separator + "AsymmetricEncryptionAlone.csv";
-	private final static String csvFileNameTogetherAsym = new File("").getAbsolutePath() + File.separator + "AsymmetricEncryptionTogether.csv";
+	private static final String csvFileNameAloneAsym = new File("").getAbsolutePath() + File.separator + "AsymmetricEncryptionAlone.csv";
+	private static final String csvFileNameTogetherAsym = new File("").getAbsolutePath() + File.separator + "AsymmetricEncryptionTogether.csv";
 
 	
-	private final static String csvFileNameAloneSym = new File("").getAbsolutePath() + File.separator + "SymmetricEncryptionAlone.csv";
-	private final static String csvFileNameTogetherSym = new File("").getAbsolutePath() + File.separator + "SymmetricEncryptionTogether.csv";
+	private static final String csvFileNameAloneSym = new File("").getAbsolutePath() + File.separator + "SymmetricEncryptionAlone.csv";
+	private static final String csvFileNameTogetherSym = new File("").getAbsolutePath() + File.separator + "SymmetricEncryptionTogether.csv";
 
 	public static final File FILE = new File(new File("").getAbsolutePath() +"/encrypted_changes");
 	public static final SymmetricEncryptionSchemeImpl SYM_ENCRYPTIONSCHEME 

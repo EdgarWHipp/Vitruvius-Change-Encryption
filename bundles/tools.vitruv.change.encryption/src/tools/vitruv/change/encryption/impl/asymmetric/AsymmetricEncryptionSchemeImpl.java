@@ -30,12 +30,15 @@ import org.eclipse.emf.ecore.xmi.impl.EcoreResourceFactoryImpl;
 import tools.vitruv.change.atomic.EChange;
 import tools.vitruv.change.encryption.EncryptionScheme;
 import tools.vitruv.change.encryption.utils.EncryptionUtils;
-
+/**
+ * Contains the logic for the asymmetric encryption of EChanges.
+ * @author Edgar Hipp
+ */
 public class AsymmetricEncryptionSchemeImpl{
 	private static final Logger logger = Logger.getLogger(AsymmetricEncryptionSchemeImpl.class.getName());
 	private final EncryptionUtils encryptionUtils = EncryptionUtils.getInstance();
-	private String csvFileNameAlone;
-	private String csvFileNameTogether;
+	private final String csvFileNameAlone;
+	private final String csvFileNameTogether;
 
 	public AsymmetricEncryptionSchemeImpl(String csvFileNameAlone, String csvFileNameTogether) {
 		this.csvFileNameAlone = csvFileNameAlone;
@@ -48,7 +51,19 @@ public class AsymmetricEncryptionSchemeImpl{
 	public String getCSVFileNameTogether()
 	{
 		return this.csvFileNameTogether;
-	}	
+	}
+	/**
+	 * Encrypts a single EChange and writes it to the encryptedChangesFile.
+	 * @param encryptionOption
+	 * @param change
+	 * @param encryptedChangesFile
+	 * @throws IOException
+	 * @throws InvalidKeyException
+	 * @throws IllegalBlockSizeException
+	 * @throws BadPaddingException
+	 * @throws NoSuchAlgorithmException
+	 * @throws NoSuchPaddingException
+	 */
 	public void encryptDeltaChangeAloneAsymmetrically(Map<?,?> encryptionOption,EChange change,File encryptedChangesFile) throws IOException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, NoSuchPaddingException {
 		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 		ResourceSet resourceSet = new ResourceSetImpl();
@@ -69,7 +84,18 @@ public class AsymmetricEncryptionSchemeImpl{
 		
 		
 	}
-	
+	/**
+	 * Decrypts a single EChange that is located inside the encryptedChangesFile.
+	 * @param decryptionOption
+	 * @param encryptedChangesFile
+	 * @return decrypted EChange
+	 * @throws IOException
+	 * @throws InvalidKeyException
+	 * @throws IllegalBlockSizeException
+	 * @throws BadPaddingException
+	 * @throws NoSuchAlgorithmException
+	 * @throws NoSuchPaddingException
+	 */
 	public EChange decryptDeltaChangeAloneAsymmetrically(Map<?,?> decryptionOption,File encryptedChangesFile) throws IOException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, NoSuchPaddingException {
 		FileInputStream fileInputStream = new FileInputStream(encryptedChangesFile);
 		
@@ -86,7 +112,18 @@ public class AsymmetricEncryptionSchemeImpl{
         EChange decryptedChange = (EChange) resource.getContents().get(0);
         return decryptedChange;
 	}
-	
+	/**
+	 * Encrypts a List<EChange> and writes them to the encryptedChangesFile.
+	 * @param  encryptionOption
+	 * @param  changes
+	 * @param  encryptedChangesFile
+	 * @throws IOException
+	 * @throws InvalidKeyException
+	 * @throws IllegalBlockSizeException
+	 * @throws BadPaddingException
+	 * @throws NoSuchAlgorithmException
+	 * @throws NoSuchPaddingException
+	 */
 	public void encryptDeltaChangeTogetherAsymmetrically(Map<?,?> encryptionOption,List<EChange> changes,File encryptedChangesFile) throws IOException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, NoSuchPaddingException {
 		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 		ResourceSet resourceSet = new ResourceSetImpl();
@@ -107,7 +144,18 @@ public class AsymmetricEncryptionSchemeImpl{
 		
 		
 	}
-	
+	/**
+	 * Decrypts a List<EChange> that is located inside the encryptedChangesFile and returns them.
+	 * @param decryptionOption
+	 * @param encryptedChangesFile
+	 * @return List<EChange> (decrypted changes)
+	 * @throws IOException
+	 * @throws InvalidKeyException
+	 * @throws IllegalBlockSizeException
+	 * @throws BadPaddingException
+	 * @throws NoSuchAlgorithmException
+	 * @throws NoSuchPaddingException
+	 */
 	public List<EChange> decryptDeltaChangeTogetherAsymmetrically(Map<?,?> decryptionOption,File encryptedChangesFile) throws IOException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, NoSuchPaddingException {
 		FileInputStream fileInputStream = new FileInputStream(encryptedChangesFile);
 		

@@ -41,6 +41,7 @@ public class SymmetricEncryptionSchemeImpl{
 	private final EncryptionUtils encryptionUtils = EncryptionUtils.getInstance();
 	private String csvFileNameAlone;
 	private String csvFileNameTogether;
+	
 	public SymmetricEncryptionSchemeImpl(String csvFileNameAlone,String csvFileNameTogether) {
 		this.csvFileNameAlone=csvFileNameAlone;
 		this.csvFileNameTogether =csvFileNameTogether;
@@ -52,10 +53,8 @@ public class SymmetricEncryptionSchemeImpl{
 		return this.csvFileNameTogether;
 	}
 	
-	public void encryptDeltasCustomKeys(Map<EChange,Pair<SecretKey,String>> options,File encryptedChangesFile) {
-		
-	}
-	/**
+	
+	/** Encrypts a single EChange and saved it to the encryptedChangesFile.
 	 * @throws IOException 
 	 * @throws NoSuchPaddingException 
 	 * @throws NoSuchAlgorithmException 
@@ -80,19 +79,21 @@ public class SymmetricEncryptionSchemeImpl{
 	    
 	    byte[] encryptedData = encryptionUtils.cryptographicFunctionSymmetric(encryptionOption,Cipher.ENCRYPT_MODE,byteArrayOutputStream.toByteArray());
 	    fileOutputStream.write(encryptedData);
+	    
 	    byteArrayOutputStream.close();
 	    fileOutputStream.close();
 
 		
 		
 	}
-	/**
+	/** Reads a single EChange from the encryptedChangesFile, decrypts it and returns the EChange.
 	 * @throws NoSuchPaddingException 
 	 * @throws NoSuchAlgorithmException 
 	 * @throws InvalidKeyException 
 	 * @throws IOException 
 	 * @throws BadPaddingException 
 	 * @throws IllegalBlockSizeException 
+	 * @return decrypted EChange
 	 * 
 	 */
 	public EChange decryptDeltaChangeAlone(Map<?,?> decryptionOption,File encryptedChangesFile) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IOException, IllegalBlockSizeException, BadPaddingException {
@@ -117,7 +118,7 @@ public class SymmetricEncryptionSchemeImpl{
 	}
 	
 	/**
-	 * Writes a list of EncryptedEChanges to the OutputStream, these contain the EChanges in the encryptedBytes field.
+	 * Writes an encrypted List<EChange> to the encryptedChangesFile.,
 	 * @param encryptionMap
 	 * @param changes
 	 * @param out
@@ -140,17 +141,15 @@ public class SymmetricEncryptionSchemeImpl{
 	     resource.save(byteArrayOutputStream,Collections.EMPTY_MAP);
 
 		    
-		    try {
-		        byte[] encryptedData = encryptionUtils.cryptographicFunctionSymmetric(encryptionMap,Cipher.ENCRYPT_MODE,byteArrayOutputStream.toByteArray());
-		        FileOutputStream fileOutputStream = new FileOutputStream(encryptedChangesFile);
-		        try {
-		            fileOutputStream.write(encryptedData);
-		        } finally {
-		            fileOutputStream.close();
-		        }
-		    } finally {
-		    	byteArrayOutputStream.close();
-		    }
+		   
+         byte[] encryptedData = encryptionUtils.cryptographicFunctionSymmetric(encryptionMap,Cipher.ENCRYPT_MODE,byteArrayOutputStream.toByteArray());
+         FileOutputStream fileOutputStream = new FileOutputStream(encryptedChangesFile);
+        
+         fileOutputStream.write(encryptedData);
+         
+         fileOutputStream.close();
+         byteArrayOutputStream.close();
+    
 		
 
 			    
@@ -158,10 +157,10 @@ public class SymmetricEncryptionSchemeImpl{
 		
 	}
 	/**
-	 * Reads the List<EncryptedEChange> from the InputStream, and reconstructs the EChange from the encryptedBytes field of each EncryptedEChange object.
-	 * @param encryptionMap
-	 * @param in
-	 * @return List<EChange>
+	 * Reads a List<EChange> from the encryptedChangesFile, decrypts them and returns the decrypted List<EChange>.
+	 * @param decryptionMap
+	 * @param encryptedChangesFile
+	 * @return decrypted changes
 	 * @throws IOException
 	 * @throws ClassNotFoundException
 	 * @throws InvalidKeyException
@@ -169,10 +168,10 @@ public class SymmetricEncryptionSchemeImpl{
 	 * @throws BadPaddingException
 	 * @throws NoSuchAlgorithmException
 	 * @throws NoSuchPaddingException
-	 * @throws InvalidAlgorithmParameterException 
+	 * @throws InvalidAlgorithmParameterException
 	 */
 
-	public  List<EChange> decryptDeltaChangesTogether(Map<?,?> decryptionMap, File encryptedChangesFile) throws IOException, ClassNotFoundException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException{
+	public List<EChange> decryptDeltaChangesTogether(Map<?,?> decryptionMap, File encryptedChangesFile) throws IOException, ClassNotFoundException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException{
 
 		FileInputStream fileInputStream = new FileInputStream(encryptedChangesFile);
 		

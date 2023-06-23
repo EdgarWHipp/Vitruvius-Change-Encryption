@@ -1,16 +1,9 @@
 package tools.vitruv.change.encryption.tests.util;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import java.io.File;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.stream.IntStream;
-
-import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
 
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
@@ -19,7 +12,6 @@ import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.emf.ecore.xmi.impl.EcoreResourceFactoryImpl;
 
-import edu.kit.ipd.sdq.commons.util.java.Pair;
 import edu.kit.ipd.sdq.metamodels.families.FamiliesFactory;
 import edu.kit.ipd.sdq.metamodels.families.Family;
 import edu.kit.ipd.sdq.metamodels.families.Member;
@@ -32,9 +24,9 @@ import tools.vitruv.change.atomic.feature.attribute.ReplaceSingleValuedEAttribut
 import tools.vitruv.change.atomic.feature.reference.InsertEReference;
 import tools.vitruv.change.atomic.root.RemoveRootEObject;
 import tools.vitruv.change.changederivation.DefaultStateBasedChangeResolutionStrategy;
-import tools.vitruv.change.composite.description.TransactionalChange;
-import tools.vitruv.change.composite.description.VitruviusChangeFactory;
-
+/**
+ * Manages the EChange creation, including the creation of valid resources, for the tests.
+ */
 public class EChangeCreationUtility {
 	private static EChangeCreationUtility util;
 	private URI MEMBER_URI = URI.createFileURI(new File("").getAbsolutePath() + "/member.ecore");

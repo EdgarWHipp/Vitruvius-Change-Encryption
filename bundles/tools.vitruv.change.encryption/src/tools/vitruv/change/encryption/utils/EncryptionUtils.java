@@ -62,9 +62,5 @@ public final class EncryptionUtils {
 			System.out.println("no correct option has been found");
 			return null;
 	}
-	
-	
-	 
-	
-	
+
 }
