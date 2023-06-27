@@ -2,6 +2,7 @@ package tools.vitruv.change.encryption.tests;
 import java.io.File;
 
 import java.util.logging.Logger;
+import java.util.stream.IntStream;
 
 import tools.vitruv.change.encryption.impl.symmetric.SymmetricEncryptionSchemeImpl;
 import tools.vitruv.change.encryption.impl.asymmetric.AsymmetricEncryptionSchemeImpl;
@@ -32,5 +33,14 @@ public abstract class TestChangeEncryption {
 	public static final EncryptionUtility ENCRYPTIONUTIL = EncryptionUtility.getInstance();
 	public static final CSVWriter WRITER = CSVWriter.getInstance();
 
-	
+	public static File[] generateFiles(int amount) {
+		File[] setOfFiles = IntStream.range(0, amount)
+		        .mapToObj(i -> new File("encryptionFile_" + i))
+		        .toArray(File[]::new);
+
+		return setOfFiles;
+	}
+	public static void deleteFiles() {
+		IntStream.range(0, 1000).forEach(x -> new File("encryptionFile_"+x).delete());
+	}
 }

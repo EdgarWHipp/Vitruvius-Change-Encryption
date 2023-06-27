@@ -13,6 +13,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
@@ -71,6 +72,10 @@ public class TestEncryptChangesSymmetricallyAlone extends TestChangeEncryption{
 		}
 	}
 	
+	@AfterAll 
+	private void deletecreatedFiles() {
+		TestChangeEncryption.deleteFiles();
+	}
 	
 	private void collectData(EChange change) throws IOException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
 		Map<String,Pair<String,long[]>> mainMap = new HashMap<String,Pair<String,long[]>>();
@@ -78,18 +83,16 @@ public class TestEncryptChangesSymmetricallyAlone extends TestChangeEncryption{
 		int[] amounts = {1,10,100,1000,10000};
 			for (Map map : TestChangeEncryption.ENCRYPTIONUTIL.getAllEncryptionMapsSymmetric()) {
 				for (int x=0;x<amounts.length;x++) {
-					File[] setOfFiles = new File[amounts[x]];
-					for (int i = 0; i < amounts[x]; i++)
-			        {
-						setOfFiles[i] = new File("encryptionFile_"+i);
-			        }
+					
+					File[] files = TestChangeEncryption.generateFiles(amounts[x]);
+
 					for (int i=0;i<10;i++) {
 						
 					    long startTime = System.currentTimeMillis();
 						//
 					   
-						for (int iter = 0;iter<amounts[x];iter++) {
-							TestChangeEncryption.SYM_ENCRYPTIONSCHEME.encryptDeltaChangeAlone(map, change, setOfFiles[iter]);
+						for (int iter = 0;iter<files.length;iter++) {
+							TestChangeEncryption.SYM_ENCRYPTIONSCHEME.encryptDeltaChangeAlone(map, change, files[iter]);
 
 						}
 								
@@ -97,9 +100,11 @@ public class TestEncryptChangesSymmetricallyAlone extends TestChangeEncryption{
 					   
 					    long betweenTime = System.currentTimeMillis();
 					   
-						for (int iterdecr = 0 ;iterdecr<amounts[x];iterdecr++) {
-							EChange decryptedChange = TestChangeEncryption.SYM_ENCRYPTIONSCHEME.decryptDeltaChangeAlone(map, setOfFiles[iterdecr]);
-							setOfFiles[iterdecr].delete();							//remove assertion on final run.
+						for (int iterdecr = 0 ;iterdecr<files.length;iterdecr++) {
+							EChange decryptedChange = TestChangeEncryption.SYM_ENCRYPTIONSCHEME.decryptDeltaChangeAlone(map, files[iterdecr]);
+							BufferedWriter writer = Files.newBufferedWriter(Paths.get(files[iterdecr].getAbsolutePath()));
+							writer.write("");
+							writer.flush();							
 							//assertTrue(new EcoreUtil.EqualityHelper().equals(change,decryptedChange)); 
 						}
 							

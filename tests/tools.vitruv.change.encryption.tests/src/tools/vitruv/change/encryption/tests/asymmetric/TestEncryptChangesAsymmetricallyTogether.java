@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -26,6 +27,7 @@ import javax.crypto.SecretKey;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.emf.ecore.util.EcoreUtil;
+import org.eclipse.emf.ecore.util.EcoreUtil.EqualityHelper;
 import org.eclipse.emf.ecore.xmi.impl.EcoreResourceFactoryImpl;
 import org.junit.jupiter.api.Test;
 
@@ -51,29 +53,58 @@ import tools.vitruv.change.composite.description.VitruviusChangeFactory;
 public class TestEncryptChangesAsymmetricallyTogether extends TestChangeEncryption{
 	private static final Logger logger = Logger.getLogger(TestEncryptChangesAsymmetricallyTogether.class.getName());
 	
-	
-	
+	private void checkCorrectness(List<EChange> changes) throws InvalidKeyException, NoSuchAlgorithmException, InvalidAlgorithmParameterException, SignatureException, IllegalBlockSizeException, BadPaddingException, NoSuchPaddingException, IOException {
+		for (Map map: TestChangeEncryption.ENCRYPTIONUTIL.getAllEncryptionMapsAsymmetric()) {
+			TestChangeEncryption.ASYM_ENCRYPTIONSCHEME.encryptDeltaChangeTogetherAsymmetrically(map, changes, TestChangeEncryption.FILE);
+			List<EChange> decryptedChanges = TestChangeEncryption.ASYM_ENCRYPTIONSCHEME.decryptDeltaChangeTogetherAsymmetrically(map, TestChangeEncryption.FILE);
+			EqualityHelper helper = new EcoreUtil.EqualityHelper();
+			IntStream.range(0, changes.size()).forEach(x -> assertTrue(helper.equals(changes.get(x),decryptedChanges.get(x))));
+			
+			
+		}
+	}
 	private void testChangesTogether(List<EChange> changes) throws IOException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, SignatureException {
 		Map<String,Pair<String,long[]>> mainMap = new HashMap<String,Pair<String,long[]>>();
 		long[][] timeArray = new long[10][3];
-		for (Map map : TestChangeEncryption.ENCRYPTIONUTIL.getAllEncryptionMapsAsymmetric()) {
-			for (int i=0;i<10;i++) {
-				
+		int[] amounts = {1,10,100,1000,10000};
 
-			    long startTime = System.currentTimeMillis();
-				//
-			    TestChangeEncryption.ASYM_ENCRYPTIONSCHEME.encryptDeltaChangeTogetherAsymmetrically(map,changes,TestChangeEncryption.FILE);
-			    long betweenTime = System.currentTimeMillis();
-				List<EChange> decryptedChanges = TestChangeEncryption.ASYM_ENCRYPTIONSCHEME.decryptDeltaChangeTogetherAsymmetrically(map, TestChangeEncryption.FILE);
-				//
-				long endTime = System.currentTimeMillis();
-				
-				long totalTime = endTime - startTime;
-				long decryptionTime = endTime - betweenTime;
-				long encryptionTime = betweenTime - startTime;
-				timeArray[i]= new long[] {encryptionTime,decryptionTime,totalTime};
-				//assertTrue(new EcoreUtil.EqualityHelper().equals(changes,decryptedChanges)); 
-			}
+		for (Map map : TestChangeEncryption.ENCRYPTIONUTIL.getAllEncryptionMapsAsymmetric()) {
+			for (int x =0;x<amounts.length ;x++){
+				for (int i=0;i<10;i++) {
+					File[] files =TestChangeEncryption.generateFiles(amounts[x]);
+					
+	
+				    long startTime = System.currentTimeMillis();
+					//
+				    IntStream.range(0,amounts[x])
+				    .forEach(j -> {
+						try {
+							TestChangeEncryption.ASYM_ENCRYPTIONSCHEME.encryptDeltaChangeTogetherAsymmetrically(map,changes,files[j]);
+						} catch (InvalidKeyException | IllegalBlockSizeException | BadPaddingException
+								| NoSuchAlgorithmException | NoSuchPaddingException | IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					});
+				    long betweenTime = System.currentTimeMillis();
+				    IntStream.range(0,amounts[x])
+				    .forEach(j->{
+						try {
+							TestChangeEncryption.ASYM_ENCRYPTIONSCHEME.decryptDeltaChangeTogetherAsymmetrically(map, files[j]);
+						} catch (InvalidKeyException | IllegalBlockSizeException | BadPaddingException
+								| NoSuchAlgorithmException | NoSuchPaddingException | IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					});
+					//
+					long endTime = System.currentTimeMillis();
+					
+					long totalTime = endTime - startTime;
+					long decryptionTime = endTime - betweenTime;
+					long encryptionTime = betweenTime - startTime;
+					timeArray[i]= new long[] {encryptionTime,decryptionTime,totalTime};
+				}
 		
 			long[] mean=new long[3];
 			long sum=0;
@@ -88,6 +119,8 @@ public class TestEncryptChangesAsymmetricallyTogether extends TestChangeEncrypti
 		        .map(change -> change.getClass().getSimpleName())
 		        .collect(Collectors.joining());
 		TestChangeEncryption.WRITER.writeToCsv(concatenatedClassNames,mainMap, TestChangeEncryption.ASYM_ENCRYPTIONSCHEME.getCSVFileNameTogether());
+		logger.info("run complete");
+			}
 		}
 	}
 	/**
@@ -111,10 +144,10 @@ public class TestEncryptChangesAsymmetricallyTogether extends TestChangeEncrypti
 		TestChangeEncryption.CREATIONUTIL.createReplaceSingleAttributeChange(changes, set);
 
 		try {
+			this.checkCorrectness(changes);
 			this.testChangesTogether(changes);
 		}catch(Exception e) {
-			System.out.println(e+":\t"+e.getMessage());
-			assert false;
+			logger.info(e+":\t"+e.getMessage());			assert false;
 		}
 		assert true;
 
@@ -139,10 +172,10 @@ public class TestEncryptChangesAsymmetricallyTogether extends TestChangeEncrypti
 			ResourceSet set = new ResourceSetImpl();
 			TestChangeEncryption.CREATIONUTIL.createCreateMemberChangeSequence(changes, set,1);
 			try {
+				this.checkCorrectness(changes);
 				this.testChangesTogether(changes);
 			}catch(Exception e) {
-				System.out.println(e+":\t"+e.getMessage());
-				assert false;
+				logger.info(e+":\t"+e.getMessage());				assert false;
 			}
 			assert true;
 	}
@@ -166,10 +199,10 @@ public class TestEncryptChangesAsymmetricallyTogether extends TestChangeEncrypti
 	    
 	     
 		try {
+			this.checkCorrectness(changes);
 			this.testChangesTogether(changes);
 		}catch(Exception e) {
-			System.out.println(e+":\t"+e.getMessage());
-			assert false;
+			logger.info(e+":\t"+e.getMessage());			assert false;
 		}
 		assert true;
 	}
@@ -192,10 +225,10 @@ public class TestEncryptChangesAsymmetricallyTogether extends TestChangeEncrypti
 		TestChangeEncryption.CREATIONUTIL.createRemoveAttributeChange(changes, set);	    
 	     
 	    try {
+	    	this.checkCorrectness(changes);
 	    	this.testChangesTogether(changes);
 		}catch(Exception e) {
-			System.out.println(e+":\t"+e.getMessage());
-			assert false;
+			logger.info(e+":\t"+e.getMessage());			assert false;
 		}
 		assert true;
 	}
@@ -218,10 +251,10 @@ public class TestEncryptChangesAsymmetricallyTogether extends TestChangeEncrypti
 			TestChangeEncryption.CREATIONUTIL.createDeleteRootEObjectChange(changes, set);
 			
 			try {
+				this.checkCorrectness(changes);
 				this.testChangesTogether(changes);
 			}catch(Exception e) {
-				System.out.println(e+":\t"+e.getMessage());
-				assert false;
+				logger.info(e+":\t"+e.getMessage());				assert false;
 			}
 			assert true;
 		     
@@ -246,10 +279,10 @@ public class TestEncryptChangesAsymmetricallyTogether extends TestChangeEncrypti
 		TestChangeEncryption.CREATIONUTIL.createInsertEAttributeValueChange(changes, set);
 		
 		try {
+			this.checkCorrectness(changes);
 			this.testChangesTogether(changes);
 		}catch(Exception e) {
-			System.out.println(e+":\t"+e.getMessage());
-			assert false;
+			logger.info(e+":\t"+e.getMessage());			assert false;
 		}
 		assert true;
 	}
@@ -272,10 +305,10 @@ public class TestEncryptChangesAsymmetricallyTogether extends TestChangeEncrypti
 		TestChangeEncryption.CREATIONUTIL.createInsertReferenceChange(changes, set);
 	   
 		try {
+			this.checkCorrectness(changes);
 			this.testChangesTogether(changes);
 		}catch(Exception e) {
-			System.out.println(e+":\t"+e.getMessage());
-			assert false;
+			logger.info(e+":\t"+e.getMessage());			assert false;
 		}
 		assert true;
 	}
@@ -285,67 +318,7 @@ public class TestEncryptChangesAsymmetricallyTogether extends TestChangeEncrypti
 	
 	
 	
-	@Test
-	public void testSaveAndLoadCreate10Members() throws NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, IOException, ClassNotFoundException {
-			
-		List<EChange> changes = new ArrayList<>();
-		ResourceSet set = new ResourceSetImpl();
-		TestChangeEncryption.CREATIONUTIL.createCreateMemberChangeSequence(changes, set,10);
-	    
-		try {
-			this.testChangesTogether(changes);
-		}catch(Exception e) {
-			System.out.println(e+":\t"+e.getMessage());
-			assert false;
-		}
-		assert true;
-	}
-	@Test
-	public void testSaveAndLoadCreate100Members() throws NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, IOException, ClassNotFoundException {
-		
-		List<EChange> changes = new ArrayList<>();
-		ResourceSet set = new ResourceSetImpl();
-		TestChangeEncryption.CREATIONUTIL.createCreateMemberChangeSequence(changes, set,100);
-	    
-		try {
-			this.testChangesTogether(changes);
-		}catch(Exception e) {
-			System.out.println(e+":\t"+e.getMessage());
-			assert false;
-		}
-		assert true;
-	}
-	@Test
-	public void testSaveAndLoadCreate1000Members() throws NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, IOException, ClassNotFoundException {
-		
-		List<EChange> changes = new ArrayList<>();
-		ResourceSet set = new ResourceSetImpl();
-		TestChangeEncryption.CREATIONUTIL.createCreateMemberChangeSequence(changes, set,1000);
-	    
-		try {
-			this.testChangesTogether(changes);
-		}catch(Exception e) {
-			System.out.println(e+":\t"+e.getMessage());
-			assert false;
-		}
-		assert true;
-	}
-	@Test
-	public void testSaveAndLoadCreate10000Members() throws NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, IOException, ClassNotFoundException {
-		
-			
-		List<EChange> changes = new ArrayList<>();
-		ResourceSet set = new ResourceSetImpl();
-		TestChangeEncryption.CREATIONUTIL.createCreateMemberChangeSequence(changes, set,10000);
-	    
-		try {
-			this.testChangesTogether(changes);
-		}catch(Exception e) {
-			System.out.println(e+":\t"+e.getMessage());
-			assert false;
-		}
-		assert true;
-	}
+	
 	
 	
 	

@@ -27,6 +27,8 @@ import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.emf.ecore.util.EcoreUtil;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import edu.kit.ipd.sdq.commons.util.java.Pair;
@@ -48,23 +50,34 @@ import tools.vitruv.change.encryption.tests.TestChangeEncryption;
 public class TestEncryptChangesAsymmetricallyAlone extends TestChangeEncryption{
 	
 
-
+	
+	@AfterAll
+	private void deleteCreatedFiles() {
+		TestChangeEncryption.deleteFiles();
+	}
+	private void checkCorrectness(EChange change) throws InvalidKeyException, NoSuchAlgorithmException, InvalidAlgorithmParameterException, SignatureException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException {
+		for (Map map: TestChangeEncryption.ENCRYPTIONUTIL.getAllEncryptionMapsAsymmetric()) {
+			TestChangeEncryption.SYM_ENCRYPTIONSCHEME.encryptDeltaChangeAlone(map, change, TestChangeEncryption.FILE);
+			EChange decryptedChange = TestChangeEncryption.SYM_ENCRYPTIONSCHEME.decryptDeltaChangeAlone(map, TestChangeEncryption.FILE);
+			assertTrue(new EcoreUtil.EqualityHelper().equals(change,decryptedChange));
+		}
+	}
 		
-	private void testChangeAlone(EChange change) throws IOException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, SignatureException {
+	private void collectData(EChange change) throws IOException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, SignatureException {
 		Map<String,Pair<String,long[]>> mainMap = new HashMap<String,Pair<String,long[]>>();
 		long[][] timeArray = new long[10][3];
 		int[] amounts = {1,10,100,1000,10000};
 		for (Map map : TestChangeEncryption.ENCRYPTIONUTIL.getAllEncryptionMapsAsymmetric()) {
 			for (int x=0;x<amounts.length;x++) {
 				for (int i=0;i<10;i++) {
+					File[] files = TestChangeEncryption.generateFiles(amounts[x]);
 					
-	
 				    long startTime = System.currentTimeMillis();
 					//
-				    IntStream.range(0, amounts[x])
+				    IntStream.range(0, files.length)
 				    .forEach(j -> {
 						try {
-							TestChangeEncryption.ASYM_ENCRYPTIONSCHEME.encryptDeltaChangeAloneAsymmetrically(map, change, TestChangeEncryption.FILE);
+							TestChangeEncryption.ASYM_ENCRYPTIONSCHEME.encryptDeltaChangeAloneAsymmetrically(map, change, files[j]);
 							
 						} catch (InvalidKeyException | IllegalBlockSizeException | BadPaddingException
 								| NoSuchAlgorithmException | NoSuchPaddingException | IOException e) {
@@ -73,12 +86,11 @@ public class TestEncryptChangesAsymmetricallyAlone extends TestChangeEncryption{
 						}
 					});
 				    long betweenTime = System.currentTimeMillis();
-				    IntStream.range(0, amounts[x])
+				    IntStream.range(0, files.length)
 				    .forEach(j -> {
 						try {
-							EChange decryptedChange = TestChangeEncryption.ASYM_ENCRYPTIONSCHEME.decryptDeltaChangeAloneAsymmetrically(map, TestChangeEncryption.FILE);
+							EChange decryptedChange = TestChangeEncryption.ASYM_ENCRYPTIONSCHEME.decryptDeltaChangeAloneAsymmetrically(map, files[j]);
 							//remove assertion on final run.
-							assertTrue(new EcoreUtil.EqualityHelper().equals(change,decryptedChange)); 
 						} catch (InvalidKeyException | IllegalBlockSizeException | BadPaddingException
 								| NoSuchAlgorithmException | NoSuchPaddingException | IOException e) {
 							// TODO Auto-generated catch block
@@ -118,7 +130,8 @@ public class TestEncryptChangesAsymmetricallyAlone extends TestChangeEncryption{
 		CreateEObjectImpl<Member> change = (CreateEObjectImpl<Member>) changes.get(0);
 		
 		try {
-			this.testChangeAlone(change);
+			this.checkCorrectness(change);
+			this.collectData(change);
 		}catch(Exception e) {
 			System.out.println(e+":\t"+e.getMessage());
 			assert false;
@@ -137,7 +150,9 @@ public class TestEncryptChangesAsymmetricallyAlone extends TestChangeEncryption{
 		InsertRootEObjectImpl<Member> change = (InsertRootEObjectImpl<Member>) changes.get(1);
 		List<String> times = new ArrayList<>();
 		try {
-			this.testChangeAlone(change);
+			this.checkCorrectness(change);
+
+			this.collectData(change);
 		}catch(Exception e) {
 			System.out.println(e+":\t"+e.getMessage());
 			assert false;
@@ -153,7 +168,9 @@ public class TestEncryptChangesAsymmetricallyAlone extends TestChangeEncryption{
 		
 		ReplaceSingleValuedEAttributeImpl<Member,String> change = (ReplaceSingleValuedEAttributeImpl<Member,String>) changes.get(2);
 		try {
-			this.testChangeAlone(change);
+			this.checkCorrectness(change);
+
+			this.collectData(change);
 		}catch(Exception e) {
 			System.out.println(e+":\t"+e.getMessage());
 			assert false;
@@ -169,7 +186,8 @@ public class TestEncryptChangesAsymmetricallyAlone extends TestChangeEncryption{
 		
 		DeleteEObject<Member> change = TypeInferringAtomicEChangeFactory.getInstance().createDeleteEObjectChange(member);
 		try {
-			this.testChangeAlone(change);
+			this.checkCorrectness(change);
+			this.collectData(change);
 		}catch(Exception e) {
 			System.out.println(e+":\t"+e.getMessage());
 			assert false;
@@ -186,7 +204,8 @@ public class TestEncryptChangesAsymmetricallyAlone extends TestChangeEncryption{
 		RemoveRootEObject<Member> change = TypeInferringAtomicEChangeFactory.getInstance().createRemoveRootChange(member,member.eResource(),0);
 		change.setResource(null);
 		try {
-			this.testChangeAlone(change);
+			this.checkCorrectness(change);
+			this.collectData(change);
 		}catch(Exception e) {
 			System.out.println(e+":\t"+e.getMessage());
 			assert false;
@@ -203,7 +222,8 @@ public class TestEncryptChangesAsymmetricallyAlone extends TestChangeEncryption{
 
 	    InsertEAttributeValue<Member, String> change = TypeInferringAtomicEChangeFactory.getInstance().createInsertAttributeChange(member, member.eClass().getEAllAttributes().get(0), 0, "test");
 	    try {
-			this.testChangeAlone(change);
+	    	this.checkCorrectness(change);
+			this.collectData(change);
 		}catch(Exception e) {
 			System.out.println(e+":\t"+e.getMessage());
 			assert false;
@@ -226,7 +246,8 @@ public class TestEncryptChangesAsymmetricallyAlone extends TestChangeEncryption{
 		InsertEReference<Family,EObject> change =TypeInferringAtomicEChangeFactory.getInstance()
 				.createInsertReferenceChange(familyImpl,familyImpl.eClass().getEAllReferences().get(3),member,0);
 		try {
-			this.testChangeAlone(change);
+			this.checkCorrectness(change);
+			this.collectData(change);
 		}catch(Exception e) {
 			System.out.println(e+":\t"+e.getMessage());
 			assert false;
@@ -245,7 +266,8 @@ public class TestEncryptChangesAsymmetricallyAlone extends TestChangeEncryption{
 		RemoveEReference<EObject, EObject> change =TypeInferringAtomicEChangeFactory.getInstance()
 				.createRemoveReferenceChange(familyImpl, familyImpl.eClass().getEAllReferences().get(1), daughter1Impl, 0);
 		try {
-			this.testChangeAlone(change);
+			this.checkCorrectness(change);
+			this.collectData(change);
 		}catch(Exception e) {
 			System.out.println(e+":\t"+e.getMessage());
 			assert false;
@@ -268,7 +290,8 @@ public class TestEncryptChangesAsymmetricallyAlone extends TestChangeEncryption{
 				.createReplaceSingleReferenceChange(familyImpl, mothersreference, motherImpl, member);
 		change.setAffectedEObject(null);
 		try {
-			this.testChangeAlone(change);
+			this.checkCorrectness(change);
+			this.collectData(change);
 		}catch(Exception e) {
 			System.out.println(e+":\t"+e.getMessage());
 			assert false;
