@@ -1,6 +1,7 @@
 package tools.vitruv.change.encryption.impl.asymmetric;
 
 import java.io.ByteArrayInputStream;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -28,7 +29,6 @@ import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.emf.ecore.xmi.impl.EcoreResourceFactoryImpl;
 
 import tools.vitruv.change.atomic.EChange;
-import tools.vitruv.change.encryption.EncryptionScheme;
 import tools.vitruv.change.encryption.utils.EncryptionUtils;
 /**
  * Contains the logic for the asymmetric encryption of EChanges.

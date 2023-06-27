@@ -134,7 +134,7 @@ public class TestEncryptChangesSymmetricallyTogether extends TestChangeEncryptio
 		TestChangeEncryption.CREATIONUTIL.createReplaceSingleAttributeChange(changes, set);
 
 		try {
-			TestChangeEncryption.WRITER.testChangesTogether(changes);
+			this.testChangesTogether(changes);
 		}catch(Exception e) {
 			System.out.println(e+":\t"+e.getMessage());
 			assert false;
@@ -162,8 +162,8 @@ public class TestEncryptChangesSymmetricallyTogether extends TestChangeEncryptio
 			ResourceSet set = new ResourceSetImpl();
 			TestChangeEncryption.CREATIONUTIL.createCreateMemberChangeSequence(changes, set,1);
 			try {
-				TestChangeEncryption.WRITER.testChangesTogether(changes);
-			}catch(Exception e) {
+				this.testChangesTogether(changes);
+				}catch(Exception e) {
 				System.out.println(e+":\t"+e.getMessage());
 				assert false;
 			}
@@ -189,8 +189,8 @@ public class TestEncryptChangesSymmetricallyTogether extends TestChangeEncryptio
 	    
 	     
 		try {
-			TestChangeEncryption.WRITER.testChangesTogether(changes);
-		}catch(Exception e) {
+			this.testChangesTogether(changes);
+			}catch(Exception e) {
 			System.out.println(e+":\t"+e.getMessage());
 			assert false;
 		}
@@ -215,8 +215,8 @@ public class TestEncryptChangesSymmetricallyTogether extends TestChangeEncryptio
 		TestChangeEncryption.CREATIONUTIL.createRemoveAttributeChange(changes, set);	    
 	     
 	    try {
-			TestChangeEncryption.WRITER.testChangesTogether(changes);
-		}catch(Exception e) {
+			this.testChangesTogether(changes);
+			}catch(Exception e) {
 			System.out.println(e+":\t"+e.getMessage());
 			assert false;
 		}
@@ -241,8 +241,8 @@ public class TestEncryptChangesSymmetricallyTogether extends TestChangeEncryptio
 			TestChangeEncryption.CREATIONUTIL.createDeleteRootEObjectChange(changes, set);
 			
 			try {
-				TestChangeEncryption.WRITER.testChangesTogether(changes);
-			}catch(Exception e) {
+				this.testChangesTogether(changes);
+				}catch(Exception e) {
 				System.out.println(e+":\t"+e.getMessage());
 				assert false;
 			}
@@ -269,8 +269,8 @@ public class TestEncryptChangesSymmetricallyTogether extends TestChangeEncryptio
 		TestChangeEncryption.CREATIONUTIL.createInsertEAttributeValueChange(changes, set);
 		
 		try {
-			TestChangeEncryption.WRITER.testChangesTogether(changes);
-		}catch(Exception e) {
+			this.testChangesTogether(changes);
+			}catch(Exception e) {
 			System.out.println(e+":\t"+e.getMessage());
 			assert false;
 		}
@@ -295,8 +295,8 @@ public class TestEncryptChangesSymmetricallyTogether extends TestChangeEncryptio
 		TestChangeEncryption.CREATIONUTIL.createInsertReferenceChange(changes, set);
 	   
 		try {
-			TestChangeEncryption.WRITER.testChangesTogether(changes);
-		}catch(Exception e) {
+			this.testChangesTogether(changes);
+			}catch(Exception e) {
 			System.out.println(e+":\t"+e.getMessage());
 			assert false;
 		}
@@ -316,8 +316,8 @@ public class TestEncryptChangesSymmetricallyTogether extends TestChangeEncryptio
 		TestChangeEncryption.CREATIONUTIL.createCreateMemberChangeSequence(changes, set,10);
 	    
 		try {
-			TestChangeEncryption.WRITER.testChangesTogether(changes);
-		}catch(Exception e) {
+			this.testChangesTogether(changes);
+			}catch(Exception e) {
 			System.out.println(e+":\t"+e.getMessage());
 			assert false;
 		}
@@ -331,8 +331,8 @@ public class TestEncryptChangesSymmetricallyTogether extends TestChangeEncryptio
 		TestChangeEncryption.CREATIONUTIL.createCreateMemberChangeSequence(changes, set,100);
 	    
 		try {
-			TestChangeEncryption.WRITER.testChangesTogether(changes);
-		}catch(Exception e) {
+			this.testChangesTogether(changes);
+			}catch(Exception e) {
 			System.out.println(e+":\t"+e.getMessage());
 			assert false;
 		}
@@ -346,8 +346,8 @@ public class TestEncryptChangesSymmetricallyTogether extends TestChangeEncryptio
 		TestChangeEncryption.CREATIONUTIL.createCreateMemberChangeSequence(changes, set,1000);
 	    
 		try {
-			TestChangeEncryption.WRITER.testChangesTogether(changes);
-		}catch(Exception e) {
+			this.testChangesTogether(changes);
+			}catch(Exception e) {
 			System.out.println(e+":\t"+e.getMessage());
 			assert false;
 		}
@@ -362,8 +362,8 @@ public class TestEncryptChangesSymmetricallyTogether extends TestChangeEncryptio
 		TestChangeEncryption.CREATIONUTIL.createCreateMemberChangeSequence(changes, set,10000);
 	    
 		try {
-			TestChangeEncryption.WRITER.testChangesTogether(changes);
-		}catch(Exception e) {
+			this.testChangesTogether(changes);
+			}catch(Exception e) {
 			System.out.println(e+":\t"+e.getMessage());
 			assert false;
 		}

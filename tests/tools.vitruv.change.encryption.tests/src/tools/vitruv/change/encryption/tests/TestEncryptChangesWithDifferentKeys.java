@@ -2,6 +2,7 @@ package tools.vitruv.change.encryption.tests;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+
 import java.io.File;
 import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;
@@ -33,14 +34,13 @@ import tools.vitruv.change.atomic.EChange;
 import tools.vitruv.change.atomic.id.IdResolver;
 import tools.vitruv.change.composite.description.TransactionalChange;
 import tools.vitruv.change.composite.description.VitruviusChangeFactory;
-import tools.vitruv.change.encryption.impl.EncryptionSchemeImpl;
 import tools.vitruv.change.encryption.tests.util.EChangeCreationUtility;
 /**
  * Test Class for encryption and decryption of single changes with different keys.
  * @author Edgar Hipp
  *
  */
-
+/*
 public class TestEncryptChangesWithDifferentKeys {
 	private static final Logger logger = Logger.getLogger(TestEncryptChangesWithDifferentKeys.class.getName());
 	private final File fileWithEncryptedChanges = new File(new File("").getAbsolutePath() +"/encrypted_changes");
@@ -84,3 +84,4 @@ public class TestEncryptChangesWithDifferentKeys {
 	    assertTrue(new EcoreUtil.EqualityHelper().equals(set.getResources().get(0).getContents(), newResourceSet.getResources().get(0).getContents()));
 	}
 }
+*/

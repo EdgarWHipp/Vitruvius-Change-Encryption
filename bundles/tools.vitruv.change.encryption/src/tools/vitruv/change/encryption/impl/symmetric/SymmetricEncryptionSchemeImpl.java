@@ -2,6 +2,7 @@ package tools.vitruv.change.encryption.impl.symmetric;
 
 import java.io.ByteArrayInputStream;
 
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -27,7 +28,6 @@ import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.emf.ecore.xmi.impl.EcoreResourceFactoryImpl;
-import edu.kit.ipd.sdq.commons.util.java.Pair;
 import tools.vitruv.change.atomic.EChange;
 import tools.vitruv.change.encryption.utils.EncryptionUtils;
 
@@ -102,7 +102,8 @@ public class SymmetricEncryptionSchemeImpl{
 		FileInputStream fileInputStream = new FileInputStream(encryptedChangesFile);
 		
         byte[] encryptedData = fileInputStream.readAllBytes();
-
+        fileInputStream.close();
+        
         byte[] decryptedData = encryptionUtils.cryptographicFunctionSymmetric(decryptionOption,Cipher.DECRYPT_MODE,encryptedData);
 
         ByteArrayInputStream decryptedStream = new ByteArrayInputStream(decryptedData);
@@ -112,6 +113,7 @@ public class SymmetricEncryptionSchemeImpl{
         Resource resource = resourceSet.createResource(URI.createFileURI(new File("").getAbsolutePath() + "/decrypted.ecore"));
         resource.load(decryptedStream,Collections.EMPTY_MAP);
         EChange decryptedChange = (EChange) resource.getContents().get(0);
+        
         return decryptedChange;
 		
 		

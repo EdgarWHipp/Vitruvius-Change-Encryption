@@ -1,6 +1,7 @@
 package tools.vitruv.change.encryption.utils;
 
 import java.security.InvalidKeyException;
+
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -12,7 +13,6 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 
-import edu.kit.ipd.sdq.commons.util.java.Pair;
 /**
  * This singleton class handles the encryption and decryption of bytes with a given key and algortihm.
  * @author Edgar Hipp
