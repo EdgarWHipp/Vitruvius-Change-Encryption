@@ -52,6 +52,11 @@ public class AsymmetricEncryptionSchemeImpl{
 	{
 		return this.csvFileNameTogether;
 	}
+	public void encryptDeltaChangeAloneAsymmetricallyHybrid(Map<?,?> encryptionOption, EChange change, File encryptedChangesFile) {
+		
+		
+		
+	}
 	/**
 	 * Encrypts a single EChange and writes it to the encryptedChangesFile.
 	 * @param encryptionOption

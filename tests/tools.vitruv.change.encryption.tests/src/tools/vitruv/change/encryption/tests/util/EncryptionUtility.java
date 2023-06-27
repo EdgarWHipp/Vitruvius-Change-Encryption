@@ -172,6 +172,26 @@ public class EncryptionUtility {
 		map.put("algorithm","DiffieHellman");
 		return map;
 	}
+	private HashMap<String,Object> getEncryptionDetailsMapAsymmetricHybridRSA() throws NoSuchAlgorithmException{
+		HashMap <String,Object> map = new HashMap<String, Object>();
+
+		KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
+		keyPairGenerator.initialize(1024); // Choose appropriate key size, e.g., 2048 or 4096
+		KeyPair keyPair = keyPairGenerator.generateKeyPair();
+		PublicKey publicKey = keyPair.getPublic();
+		PrivateKey privateKey = keyPair.getPrivate();
+		
+		KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
+		keyGenerator.init(1024); // Choose appropriate key size, e.g., 128, 192, or 256
+		SecretKey symmetricKey = keyGenerator.generateKey();
+		map.put("symmetricKey", symmetricKey);
+		map.put("publicKey", publicKey);
+		map.put("privateKey", privateKey);
+		
+		
+		
+		return map;
+	}
 	
 	
 }
