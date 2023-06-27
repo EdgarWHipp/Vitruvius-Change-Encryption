@@ -64,7 +64,7 @@ public class TestEncryptChangesSymmetricallyAlone extends TestChangeEncryption{
 	
 	
 	private void testChangeAloneWithAssertion(EChange change) throws InvalidKeyException, NoSuchAlgorithmException, InvalidAlgorithmParameterException, SignatureException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException {
-		for (Map map: TestChangeEncryption.ENCRYPTIONUTIL.getAllEncryptionMapsAsymmetric()) {
+		for (Map map: TestChangeEncryption.ENCRYPTIONUTIL.getAllEncryptionMapsSymmetric()) {
 			TestChangeEncryption.SYM_ENCRYPTIONSCHEME.encryptDeltaChangeAlone(map, change, TestChangeEncryption.FILE);
 			EChange decryptedChange = TestChangeEncryption.SYM_ENCRYPTIONSCHEME.decryptDeltaChangeAlone(map, TestChangeEncryption.FILE);
 			assertTrue(new EcoreUtil.EqualityHelper().equals(change,decryptedChange));
@@ -72,7 +72,7 @@ public class TestEncryptChangesSymmetricallyAlone extends TestChangeEncryption{
 	}
 	
 	
-	private void testChangeAlone(EChange change) throws IOException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
+	private void collectData(EChange change) throws IOException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
 		Map<String,Pair<String,long[]>> mainMap = new HashMap<String,Pair<String,long[]>>();
 		long[][] timeArray = new long[10][3];
 		int[] amounts = {1,10,100,1000,10000};
@@ -99,7 +99,7 @@ public class TestEncryptChangesSymmetricallyAlone extends TestChangeEncryption{
 					   
 						for (int iterdecr = 0 ;iterdecr<amounts[x];iterdecr++) {
 							EChange decryptedChange = TestChangeEncryption.SYM_ENCRYPTIONSCHEME.decryptDeltaChangeAlone(map, setOfFiles[iterdecr]);
-							//remove assertion on final run.
+							setOfFiles[iterdecr].delete();							//remove assertion on final run.
 							//assertTrue(new EcoreUtil.EqualityHelper().equals(change,decryptedChange)); 
 						}
 							
@@ -112,10 +112,7 @@ public class TestEncryptChangesSymmetricallyAlone extends TestChangeEncryption{
 						long decryptionTime = endTime - betweenTime;
 						long encryptionTime = betweenTime - startTime;
 						timeArray[i]= new long[] {encryptionTime,decryptionTime,totalTime};
-						for (int k = 0; k < amounts[x]; k++)
-				        {
-							System.out.println(setOfFiles[k].delete());
-				        }
+						
 					
 					    	
 						
@@ -131,7 +128,7 @@ public class TestEncryptChangesSymmetricallyAlone extends TestChangeEncryption{
 				}
 			mainMap.put("result",new Pair<String, long[]>((String)map.get("algorithm"),mean));
 			TestChangeEncryption.WRITER.writeToCsv(change.getClass().getSimpleName()+amounts[x],mainMap,TestChangeEncryption.SYM_ENCRYPTIONSCHEME.getCSVFileNameAlone());
-			
+			TestChangeEncryption.LOGGER.info("run complete");
 			}
 		}
 	}
@@ -145,7 +142,7 @@ public class TestEncryptChangesSymmetricallyAlone extends TestChangeEncryption{
 		CreateEObjectImpl<Member> change = (CreateEObjectImpl<Member>) changes.get(0);
 		try {
 			this.testChangeAloneWithAssertion(change);
-			this.testChangeAlone(change);
+			this.collectData(change);
 		}catch(Exception e) {
 			System.out.println(e+":\t"+e.getMessage());
 			assert false;
@@ -164,7 +161,7 @@ public class TestEncryptChangesSymmetricallyAlone extends TestChangeEncryption{
 		try {
 			this.testChangeAloneWithAssertion(change);
 
-			this.testChangeAlone(change);
+			this.collectData(change);
 		}catch(Exception e) {
 			System.out.println(e+":\t"+e.getMessage());
 			assert false;
@@ -181,7 +178,7 @@ public class TestEncryptChangesSymmetricallyAlone extends TestChangeEncryption{
 		try {
 			this.testChangeAloneWithAssertion(change);
 
-			this.testChangeAlone(change);
+			this.collectData(change);
 		}catch(Exception e) {
 			System.out.println(e+":\t"+e.getMessage());
 			assert false;
@@ -199,7 +196,7 @@ public class TestEncryptChangesSymmetricallyAlone extends TestChangeEncryption{
 		try {
 			this.testChangeAloneWithAssertion(change);
 
-			this.testChangeAlone(change);
+			this.collectData(change);
 		}catch(Exception e) {
 			TestChangeEncryption.LOGGER.severe(e+":\t"+e.getMessage());
 			assert false;
@@ -218,7 +215,7 @@ public class TestEncryptChangesSymmetricallyAlone extends TestChangeEncryption{
 		try {
 			this.testChangeAloneWithAssertion(change);
 
-			this.testChangeAlone(change);
+			this.collectData(change);
 		}catch(Exception e) {
 			System.out.println(e+":\t"+e.getMessage());
 			assert false;
@@ -237,7 +234,7 @@ public class TestEncryptChangesSymmetricallyAlone extends TestChangeEncryption{
 	    try {
 			this.testChangeAloneWithAssertion(change);
 
-			this.testChangeAlone(change);
+			this.collectData(change);
 		}catch(Exception e) {
 			System.out.println(e+":\t"+e.getMessage());
 			assert false;
@@ -260,7 +257,7 @@ public class TestEncryptChangesSymmetricallyAlone extends TestChangeEncryption{
 		try {
 			this.testChangeAloneWithAssertion(change);
 
-			this.testChangeAlone(change);
+			this.collectData(change);
 		}catch(Exception e) {
 			System.out.println(e+":\t"+e.getMessage());
 			assert false;
@@ -280,7 +277,7 @@ public class TestEncryptChangesSymmetricallyAlone extends TestChangeEncryption{
 		try {
 			this.testChangeAloneWithAssertion(change);
 
-			this.testChangeAlone(change);
+			this.collectData(change);
 		}catch(Exception e) {
 			System.out.println(e+":\t"+e.getMessage());
 			assert false;
@@ -305,7 +302,7 @@ public class TestEncryptChangesSymmetricallyAlone extends TestChangeEncryption{
 		try {
 			this.testChangeAloneWithAssertion(change);
 
-			this.testChangeAlone(change);
+			this.collectData(change);
 		}catch(Exception e) {
 			System.out.println(e+":\t"+e.getMessage());
 			assert false;
