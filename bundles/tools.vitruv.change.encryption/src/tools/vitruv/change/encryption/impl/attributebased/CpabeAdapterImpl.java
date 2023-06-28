@@ -24,7 +24,6 @@ import tools.vitruv.change.encryption.utils.EncryptionUtils;
  * Adapter for the CPABE implementation provided by Junwei.
  */
 public class CpabeAdapterImpl {
-	private final EncryptionUtils encryptionUtils = EncryptionUtils.getInstance();
 	private final String privateKeyPath;
 	private final String publicKeyPath;
 	private final String masterKeyPath;
@@ -67,33 +66,26 @@ public class CpabeAdapterImpl {
 	    fileOutputStream.write(byteArrayOutputStream.toByteArray());
 	    byteArrayOutputStream.close();
 	    fileOutputStream.close();
-		System.out.println("//start to setup");
 		instance.setup(publicKeyPath, masterKeyPath);
-		System.out.println("//end to setup");
-
-		System.out.println("//start to keygen");
+		
 		// if attributes are passing here the file should be encrypted correctly, otherwise it fails.
 		instance.keygen(publicKeyPath, privateKeyPath, masterKeyPath, attributes);
-		System.out.println("//end to keygen");
-
-		System.out.println("//start to enc");
+		
 		// create a file with the content of a change;
 		
 		instance.enc(publicKeyPath, policy, this.inputFileString, encryptedFilePath);
 		
 	}
 	public EChange decryptAlone() throws Exception {
-		System.out.println("//start to dec");
 		
 
 		instance.dec(publicKeyPath, privateKeyPath, encryptedFilePath, decryptedFilePath);
-		System.out.println("//end to dec");
 		
 		FileInputStream fileInputStream = new FileInputStream(decryptedFilePath);
 		
         byte[] decryptedDataInFile = fileInputStream.readAllBytes();
 
-     
+        fileInputStream.close();
 
         ByteArrayInputStream decryptedStream = new ByteArrayInputStream(decryptedDataInFile);
        
@@ -121,32 +113,25 @@ public class CpabeAdapterImpl {
 	    fileOutputStream.write(byteArrayOutputStream.toByteArray());
 	    byteArrayOutputStream.close();
 	    fileOutputStream.close();
-		System.out.println("//start to setup");
 		instance.setup(publicKeyPath, masterKeyPath);
-		System.out.println("//end to setup");
 
-		System.out.println("//start to keygen");
 		// if attributes are passing here the file should be encrypted correctly, otherwise it fails.
 		instance.keygen(publicKeyPath, privateKeyPath, masterKeyPath, attributes);
-		System.out.println("//end to keygen");
 
-		System.out.println("//start to enc");
 		// create a file with the content of a change;
 		
 		instance.enc(publicKeyPath, policy, this.inputFileString, encryptedFilePath);
 		
 	}
 	public List<EChange> decryptTogether() throws Exception {
-		System.out.println("//start to dec");
 		instance.dec(publicKeyPath, privateKeyPath, encryptedFilePath, decryptedFilePath);
-		System.out.println("//end to dec");
 		
 		FileInputStream fileInputStream = new FileInputStream(decryptedFilePath);
 		
         byte[] decryptedDataInFile = fileInputStream.readAllBytes();
 
      
-
+        fileInputStream.close();
         ByteArrayInputStream decryptedStream = new ByteArrayInputStream(decryptedDataInFile);
        
         ResourceSet resourceSet = new ResourceSetImpl();

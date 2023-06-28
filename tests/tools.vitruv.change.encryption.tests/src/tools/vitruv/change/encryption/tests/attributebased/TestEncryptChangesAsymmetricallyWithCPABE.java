@@ -126,7 +126,7 @@ public class TestEncryptChangesAsymmetricallyWithCPABE extends TestChangeEncrypt
 		
 		
 		assertFalse(this.checkCorrectness(change, this.getFailingUserAttributes()));
-		 
+		//this.collectData(change);
 		
 		
 	}
