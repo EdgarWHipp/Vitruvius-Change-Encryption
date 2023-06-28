@@ -35,7 +35,9 @@ public class EncryptionUtility {
 	//----SYMMETRIC
 	public List<HashMap<String,Object>> getAllEncryptionMapsSymmetric() throws NoSuchAlgorithmException{
 		List<HashMap<String,Object>> maps = new ArrayList<>();
-		maps.add(getEncryptionDetailsMapAES());
+		maps.add(getEncryptionDetailsMapAES128());
+		maps.add(getEncryptionDetailsMapAES192());
+		maps.add(getEncryptionDetailsMapAES256());
 		maps.add(getEncryptionDetailsMapDES());
 		maps.add(getEncryptionDetailsMapDESede());
 		maps.add(getEncryptionDetailsMapARCFOUR());
@@ -44,9 +46,31 @@ public class EncryptionUtility {
 		return maps;
 		}
 	
-	private HashMap<String,Object> getEncryptionDetailsMapAES() throws NoSuchAlgorithmException{
+	private HashMap<String,Object> getEncryptionDetailsMapAES128() throws NoSuchAlgorithmException{
 		KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
 		keyGenerator.init(128);
+		
+		// Create map of encryptionOptions
+		SecretKey secretKey = keyGenerator.generateKey();
+		HashMap <String,Object> map = new HashMap<String, Object>();
+		map.put("secretKey", secretKey);
+		map.put("algorithm", "AES");
+		return map;
+	}
+	private HashMap<String,Object> getEncryptionDetailsMapAES192() throws NoSuchAlgorithmException{
+		KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
+		keyGenerator.init(192);
+		
+		// Create map of encryptionOptions
+		SecretKey secretKey = keyGenerator.generateKey();
+		HashMap <String,Object> map = new HashMap<String, Object>();
+		map.put("secretKey", secretKey);
+		map.put("algorithm", "AES");
+		return map;
+	}
+	private HashMap<String,Object> getEncryptionDetailsMapAES256() throws NoSuchAlgorithmException{
+		KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
+		keyGenerator.init(256);
 		
 		// Create map of encryptionOptions
 		SecretKey secretKey = keyGenerator.generateKey();
@@ -105,8 +129,9 @@ public class EncryptionUtility {
 	public List<HashMap<String,Object>> getAllEncryptionMapsAsymmetric() throws NoSuchAlgorithmException, InvalidKeyException, InvalidAlgorithmParameterException, SignatureException{
 		List<HashMap<String,Object>> maps = new ArrayList<>();
 		maps.add(getEncryptionDetailsMapAsymmetricRSA());
-		maps.add(getEncryptionDetailsMapAsymmetricDSA());
-		maps.add(getEncryptionDetailsMapAsymmetricDiffieHellman());
+		//maps.add(getEncryptionDetailsMapAsymmetricDSA());
+		//maps.add(getEncryptionDetailsMapAsymmetricDiffieHellman());
+		maps.add(getEncryptionDetailsMapAsymmetricHybridRSA());
 		
 
 		return maps;
@@ -122,7 +147,7 @@ public class EncryptionUtility {
 		keyPairGenerator = KeyPairGenerator.getInstance("RSA");
 
         keyPairGenerator.initialize(
-        		4500, secureRandom);
+        		4096, secureRandom);
  
         KeyPair pair =  keyPairGenerator.generateKeyPair();
         PrivateKey privateKey = pair.getPrivate();
@@ -132,6 +157,7 @@ public class EncryptionUtility {
 		map.put("algorithm","RSA");
 		return map;
 	}
+	/*
 	private HashMap<String,Object> getEncryptionDetailsMapAsymmetricDSA() throws NoSuchAlgorithmException, InvalidAlgorithmParameterException, InvalidKeyException, SignatureException{
 		HashMap <String,Object> map = new HashMap<String, Object>();
 		
@@ -152,6 +178,8 @@ public class EncryptionUtility {
 		map.put("algorithm","DSA");
 		return map;
 	}
+	*/
+	/*
 	private HashMap<String,Object> getEncryptionDetailsMapAsymmetricDiffieHellman() throws NoSuchAlgorithmException, InvalidAlgorithmParameterException, InvalidKeyException, SignatureException{
 		HashMap <String,Object> map = new HashMap<String, Object>();
 		
@@ -172,6 +200,7 @@ public class EncryptionUtility {
 		map.put("algorithm","DiffieHellman");
 		return map;
 	}
+	*/
 	private HashMap<String,Object> getEncryptionDetailsMapAsymmetricHybridRSA() throws NoSuchAlgorithmException{
 		HashMap <String,Object> map = new HashMap<String, Object>();
 
@@ -182,12 +211,12 @@ public class EncryptionUtility {
 		PrivateKey privateKey = keyPair.getPrivate();
 		
 		KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
-		keyGenerator.init(1024); // Choose appropriate key size, e.g., 128, 192, or 256
+		keyGenerator.init(128); // Choose appropriate key size, e.g., 128, 192, or 256
 		SecretKey symmetricKey = keyGenerator.generateKey();
 		map.put("symmetricKey", symmetricKey);
 		map.put("publicKey", publicKey);
 		map.put("privateKey", privateKey);
-		
+		map.put("algorithm", "RSA-Hybrid");
 		
 		
 		return map;

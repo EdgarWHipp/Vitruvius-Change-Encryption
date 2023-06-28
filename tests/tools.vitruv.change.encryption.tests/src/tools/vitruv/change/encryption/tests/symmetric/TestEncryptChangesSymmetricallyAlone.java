@@ -105,7 +105,16 @@ public class TestEncryptChangesSymmetricallyAlone extends TestChangeEncryption{
 													
 							//assertTrue(new EcoreUtil.EqualityHelper().equals(change,decryptedChange)); 
 						}
-							
+						
+						
+						
+						long endTime = System.currentTimeMillis();
+						
+						long totalTime = endTime - startTime;
+						long decryptionTime = endTime - betweenTime;
+						long encryptionTime = betweenTime - startTime;
+						timeArray[i]= new long[] {encryptionTime,decryptionTime,totalTime};
+						//clear the files.
 						IntStream.range(0,files.length).forEach(l -> 
 						{BufferedWriter writer;
 						try {
@@ -117,15 +126,6 @@ public class TestEncryptChangesSymmetricallyAlone extends TestChangeEncryption{
 							e.printStackTrace();
 						}
 						});
-						
-						//
-						long endTime = System.currentTimeMillis();
-						
-						long totalTime = endTime - startTime;
-						long decryptionTime = endTime - betweenTime;
-						long encryptionTime = betweenTime - startTime;
-						timeArray[i]= new long[] {encryptionTime,decryptionTime,totalTime};
-						
 					
 					    	
 						

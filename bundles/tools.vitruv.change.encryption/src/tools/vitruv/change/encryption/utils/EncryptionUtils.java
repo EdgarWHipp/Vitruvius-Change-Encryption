@@ -59,60 +59,56 @@ public final class EncryptionUtils {
 		PublicKey publicKey = (PublicKey) options.get("publicKey");
 		PrivateKey privateKey = (PrivateKey) options.get("privateKey");
 		String algorithm =  (String) options.get("algorithm");
-
-		// check if symmetrickey exists.
-		SecretKey symmetricKey = (SecretKey) options.get("symmetricKey");
-		// check if a hybrid approach is used for encryption/decryption.
-		if (symmetricKey !=null) {
-			switch (opMode){
-			case Cipher.ENCRYPT_MODE:
-				Cipher cipher = Cipher.getInstance("AES");
-				cipher.init(Cipher.ENCRYPT_MODE, symmetricKey);
-				byte[] encryptedData = cipher.doFinal(bytes);
-				Cipher asymmetricCipher = Cipher.getInstance(algorithm);
-				asymmetricCipher.init(Cipher.ENCRYPT_MODE, publicKey);
-				byte[] encryptedKey = asymmetricCipher.doFinal(symmetricKey.getEncoded());
-				Files.write(filePathOfSymmetricKey, encryptedKey, StandardOpenOption.CREATE);
-				return encryptedData;
-				
-			case Cipher.DECRYPT_MODE:
-				byte[] encryptedSymmetricKey = Files.readAllBytes(filePathOfSymmetricKey);
-				Cipher rsaDecryptCipher = Cipher.getInstance("RSA");
-				rsaDecryptCipher.init(Cipher.DECRYPT_MODE, privateKey);
-				byte[] decryptedKey = rsaDecryptCipher.doFinal(encryptedSymmetricKey);
-				SecretKey decryptedSymmetricKey = new SecretKeySpec(decryptedKey, algorithm);
-				Cipher decryptCipher = Cipher.getInstance("AES");
-				decryptCipher.init(Cipher.DECRYPT_MODE, decryptedSymmetricKey);
-				byte[] decryptedData = decryptCipher.doFinal(bytes);
-				return decryptedData;
-			default:
-				logger.severe("no valid encryption option was selected during the hybrid asymmetric approach ");
-				throw new IOException();
-			}
+		if (algorithm.equals("RSA-Hybrid")) {
+			SecretKey symmetricKey = (SecretKey) options.get("symmetricKey");
 			
-
+			switch (opMode){
+				case Cipher.ENCRYPT_MODE:
+					Cipher cipher = Cipher.getInstance("AES");
+					cipher.init(Cipher.ENCRYPT_MODE, symmetricKey);
+					byte[] encryptedData = cipher.doFinal(bytes);
+					Cipher asymmetricCipher = Cipher.getInstance("RSA");
+					asymmetricCipher.init(Cipher.ENCRYPT_MODE, publicKey);
+					byte[] encryptedKey = asymmetricCipher.doFinal(symmetricKey.getEncoded());
+					Files.write(filePathOfSymmetricKey, encryptedKey, StandardOpenOption.CREATE);
+					return encryptedData;
+					
+				case Cipher.DECRYPT_MODE:
+					byte[] encryptedSymmetricKey = Files.readAllBytes(filePathOfSymmetricKey);
+					Cipher rsaDecryptCipher = Cipher.getInstance("RSA");
+					rsaDecryptCipher.init(Cipher.DECRYPT_MODE, privateKey);
+					byte[] decryptedKey = rsaDecryptCipher.doFinal(encryptedSymmetricKey);
+					SecretKey decryptedSymmetricKey = new SecretKeySpec(decryptedKey, "AES");
+					Cipher decryptCipher = Cipher.getInstance("AES");
+					decryptCipher.init(Cipher.DECRYPT_MODE, decryptedSymmetricKey);
+					byte[] decryptedData = decryptCipher.doFinal(bytes);
+					return decryptedData;
+				default:
+					logger.severe("no valid encryption option was selected during the hybrid asymmetric approach ");
+					throw new IOException();
+				}
+					
 		}else {
+			
 			Cipher asymmetricCipher = Cipher.getInstance(algorithm);
 			switch (opMode){
-			case Cipher.ENCRYPT_MODE:
-				asymmetricCipher.init(Cipher.ENCRYPT_MODE, publicKey);
-				byte[] encryptedBytes = asymmetricCipher.doFinal(bytes);
-				return encryptedBytes;
-			case Cipher.DECRYPT_MODE:
-				asymmetricCipher.init(Cipher.DECRYPT_MODE, privateKey);
-				byte[] decryptedBytes = asymmetricCipher.doFinal(bytes);
-				return decryptedBytes;
-			default:
-				logger.severe("no valid encryption option was selected during the asymmetric approach ");
-				throw new IOException();
-			
+				case Cipher.ENCRYPT_MODE:
+					asymmetricCipher.init(Cipher.ENCRYPT_MODE, publicKey);
+					byte[] encryptedBytes = asymmetricCipher.doFinal(bytes);
+					return encryptedBytes;
+				case Cipher.DECRYPT_MODE:
+					asymmetricCipher.init(Cipher.DECRYPT_MODE, privateKey);
+					byte[] decryptedBytes = asymmetricCipher.doFinal(bytes);
+					return decryptedBytes;
+				default:
+					logger.severe("no valid encryption option was selected during the asymmetric approach ");
+					throw new IOException();
+				
 			}
 			
-			
-		
-		
-	
-	}
+		}
 
+	
+		
 	}
 }

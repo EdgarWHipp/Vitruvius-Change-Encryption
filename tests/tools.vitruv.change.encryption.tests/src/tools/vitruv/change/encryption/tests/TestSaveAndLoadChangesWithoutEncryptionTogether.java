@@ -2,6 +2,7 @@ package tools.vitruv.change.encryption.tests;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -22,7 +23,6 @@ import org.junit.jupiter.api.Test;
 
 import tools.vitruv.change.atomic.EChange;
 import tools.vitruv.change.atomic.id.IdResolver;
-import tools.vitruv.change.encryption.impl.EncryptionSchemeImpl;
 import tools.vitruv.change.encryption.tests.util.EChangeCreationUtility;
 import tools.vitruv.change.encryption.tests.util.EncryptionUtility;
 import tools.vitruv.change.composite.description.TransactionalChange;
@@ -40,7 +40,6 @@ import tools.vitruv.change.composite.description.VitruviusChangeFactory;
 public class TestSaveAndLoadChangesWithoutEncryptionTogether {
 	private static final Logger logger = Logger.getLogger(TestSaveAndLoadChangesWithoutEncryptionTogether.class.getName());
 	private final File fileWithEncryptedChanges = new File(new File("").getAbsolutePath() +"/encrypted_changes");
-	private EncryptionSchemeImpl encryptionScheme = new EncryptionSchemeImpl();
 	private final EChangeCreationUtility creationUtil= EChangeCreationUtility.getInstance();
 	private final EncryptionUtility encryptionUtil= EncryptionUtility.getInstance();
 	

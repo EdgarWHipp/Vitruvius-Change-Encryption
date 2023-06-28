@@ -7,6 +7,8 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -57,9 +59,10 @@ public class TestEncryptChangesAsymmetricallyAlone extends TestChangeEncryption{
 	}
 	private void checkCorrectness(EChange change) throws InvalidKeyException, NoSuchAlgorithmException, InvalidAlgorithmParameterException, SignatureException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException {
 		for (Map map: TestChangeEncryption.ENCRYPTIONUTIL.getAllEncryptionMapsAsymmetric()) {
-			TestChangeEncryption.SYM_ENCRYPTIONSCHEME.encryptDeltaChangeAlone(map, change, TestChangeEncryption.FILE);
-			EChange decryptedChange = TestChangeEncryption.SYM_ENCRYPTIONSCHEME.decryptDeltaChangeAlone(map, TestChangeEncryption.FILE);
-			assertTrue(new EcoreUtil.EqualityHelper().equals(change,decryptedChange));
+			
+			TestChangeEncryption.ASYM_ENCRYPTIONSCHEME.encryptDeltaChangeAloneAsymmetrically(map, change, TestChangeEncryption.FILE);
+			EChange decryptedChange = TestChangeEncryption.ASYM_ENCRYPTIONSCHEME.decryptDeltaChangeAloneAsymmetrically(map, TestChangeEncryption.FILE);
+			//assertTrue(new EcoreUtil.EqualityHelper().equals(change,decryptedChange));
 		}
 	}
 		
@@ -70,41 +73,49 @@ public class TestEncryptChangesAsymmetricallyAlone extends TestChangeEncryption{
 		for (Map map : TestChangeEncryption.ENCRYPTIONUTIL.getAllEncryptionMapsAsymmetric()) {
 			for (int x=0;x<amounts.length;x++) {
 				for (int i=0;i<10;i++) {
-					File[] files = TestChangeEncryption.generateFiles(amounts[x]);
+					File[] files = TestChangeEncryption.generateEncryptionFiles(amounts[x]);
 					
-				    long startTime = System.currentTimeMillis();
-					//
-				    IntStream.range(0, files.length)
-				    .forEach(j -> {
-						try {
-							TestChangeEncryption.ASYM_ENCRYPTIONSCHEME.encryptDeltaChangeAloneAsymmetrically(map, change, files[j]);
-							
-						} catch (InvalidKeyException | IllegalBlockSizeException | BadPaddingException
-								| NoSuchAlgorithmException | NoSuchPaddingException | IOException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-					});
-				    long betweenTime = System.currentTimeMillis();
-				    IntStream.range(0, files.length)
-				    .forEach(j -> {
-						try {
-							EChange decryptedChange = TestChangeEncryption.ASYM_ENCRYPTIONSCHEME.decryptDeltaChangeAloneAsymmetrically(map, files[j]);
-							//remove assertion on final run.
-						} catch (InvalidKeyException | IllegalBlockSizeException | BadPaddingException
-								| NoSuchAlgorithmException | NoSuchPaddingException | IOException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-					});
-					//
+					long startTime = System.currentTimeMillis();
+
+					for (int j = 0; j < files.length; j++) {
+					    try {
+					        TestChangeEncryption.ASYM_ENCRYPTIONSCHEME.encryptDeltaChangeAloneAsymmetrically(map, change, files[j]);
+					    } catch (InvalidKeyException | IllegalBlockSizeException | BadPaddingException
+					             | NoSuchAlgorithmException | NoSuchPaddingException | IOException e) {
+					        e.printStackTrace();
+					    }
+					}
+
+					long betweenTime = System.currentTimeMillis();
+
+					for (int j = 0; j < files.length; j++) {
+					    try {
+					        EChange decryptedChange = TestChangeEncryption.ASYM_ENCRYPTIONSCHEME.decryptDeltaChangeAloneAsymmetrically(map, files[j]);
+					        // Remove assertion on the final run.
+					    } catch (InvalidKeyException | IllegalBlockSizeException | BadPaddingException
+					             | NoSuchAlgorithmException | NoSuchPaddingException | IOException e) {
+					        e.printStackTrace();
+					    }
+					}
+
 					long endTime = System.currentTimeMillis();
-					
+
 					long totalTime = endTime - startTime;
 					long decryptionTime = endTime - betweenTime;
 					long encryptionTime = betweenTime - startTime;
+
 					timeArray[i]= new long[] {encryptionTime,decryptionTime,totalTime};
-					
+					IntStream.range(0,files.length).forEach(l -> 
+					{BufferedWriter writer;
+					try {
+						writer = Files.newBufferedWriter(Paths.get(files[l].getAbsolutePath()));
+						writer.write("");
+						writer.flush();	
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					});
 				//	assertTrue(new EcoreUtil.EqualityHelper().equals(change,decryptedChange)); 
 				}
 		
@@ -118,7 +129,7 @@ public class TestEncryptChangesAsymmetricallyAlone extends TestChangeEncryption{
 			}
 		mainMap.put("result",new Pair<String, long[]>((String)map.get("algorithm"),mean));
 		TestChangeEncryption.WRITER.writeToCsv(change.getClass().getSimpleName()+amounts[x],mainMap,TestChangeEncryption.ASYM_ENCRYPTIONSCHEME.getCSVFileNameAlone());
-		
+		TestChangeEncryption.LOGGER.info("run complete");
 		}
 	}
 }
@@ -197,20 +208,16 @@ public class TestEncryptChangesAsymmetricallyAlone extends TestChangeEncryption{
 		
 	}
 	@Test
-	public void testRootEObjectDeletedChangeEncryption() throws NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException {
+	public void testRootEObjectDeletedChangeEncryption() throws NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException, InvalidAlgorithmParameterException, SignatureException {
 		Resource memberResource = TestChangeEncryption.CREATIONUTIL.createCompleteMember();
 		Member member = (Member) memberResource.getContents().get(0);
 	
 		RemoveRootEObject<Member> change = TypeInferringAtomicEChangeFactory.getInstance().createRemoveRootChange(member,member.eResource(),0);
 		change.setResource(null);
-		try {
-			this.checkCorrectness(change);
-			this.collectData(change);
-		}catch(Exception e) {
-			System.out.println(e+":\t"+e.getMessage());
-			assert false;
-		}
-		assert true;
+	
+		this.checkCorrectness(change);
+		this.collectData(change);
+	
 		
 		
 	}

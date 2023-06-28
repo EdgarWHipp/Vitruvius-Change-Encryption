@@ -174,11 +174,30 @@ public class TestEncryptChangesAsymmetricallyWithCPABE extends TestChangeEncrypt
 		
 		
 		assertTrue(this.checkCorrectness(change,this.getPassingUserAttributes()));
-		this.collectData(change);
+		//this.collectData(change);
 		
 		
 		
 	}
+	@Test 
+	public void testPassingFileAccessWithReplaceSingleReferenceChange() {
+		
+	}
+	@Test
+	public void testPassingFileAccessWithRemoveReferenceChange() {}
+	@Test
+	public void testPassingFileAccessWithInsertEReferenceChange() {}
+	@Test
+	public void testPasingFileAccessWithInsertEAttributeValueChange() {}
+	@Test
+	public void testPassingFileAccessWithRootEObjectDeletedChange() {}
+	@Test 
+	public void testPassingFileAccessWithEObjecteDeletedChange() {}
+	
+	
+	
+	
+	
 	// These tests should be extended to a wider range of policies and attributes to test the scalability.
 	private String getPassingUserAttributes() {
 		String passing = 
