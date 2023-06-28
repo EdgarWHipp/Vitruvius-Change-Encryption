@@ -52,7 +52,7 @@ public class TestEncryptChangesAsymmetricallyAlone extends TestChangeEncryption{
 
 	
 	@AfterAll
-	private void deleteCreatedFiles() {
+	public static void deleteCreatedFiles() {
 		TestChangeEncryption.deleteFiles();
 	}
 	private void checkCorrectness(EChange change) throws InvalidKeyException, NoSuchAlgorithmException, InvalidAlgorithmParameterException, SignatureException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException {

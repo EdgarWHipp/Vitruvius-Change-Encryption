@@ -266,7 +266,7 @@ public class Bswabe {
 	 * the policy of the ciphertext (in which case m is unaltered).
 	 */
 	public static BswabeElementBoolean dec(BswabePub pub, BswabePrv prv,
-			BswabeCph cph) {
+			BswabeCph cph) throws Exception {
 		Element t;
 		Element m;
 		BswabeElementBoolean beb = new BswabeElementBoolean();
@@ -276,11 +276,15 @@ public class Bswabe {
 
 		checkSatisfy(cph.p, prv);
 		if (!cph.p.satisfiable) {
+			throw new Exception("decryption has failed");
+			/*
 			System.err
 					.println("cannot decrypt, attributes in key do not satisfy policy");
 			beb.e = null;
 			beb.b = false;
+			
 			return beb;
+			*/
 		}
 
 		pickSatisfyMinLeaves(cph.p, prv);

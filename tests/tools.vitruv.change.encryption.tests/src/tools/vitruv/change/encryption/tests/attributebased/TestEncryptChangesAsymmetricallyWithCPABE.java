@@ -1,6 +1,8 @@
 package tools.vitruv.change.encryption.tests.attributebased;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
@@ -14,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.emf.ecore.util.EcoreUtil;
@@ -22,8 +25,8 @@ import org.junit.jupiter.api.Test;
 import edu.kit.ipd.sdq.metamodels.families.Member;
 import junwei.cpabe.junwei.cpabe.Cpabe;
 import tools.vitruv.change.atomic.EChange;
+import tools.vitruv.change.atomic.TypeInferringAtomicEChangeFactory;
 import tools.vitruv.change.atomic.eobject.impl.CreateEObjectImpl;
-import tools.vitruv.change.encryption.impl.EncryptionSchemeImpl;
 import tools.vitruv.change.encryption.impl.asymmetric.AsymmetricEncryptionSchemeImpl;
 import tools.vitruv.change.encryption.impl.attributebased.CpabeAdapterImpl;
 import tools.vitruv.change.encryption.tests.TestChangeEncryption;
@@ -32,10 +35,6 @@ import tools.vitruv.change.encryption.tests.util.EChangeCreationUtility;
 import tools.vitruv.change.encryption.tests.util.EncryptionUtility;
 
 public class TestEncryptChangesAsymmetricallyWithCPABE extends TestChangeEncryption{
-	private static final Logger logger = Logger.getLogger(TestEncryptChangesAsymmetricallyWithCPABE.class.getName());
-	private final File fileWithEncryptedChanges = new File(new File("").getAbsolutePath() +"/encrypted_changes");
-	private final EChangeCreationUtility creationUtil= EChangeCreationUtility.getInstance();
-	private final EncryptionUtility encryptionUtil = EncryptionUtility.getInstance();
 	private final String publicKeyPath = new File("").getAbsolutePath() +"/public_key";
 	private final String masterKeyPath = new File("").getAbsolutePath() +"/master_key";
 	private final String privateKeyPath = new File("").getAbsolutePath() +"/private_key";
@@ -48,7 +47,11 @@ public class TestEncryptChangesAsymmetricallyWithCPABE extends TestChangeEncrypt
 	 * Encrypts a set of valid changes and opens the decryptedChanges in read-only mode.
 	 */
 	@Test
-	public void testFailingFileAccess() throws Exception {
+	public void testFailingFileAccessWithCreateEObjectChange() throws Exception {
+		Resource memberResource = TestChangeEncryption.CREATIONUTIL.createCompleteMember();
+		Member member = (Member)memberResource.getContents().get(0);
+		EChange change = TypeInferringAtomicEChangeFactory.getInstance().createCreateEObjectChange(member);
+
 		String failingUserAttributes = getFailingUserAttributes();
 		String policy = getPolicy();
 		Cpabe test = new Cpabe();
@@ -56,13 +59,16 @@ public class TestEncryptChangesAsymmetricallyWithCPABE extends TestChangeEncrypt
 		CpabeAdapterImpl adapter = 
 				new CpabeAdapterImpl(test,privateKeyPath,publicKeyPath,masterKeyPath,decryptedFilePath,encryptedFilePath,inputFile);
 		
-		EChange change = null;
 		//encrypt
 		adapter.encryptAloneAndGenerateKeys(failingUserAttributes, policy,change);
 		
 		//decrypt
-		EChange decryptedChange = adapter.decryptAlone();
-		assertTrue(new EcoreUtil.EqualityHelper().equals(change,decryptedChange)); 
+		try {
+			EChange decryptedChange = adapter.decryptAlone();
+		} catch(Exception e) {
+			assertEquals(e.getMessage(),"decryption has failed");
+		}
+		 
 		
 		
 	}
@@ -71,10 +77,13 @@ public class TestEncryptChangesAsymmetricallyWithCPABE extends TestChangeEncrypt
 	 * @throws Exception
 	 */
 	@Test
-	public void testPassingFileAccess() throws Exception {
+	public void testPassingFileAccessWithCreateEObjectChange() throws Exception {
+		List<EChange> changes = new ArrayList<>();
+		ResourceSet set = new ResourceSetImpl();
+		TestChangeEncryption.CREATIONUTIL.createCreateMemberChangeSequence(changes, set,1);
+		CreateEObjectImpl<Member> change = (CreateEObjectImpl<Member>) changes.get(0);
 		// PUBLIC KEY IS GIVEN
 		// DECRYPT WITH PRIVATE KEY 
-		EChange change = null;
 		
 		
 		String passingUserAttributes = getPassingUserAttributes();
@@ -89,7 +98,8 @@ public class TestEncryptChangesAsymmetricallyWithCPABE extends TestChangeEncrypt
 		
 		//decryption should fail here.
 		EChange decryptedChange = adapter.decryptAlone();
-		assertFalse(new EcoreUtil.EqualityHelper().equals(change,decryptedChange)); 
+		assertNotEquals(decryptedChange,null);
+		assertTrue(new EcoreUtil.EqualityHelper().equals(change,decryptedChange)); 
 		
 		
 	}

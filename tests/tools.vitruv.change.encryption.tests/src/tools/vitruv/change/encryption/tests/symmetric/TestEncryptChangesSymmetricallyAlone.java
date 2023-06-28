@@ -73,7 +73,7 @@ public class TestEncryptChangesSymmetricallyAlone extends TestChangeEncryption{
 	}
 	
 	@AfterAll 
-	private void deletecreatedFiles() {
+	public static void deletecreatedFiles() {
 		TestChangeEncryption.deleteFiles();
 	}
 	
