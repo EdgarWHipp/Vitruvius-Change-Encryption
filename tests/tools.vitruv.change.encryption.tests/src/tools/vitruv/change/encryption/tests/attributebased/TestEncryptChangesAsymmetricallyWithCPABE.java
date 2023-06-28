@@ -1,14 +1,14 @@
 package tools.vitruv.change.encryption.tests.attributebased;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
-
-
-
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -44,6 +44,7 @@ public class TestEncryptChangesAsymmetricallyWithCPABE extends TestChangeEncrypt
 	public static void deleteAllFiles() {
 		TestChangeEncryption.deleteFiles();
 	}
+	
 	private boolean checkCorrectness(EChange change,String attributes) throws Exception {
 		String passingUserAttributes = this.getPassingUserAttributes();
 		String policy = getPolicy();
@@ -74,23 +75,37 @@ public class TestEncryptChangesAsymmetricallyWithCPABE extends TestChangeEncrypt
 		Map<String,Pair<String,long[]>> mainMap = new HashMap<String,Pair<String,long[]>>();
 		long[][] timeArray = new long[10][3];
 		int[] amounts = {1,10,100,1000,10000};
-		// ueberlegen wie ich die daten fuer attribut based sammel. code duplicates vermeiden.
 			for (int x=0;x<amounts.length;x++) {
 				for (int i=0;i<10;i++) {
-					File[] files = TestChangeEncryption.generateFiles(amounts[x]);
-					
+					File[] decryptionFiles = TestChangeEncryption.generateDecryptionFiles(amounts[x]);
+					File[] encryptionFiles = TestChangeEncryption.generateEncryptionFiles(amounts[x]);
 				    
-					CpabeAdapterImpl[] adapters = IntStream.range(0,files.length)
-							.mapToObj(x -> 
-							new CpabeAdapterImpl(cpabeInstance,privateKeyPath,publicKeyPath,masterKeyPath,decryptedPath[x],encryptedPath[x],inputFile)).toArray(CpabeAdapterImpl[]::new);
+					CpabeAdapterImpl[] adapters = IntStream.range(0,decryptionFiles.length)
+							.mapToObj(l -> 
+							new CpabeAdapterImpl
+							(cpabeInstance,privateKeyPath,publicKeyPath,masterKeyPath,decryptionFiles[l].getAbsolutePath(),encryptionFiles[l].getAbsolutePath(),inputFile))
+							.toArray(CpabeAdapterImpl[]::new);
 				    
 				    long startTime = System.currentTimeMillis();
-					
-					adapter.encryptAloneAndGenerateKeys(passingUserAttributes, policy,change);
+					IntStream.range(0,decryptionFiles.length).forEach(j -> {
+						try {
+							adapters[j].encryptAloneAndGenerateKeys(passingUserAttributes, policy, change);
+						} catch (Exception e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					});
 					
 					long betweenTime = System.currentTimeMillis();
 					
-					adapter.decryptAlone();
+					IntStream.range(0,decryptionFiles.length).forEach(k -> {
+						try {
+							adapters[k].decryptAlone();
+						} catch (Exception e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					});
 					
 					long endTime = System.currentTimeMillis();
 					
@@ -98,6 +113,20 @@ public class TestEncryptChangesAsymmetricallyWithCPABE extends TestChangeEncrypt
 					long decryptionTime = endTime - betweenTime;
 					long encryptionTime = betweenTime - startTime;
 					timeArray[i]= new long[] {encryptionTime,decryptionTime,totalTime};
+					IntStream.range(0,decryptionFiles.length).forEach(l -> 
+					{BufferedWriter writer,writerEnc;
+					try {
+						writer = Files.newBufferedWriter(Paths.get(decryptionFiles[l].getAbsolutePath()));
+						writerEnc = Files.newBufferedWriter(Paths.get(decryptionFiles[l].getAbsolutePath()));
+						writerEnc.write("");
+						writerEnc.flush();
+						writer.write("");
+						writer.flush();	
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					});
 					
 				//	assertTrue(new EcoreUtil.EqualityHelper().equals(change,decryptedChange)); 
 				}
@@ -110,8 +139,9 @@ public class TestEncryptChangesAsymmetricallyWithCPABE extends TestChangeEncrypt
 				}
 				mean[j]=sum/3;
 			}
-		
-		
+			mainMap.put("result",new Pair<String, long[]>("CPABE"+amounts[x],mean));
+
+		TestChangeEncryption.WRITER.writeToCsv(policy, mainMap, passingUserAttributes);
 	}
 }
 	/**
@@ -120,13 +150,12 @@ public class TestEncryptChangesAsymmetricallyWithCPABE extends TestChangeEncrypt
 	@Test
 	public void testFailingFileAccessWithCreateEObjectChange() throws Exception {
 		Resource memberResource = TestChangeEncryption.CREATIONUTIL.createCompleteMember();
-		Member member = (Member)memberResource.getContents().get(0);
+		Member member = (Member) memberResource.getContents().get(0);
 		EChange change = TypeInferringAtomicEChangeFactory.getInstance().createCreateEObjectChange(member);
 
 		
 		
 		assertFalse(this.checkCorrectness(change, this.getFailingUserAttributes()));
-		//this.collectData(change);
 		
 		
 	}
@@ -145,7 +174,7 @@ public class TestEncryptChangesAsymmetricallyWithCPABE extends TestChangeEncrypt
 		
 		
 		assertTrue(this.checkCorrectness(change,this.getPassingUserAttributes()));
-		//this.collectData(change);
+		this.collectData(change);
 		
 		
 		

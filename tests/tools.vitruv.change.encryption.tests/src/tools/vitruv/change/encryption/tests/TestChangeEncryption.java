@@ -33,14 +33,23 @@ public abstract class TestChangeEncryption {
 	public static final EncryptionUtility ENCRYPTIONUTIL = EncryptionUtility.getInstance();
 	public static final CSVWriter WRITER = CSVWriter.getInstance();
 
-	public static File[] generateFiles(int amount) {
+	public static File[] generateEncryptionFiles(int amount) {
 		File[] setOfFiles = IntStream.range(0, amount)
 		        .mapToObj(i -> new File("encryptionFile_" + i))
 		        .toArray(File[]::new);
 
 		return setOfFiles;
 	}
+	public static File[] generateDecryptionFiles(int amount) {
+		File[] setOfFiles = IntStream.range(0, amount)
+		        .mapToObj(i -> new File("decryptionFile_" + i))
+		        .toArray(File[]::new);
+
+		return setOfFiles;
+	}
 	public static void deleteFiles() {
 		IntStream.range(0, 1000).forEach(x -> new File("encryptionFile_"+x).delete());
+		
+		IntStream.range(0, 1000).forEach(x -> new File("decryptionFile_"+x).delete());
 	}
 }

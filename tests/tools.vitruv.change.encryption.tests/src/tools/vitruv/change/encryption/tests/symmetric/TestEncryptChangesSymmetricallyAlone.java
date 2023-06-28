@@ -84,7 +84,7 @@ public class TestEncryptChangesSymmetricallyAlone extends TestChangeEncryption{
 			for (Map map : TestChangeEncryption.ENCRYPTIONUTIL.getAllEncryptionMapsSymmetric()) {
 				for (int x=0;x<amounts.length;x++) {
 					
-					File[] files = TestChangeEncryption.generateFiles(amounts[x]);
+					File[] files = TestChangeEncryption.generateEncryptionFiles(amounts[x]);
 
 					for (int i=0;i<10;i++) {
 						
@@ -102,13 +102,21 @@ public class TestEncryptChangesSymmetricallyAlone extends TestChangeEncryption{
 					   
 						for (int iterdecr = 0 ;iterdecr<files.length;iterdecr++) {
 							EChange decryptedChange = TestChangeEncryption.SYM_ENCRYPTIONSCHEME.decryptDeltaChangeAlone(map, files[iterdecr]);
-							BufferedWriter writer = Files.newBufferedWriter(Paths.get(files[iterdecr].getAbsolutePath()));
-							writer.write("");
-							writer.flush();							
+													
 							//assertTrue(new EcoreUtil.EqualityHelper().equals(change,decryptedChange)); 
 						}
 							
-
+						IntStream.range(0,files.length).forEach(l -> 
+						{BufferedWriter writer;
+						try {
+							writer = Files.newBufferedWriter(Paths.get(files[l].getAbsolutePath()));
+							writer.write("");
+							writer.flush();	
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						});
 						
 						//
 						long endTime = System.currentTimeMillis();
