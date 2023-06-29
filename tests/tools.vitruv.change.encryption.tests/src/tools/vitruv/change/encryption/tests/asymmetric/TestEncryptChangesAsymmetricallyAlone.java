@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 import java.util.stream.IntStream;
 
 import javax.crypto.BadPaddingException;
@@ -75,6 +76,9 @@ public class TestEncryptChangesAsymmetricallyAlone extends TestChangeEncryption{
 				for (int i=0;i<10;i++) {
 					File[] files = TestChangeEncryption.generateEncryptionFiles(amounts[x]);
 					
+					CountDownLatch encryptionLatch = new CountDownLatch(files.length);
+					CountDownLatch decryptionLatch = new CountDownLatch(files.length);
+
 					long startTime = System.currentTimeMillis();
 
 					for (int j = 0; j < files.length; j++) {
@@ -83,7 +87,15 @@ public class TestEncryptChangesAsymmetricallyAlone extends TestChangeEncryption{
 					    } catch (InvalidKeyException | IllegalBlockSizeException | BadPaddingException
 					             | NoSuchAlgorithmException | NoSuchPaddingException | IOException e) {
 					        e.printStackTrace();
+					    } finally {
+					        encryptionLatch.countDown();
 					    }
+					}
+
+					try {
+					    encryptionLatch.await(); // Wait until all encryption operations complete
+					} catch (InterruptedException e) {
+					    e.printStackTrace();
 					}
 
 					long betweenTime = System.currentTimeMillis();
@@ -95,7 +107,15 @@ public class TestEncryptChangesAsymmetricallyAlone extends TestChangeEncryption{
 					    } catch (InvalidKeyException | IllegalBlockSizeException | BadPaddingException
 					             | NoSuchAlgorithmException | NoSuchPaddingException | IOException e) {
 					        e.printStackTrace();
+					    } finally {
+					        decryptionLatch.countDown();
 					    }
+					}
+
+					try {
+					    decryptionLatch.await(); // Wait until all decryption operations complete
+					} catch (InterruptedException e) {
+					    e.printStackTrace();
 					}
 
 					long endTime = System.currentTimeMillis();
@@ -103,6 +123,7 @@ public class TestEncryptChangesAsymmetricallyAlone extends TestChangeEncryption{
 					long totalTime = endTime - startTime;
 					long decryptionTime = endTime - betweenTime;
 					long encryptionTime = betweenTime - startTime;
+
 
 					timeArray[i]= new long[] {encryptionTime,decryptionTime,totalTime};
 					IntStream.range(0,files.length).forEach(l -> 

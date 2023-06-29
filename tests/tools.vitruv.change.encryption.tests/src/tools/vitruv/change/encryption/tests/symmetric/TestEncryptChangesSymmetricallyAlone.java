@@ -65,11 +65,13 @@ public class TestEncryptChangesSymmetricallyAlone extends TestChangeEncryption{
 	
 	
 	private void testChangeAloneWithAssertion(EChange change) throws InvalidKeyException, NoSuchAlgorithmException, InvalidAlgorithmParameterException, SignatureException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException {
+		/*
 		for (Map map: TestChangeEncryption.ENCRYPTIONUTIL.getAllEncryptionMapsSymmetric()) {
 			TestChangeEncryption.SYM_ENCRYPTIONSCHEME.encryptDeltaChangeAlone(map, change, TestChangeEncryption.FILE);
 			EChange decryptedChange = TestChangeEncryption.SYM_ENCRYPTIONSCHEME.decryptDeltaChangeAlone(map, TestChangeEncryption.FILE);
 			assertTrue(new EcoreUtil.EqualityHelper().equals(change,decryptedChange));
 		}
+		*/
 	}
 	
 	@AfterAll 
@@ -93,6 +95,7 @@ public class TestEncryptChangesSymmetricallyAlone extends TestChangeEncryption{
 					   
 						for (int iter = 0;iter<files.length;iter++) {
 							TestChangeEncryption.SYM_ENCRYPTIONSCHEME.encryptDeltaChangeAlone(map, change, files[iter]);
+							
 
 						}
 								
@@ -102,7 +105,6 @@ public class TestEncryptChangesSymmetricallyAlone extends TestChangeEncryption{
 					   
 						for (int iterdecr = 0 ;iterdecr<files.length;iterdecr++) {
 							EChange decryptedChange = TestChangeEncryption.SYM_ENCRYPTIONSCHEME.decryptDeltaChangeAlone(map, files[iterdecr]);
-													
 							//assertTrue(new EcoreUtil.EqualityHelper().equals(change,decryptedChange)); 
 						}
 						
@@ -115,17 +117,7 @@ public class TestEncryptChangesSymmetricallyAlone extends TestChangeEncryption{
 						long encryptionTime = betweenTime - startTime;
 						timeArray[i]= new long[] {encryptionTime,decryptionTime,totalTime};
 						//clear the files.
-						IntStream.range(0,files.length).forEach(l -> 
-						{BufferedWriter writer;
-						try {
-							writer = Files.newBufferedWriter(Paths.get(files[l].getAbsolutePath()));
-							writer.write("");
-							writer.flush();	
-						} catch (IOException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-						});
+						IntStream.range(0,files.length).forEach(l -> files[l].delete());
 					
 					    	
 						

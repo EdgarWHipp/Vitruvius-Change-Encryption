@@ -1,5 +1,6 @@
 package tools.vitruv.change.encryption.impl.symmetric;
 
+import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
 
 
@@ -7,6 +8,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 
 
@@ -67,21 +69,22 @@ public class SymmetricEncryptionSchemeImpl{
 
 
 		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-		ResourceSet resourceSet = new ResourceSetImpl();
+	    ResourceSet resourceSet = new ResourceSetImpl();
 	    resourceSet.getResourceFactoryRegistry().getExtensionToFactoryMap().put("ecore", new EcoreResourceFactoryImpl());
-	    
+
 	    Resource resource = resourceSet.createResource(URI.createFileURI(new File("").getAbsolutePath() + "/dummy.ecore"));
 	    resource.getContents().add(change);
+
+	    resource.save(byteArrayOutputStream, Collections.EMPTY_MAP);
+
+	    byte[] encryptedData = encryptionUtils.cryptographicFunctionSymmetric(encryptionOption, Cipher.ENCRYPT_MODE, byteArrayOutputStream.toByteArray());
+
+	    try (FileOutputStream fileOutputStream = new FileOutputStream(encryptedChangesFile)) {
+	        fileOutputStream.write(encryptedData);
+	        fileOutputStream.close();
+	    }
 	    
-	    
-	    resource.save(byteArrayOutputStream,Collections.EMPTY_MAP);
-	    FileOutputStream fileOutputStream = new FileOutputStream(encryptedChangesFile);
-	    
-	    byte[] encryptedData = encryptionUtils.cryptographicFunctionSymmetric(encryptionOption,Cipher.ENCRYPT_MODE,byteArrayOutputStream.toByteArray());
-	    fileOutputStream.write(encryptedData);
-	    
-	    byteArrayOutputStream.close();
-	    fileOutputStream.close();
+	   
 
 		
 		
