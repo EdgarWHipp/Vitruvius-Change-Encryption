@@ -1,4 +1,4 @@
-package kpabe.gpswabe;
+package java.nl.sudohenk.kpabe.gpswabe;
 
 import java.util.ArrayList;
 

@@ -71,7 +71,7 @@ public class TestEncryptChangesAsymmetricallyTogether extends TestChangeEncrypti
 		for (Map map : TestChangeEncryption.ENCRYPTIONUTIL.getAllEncryptionMapsAsymmetric()) {
 			for (int x =0;x<amounts.length ;x++){
 				for (int i=0;i<10;i++) {
-					File[] files =TestChangeEncryption.generateFiles(amounts[x]);
+					File[] files =TestChangeEncryption.generateEncryptionFiles(amounts[x]);
 					
 	
 				    long startTime = System.currentTimeMillis();

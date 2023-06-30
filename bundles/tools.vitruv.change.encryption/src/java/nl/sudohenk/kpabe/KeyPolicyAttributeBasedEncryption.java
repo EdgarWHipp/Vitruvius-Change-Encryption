@@ -1,24 +1,31 @@
-package kpabe.kpabe;
-
-import kpabe.gpswabe.*;
+package java.nl.sudohenk.kpabe;
 
 import it.unisa.dia.gas.jpbc.Element;
 
-import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
+import java.nl.sudohenk.kpabe.gpswabe.SerializeUtils;
+import java.nl.sudohenk.kpabe.gpswabe.gpswabe;
+import java.nl.sudohenk.kpabe.gpswabe.gpswabeCph;
+import java.nl.sudohenk.kpabe.gpswabe.gpswabeCphKey;
+import java.nl.sudohenk.kpabe.gpswabe.gpswabeMsk;
+import java.nl.sudohenk.kpabe.gpswabe.gpswabePolicy;
+import java.nl.sudohenk.kpabe.gpswabe.gpswabePrv;
+import java.nl.sudohenk.kpabe.gpswabe.gpswabePub;
 
-import kpabe.kpabe.policy.LangPolicy;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.security.NoSuchAlgorithmException;
 
 /**
  * @param args
  * @author Liang Zhang(lz278@cornell.edu)
  */
-public class kpabe{
-	public void setup(String pubfile, String mskfile, String[] attrs_univ) throws IOException, ClassNotFoundException {
+public class KeyPolicyAttributeBasedEncryption{
+	public void setup(String pubfile, String mskfile, String[] attrs_univ, String curveparamsFileLocation) throws IOException, ClassNotFoundException {
 		byte[] pub_byte, msk_byte;
 		gpswabePub pub = new gpswabePub();
 		gpswabeMsk msk = new gpswabeMsk();
-		gpswabe.setup(pub, msk, attrs_univ);
+		gpswabe.setup(pub, msk, attrs_univ, curveparamsFileLocation);
 
 		/* store gpswabePub into pubfile */
 		pub_byte = SerializeUtils.serializegpswabePub(pub);
@@ -30,7 +37,7 @@ public class kpabe{
 	}
 	
 	public void keygen(String pubfile, String mskfile, String prvfile, 
-			String policy) throws Exception {
+	    gpswabePolicy policy) throws Exception {
 		gpswabePub pub;
 		gpswabeMsk msk;
 		gpswabePrv prv;
@@ -52,8 +59,7 @@ public class kpabe{
 		Common.spitFile(prvfile, prv_byte);
 	}
 	
-	public void enc(String pubfile, String inputfile, String[] attrs,
-			String encfile) throws Exception {
+	public byte[] enc(String pubfile, byte[] plaintext, String[] attrs) throws Exception {
 		gpswabePub pub;
 		gpswabeCphKey cphKey;
 		gpswabeCph cph;
@@ -80,14 +86,14 @@ public class kpabe{
 		cphBuf = SerializeUtils.gpswabeCphSerialize(cph);
 
 		/* read file to encrypted */
-		plt = Common.suckFile(inputfile);
+		plt = plaintext;
 		aesBuf = AESCoder.encrypt(m.toBytes(), plt);
 		// PrintArr("element: ", m.toBytes());
-		Common.writeKpabeFile(encfile, cphBuf, aesBuf);
+		// Common.writeKpabeFile(encfile, cphBuf, aesBuf);
+		return Common.writeKpabeStream(cphBuf, aesBuf);
 	}
 	
-	public void dec(String pubfile, String prvfile, String encfile,
-			String decfile) throws Exception {
+	public byte[] dec(String pubfile, String prvfile, byte[] ciphertext) throws Exception {
 		byte[] aesBuf, cphBuf;
 		byte[] plt;
 		byte[] prv_byte;
@@ -102,7 +108,7 @@ public class kpabe{
 		pub = SerializeUtils.unserializegpswabePub(pub_byte);
 
 		/* read ciphertext */
-		tmp = Common.readKpabeFile(encfile);
+		tmp = Common.readKpabeStream(ciphertext);
 		aesBuf = tmp[0];
 		cphBuf = tmp[1];
 		cph = SerializeUtils.gpswabeCphUnserialize(pub, cphBuf);
@@ -114,9 +120,13 @@ public class kpabe{
 		Element m=gpswabe.dec(pub,  prv, cph);
 		if (m!=null) {
 			plt = AESCoder.decrypt(m.toBytes(), aesBuf);
-			Common.spitFile(decfile, plt);
+			//Common.spitFile(decfile, plt);
+			return plt;
 		} else {
 			System.exit(0);
 		}
+        return null;
 	}
+	
+	
 }

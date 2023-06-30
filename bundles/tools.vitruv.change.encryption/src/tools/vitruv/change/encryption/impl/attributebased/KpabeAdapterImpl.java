@@ -5,6 +5,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.nl.sudohenk.kpabe.KeyPolicyAttributeBasedEncryption;
+import java.nl.sudohenk.kpabe.gpswabe.gpswabePolicy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -34,16 +36,18 @@ public class KpabeAdapterImpl {
 	private final String encryptedFilePath;
 	private final String decryptedFilePath;
 	private final String inputFileString;
-	kpabe instance;
+	private final String curveParamsFileString;
+	KeyPolicyAttributeBasedEncryption instance;
 	
-	public KpabeAdapterImpl(kpabe kpInstance,String privateKeyPath,String publicKeyPath,String masterKeyPath, String decryptedFilePath, String encryptedFilePath, String inputFileString) {
-		this.instance=kpInstance;
+	public KpabeAdapterImpl(String privateKeyPath,String publicKeyPath,String masterKeyPath, String decryptedFilePath, String encryptedFilePath, String inputFileString, String curveParamsFileString) {
+		this.instance= new KeyPolicyAttributeBasedEncryption();
 		this.privateKeyPath=privateKeyPath;
 		this.publicKeyPath=publicKeyPath;
 		this.masterKeyPath=masterKeyPath;
 		this.encryptedFilePath = encryptedFilePath;
 		this.decryptedFilePath = decryptedFilePath;
 		this.inputFileString = inputFileString;
+		this.curveParamsFileString = curveParamsFileString;
 		
 		
 	}
@@ -54,7 +58,7 @@ public class KpabeAdapterImpl {
 	 * @param change
 	 * @throws Exception
 	 */
-	public void encryptAloneAndGenerateKeys(String attributes,String policy,EChange change) throws Exception {
+	public void encryptAloneAndGenerateKeys(String[] attrs_univ,String policy,EChange change) throws Exception {
 		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 		ResourceSet resourceSet = new ResourceSetImpl();
 	    resourceSet.getResourceFactoryRegistry().getExtensionToFactoryMap().put("ecore", new EcoreResourceFactoryImpl());
@@ -70,19 +74,27 @@ public class KpabeAdapterImpl {
 	    fileOutputStream.write(byteArrayOutputStream.toByteArray());
 	    byteArrayOutputStream.close();
 	    fileOutputStream.close();
-		System.out.println("//start to setup");
-		instance.setup(publicKeyPath, masterKeyPath);
-		System.out.println("//end to setup");
-
-		System.out.println("//start to keygen");
-		// if attributes are passing here the file should be encrypted correctly, otherwise it fails.
-		instance.keygen(publicKeyPath, privateKeyPath, masterKeyPath, attributes);
-		System.out.println("//end to keygen");
-
-		System.out.println("//start to enc");
-		// create a file with the content of a change;
+		instance.setup(this.publicKeyPath, this.masterKeyPath,attrs_univ,this.curveParamsFileString);
+		// Build up the access tree structure:
+		gpswabePolicy sub1_policy = new gpswabePolicy("solution1", 1, null);
+        gpswabePolicy sub2_policy = new gpswabePolicy(null, 1, null);
+        gpswabePolicy[] sub2_children = new gpswabePolicy[] {new gpswabePolicy("application1", 1, null), new gpswabePolicy("module1", 1, null)};
+        sub2_policy.setChildren(sub2_children);
+        // create the root object
+        gpswabePolicy kpabepolicy = new gpswabePolicy(null, 2, null);
+        gpswabePolicy[] policy_children = new gpswabePolicy[] {sub1_policy, sub2_policy};
+        kpabepolicy.setChildren(policy_children);
 		
-		instance.enc(publicKeyPath, policy, this.inputFileString, encryptedFilePath);
+		
+		
+
+		// if attributes are passing here the file should be encrypted correctly, otherwise it fails.
+		instance.keygen(this.publicKeyPath, this.masterKeyPath,
+				this.privateKeyPath, kpabepolicy);
+		
+		// create a file with the content of a change;
+		byte[] bytes = byteArrayOutputStream.toByteArray();
+		instance.enc(this.publicKeyPath, bytes, attrs_univ);
 		
 	}
 	public EChange decryptAlone() throws Exception {

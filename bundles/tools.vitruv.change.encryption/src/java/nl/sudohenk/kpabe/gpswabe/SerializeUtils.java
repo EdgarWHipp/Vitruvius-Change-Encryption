@@ -1,12 +1,14 @@
-package kpabe.gpswabe;
+package java.nl.sudohenk.kpabe.gpswabe;
 import it.unisa.dia.gas.jpbc.Element;
+
 import it.unisa.dia.gas.jpbc.Pairing;
 import it.unisa.dia.gas.plaf.jpbc.pairing.PairingFactory;
 
 import java.util.ArrayList;
 
-public class SerializeUtils {
 
+
+public class SerializeUtils {
 	/* Method has been test okay */
 	public static void serializeElement(ArrayList<Byte> arrlist, Element e) {
 		byte[] arr_e = e.toBytes();
@@ -95,7 +97,7 @@ public class SerializeUtils {
 		offset = unserializeString(b, offset, sb);
 		pub.pairingDesc = sb.substring(0);
 		
-		pub.p=PairingFactory.getPairing("C://Users/Liang/Downloads/jpbc-2.0.0/params/curves/a.properties");
+		pub.p=PairingFactory.getPairing("C://abeproject/curveparams.txt");
 		Pairing pairing=pub.p;
 
 		pub.g = pairing.getG1().newElement();
@@ -261,11 +263,12 @@ public class SerializeUtils {
 	private static void serializePolicy(ArrayList<Byte> arrlist, gpswabePolicy p) {
 		serializeUint32(arrlist, p.k);
 		if (p.children == null || p.children.length == 0) {
-			serializeString(arrlist, p.attr);
+		    serializeUint32(arrlist, 0);
+		    serializeString(arrlist, p.attr);
 			serializeElement(arrlist, p.D);
 		} else {
-			serializeUint32(arrlist, p.children.length);
-			for (int i = 0; i < p.children.length; i++)
+		    serializeUint32(arrlist, p.children.length);
+		    for (int i = 0; i < p.children.length; i++)
 				serializePolicy(arrlist, p.children[i]);
 		}
 	}
@@ -281,16 +284,16 @@ public class SerializeUtils {
 	 */
 	private static gpswabePolicy unserializePolicy(gpswabePub pub, byte[] arr,
 			int offset) {
-		int i;
+	    int i;
 		int n;
 		gpswabePolicy p = new gpswabePolicy();
+		p.serilize_cost = 0 - offset;
 		p.k = unserializeUint32(arr, offset);
 		offset += 4;
 		p.attr = "";
 	
 		/* children */
 		n = unserializeUint32(arr, offset);
-		System.out.println("number of children is: "+n);
 		offset += 4;
 		if (n == 0) {
 			p.children = null;
@@ -304,13 +307,12 @@ public class SerializeUtils {
 			offset = unserializeElement(arr, offset, p.D);
 		} else {
 			p.children = new gpswabePolicy[n];
-			System.out.println("p.children length is: "+p.children.length);
 			for (i = 0; i < n; i++){
-				System.out.println("\nbefore assignment offset is :"+offset);
 				p.children[i] = unserializePolicy(pub, arr, offset);
-			    System.out.println("\n now the offset is:"+offset);
+				offset = offset + p.children[i].serilize_cost;
 			}
 		}
+		p.serilize_cost += offset;
 		return p;
 	}
 

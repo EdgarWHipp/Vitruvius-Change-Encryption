@@ -1,5 +1,11 @@
-package kpabe.gpswabe;
+package java.nl.sudohenk.kpabe.gpswabe;
 
+import it.unisa.dia.gas.jpbc.PairingParametersGenerator;
+
+import it.unisa.dia.gas.jpbc.PairingParameters;
+import it.unisa.dia.gas.plaf.jpbc.pairing.a.TypeACurveGenerator;
+import it.unisa.dia.gas.plaf.jpbc.pbc.curve.PBCTypeACurveGenerator;
+import java.nl.sudohenk.kpabe.Example;
 import it.unisa.dia.gas.jpbc.Element;
 import it.unisa.dia.gas.jpbc.Pairing;
 import it.unisa.dia.gas.plaf.jpbc.pairing.PairingFactory;
@@ -7,9 +13,14 @@ import it.unisa.dia.gas.plaf.jpbc.pairing.PairingFactory;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
+
+
+
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.LinkedList;
 public class gpswabe {
 	private static String curveParams = "type a\n"
 			+ "q 87807107996633125224377819847540498158068831994142082"
@@ -29,10 +40,10 @@ public class gpswabe {
 	 * @return				none.
 	 */
 
-	public static void setup(gpswabePub pub, gpswabeMsk msk, String[] attrs) {
+	public static void setup(gpswabePub pub, gpswabeMsk msk, String[] attrs, String curveparamsFileLocation) {
 		Element tmp;
 		pub.pairingDesc=curveParams; 
-		pub.p=PairingFactory.getPairing("C://Users/Liang/Downloads/jpbc-2.0.0/params/curves/a.properties");
+		pub.p=PairingFactory.getPairing(curveparamsFileLocation);
 		Pairing pairing=pub.p;
 		
 		pub.g=pairing.getG1().newElement();
@@ -67,90 +78,17 @@ public class gpswabe {
 		}
 	}
 	
-	public static gpswabePrv keygen(gpswabePub pub, gpswabeMsk msk, String policy) throws Exception{
+	public static gpswabePrv keygen(gpswabePub pub, gpswabeMsk msk, gpswabePolicy policy) throws Exception{
 		gpswabePrv prv=new gpswabePrv();
-		prv.p=parsePolicyPostfix(policy);
+		prv.p=policy;
 		if(prv.p==null){
-			System.out.println("Policy cannot be found!");
+			logger.error("Policy cannot be found!");
 			return null;
 		}
 		else {
 			fillPolicy(prv.p, pub, msk, msk.y);
 			return prv;
 			}
-	}
-	
-	/*!
-	 * Generate a Policy tree from the input policy string.
-	 *
-	 * @param s				Policy string
-	 * @return				Policy root node data structure
-	 */
-
-	private static gpswabePolicy parsePolicyPostfix(String s) throws Exception {
-		String[] toks;
-		String tok;
-		ArrayList<gpswabePolicy> stack = new ArrayList<gpswabePolicy>();
-		gpswabePolicy root;
-
-		toks = s.split(" ");
-
-		int toks_cnt = toks.length;
-		for (int index = 0; index < toks_cnt; index++) {
-			int i, k, n;
-
-			tok = toks[index];
-			if (!tok.contains("of")) {
-				stack.add(baseNode(1, tok));
-			} else {
-				gpswabePolicy node;
-
-				/* parse "kofn" node */
-				String[] k_n = tok.split("of");
-				k = Integer.parseInt(k_n[0]);
-				n = Integer.parseInt(k_n[1]);
-				
-				if (k < 1) {
-					System.out.println("error parsing " + s
-							+ ": trivially satisfied operator " + tok);
-					return null;
-				} else if (k > n) {
-					System.out.println("error parsing " + s
-							+ ": unsatisfiable operator " + tok);
-					return null;
-				} else if (n == 1) {
-					System.out.println("error parsing " + s
-							+ ": indentity operator " + tok);
-					return null;
-				} else if (n > stack.size()) {
-					System.out.println("error parsing " + s
-							+ ": stack underflow at " + tok);
-					return null;
-				}
-
-				/* pop n things and fill in children */
-				node = baseNode(k, null);
-				node.children = new gpswabePolicy[n];
-
-				for (i = n - 1; i >= 0; i--)
-					node.children[i] = stack.remove(stack.size() - 1);
-
-				/* push result */
-				stack.add(node);
-			}
-		}
-
-		if (stack.size() > 1) {
-			System.out.println("error parsing " + s
-					+ ": extra node left on the stack");
-			return null;
-		} else if (stack.size() < 1) {
-			System.out.println("error parsing " + s + ": empty policy");
-			return null;
-		}
-
-		root = stack.get(0);
-		return root;
 	}
 	
 
@@ -321,7 +259,7 @@ public class gpswabe {
 				}
 				else{
 					if(j==(pub.comps.size()-1)){
-						System.out.println("Check your attribute universe. Certain attribute is not included.");
+					    logger.error("Check your attribute universe. Certain attribute is not included.");
 						System.exit(0);
 					}
 				}
@@ -366,7 +304,7 @@ public class gpswabe {
 				}
 				else{
 					if(j==(pub.comps.size()-1)){
-						System.out.println("Check your attribute universe. Certain attribute is not included.");
+					    logger.error("Check your attribute universe. Certain attribute is not included.");
 					}
 				}
 			}
@@ -412,7 +350,7 @@ public class gpswabe {
 				}
 				else{
 					if(i==pub.comps.size()-1){
-						System.out.println("Check your attribute universe. Certain attribute is not included!");
+					    logger.error("Check your attribute universe. Certain attribute is not included!");
 						break;
 					}
 				}
@@ -569,7 +507,7 @@ public class gpswabe {
 		Ys=pairing.getGT().newElement();
 		checkSatisfy(prv.p, cph, pub);
 		if(!prv.p.satisfiable){
-			System.out.println("Cannot decrypt.");
+		    logger.error("Cannot decrypt.");
 			return null;
 		}
 		pickSatisfyMinLeaves(prv.p);
@@ -587,7 +525,6 @@ public class gpswabe {
 			this.policy = p;
 		}
 
-		@Override
 		public int compare(Integer o1, Integer o2) {
 			int k, l;
 

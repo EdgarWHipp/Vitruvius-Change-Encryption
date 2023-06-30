@@ -1,4 +1,4 @@
-package kpabe.kpabe;
+package java.nl.sudohenk.kpabe;
 
 import java.security.SecureRandom;
 
