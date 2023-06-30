@@ -89,8 +89,12 @@ public final class EncryptionUtils {
 				}
 					
 		}else {
-			
-			Cipher asymmetricCipher = Cipher.getInstance(algorithm);
+			Cipher asymmetricCipher;
+			if (algorithm.startsWith("AES")) {
+				asymmetricCipher = Cipher.getInstance("AES");
+			}else {
+				asymmetricCipher = Cipher.getInstance(algorithm);
+			}
 			switch (opMode){
 				case Cipher.ENCRYPT_MODE:
 					asymmetricCipher.init(Cipher.ENCRYPT_MODE, publicKey);

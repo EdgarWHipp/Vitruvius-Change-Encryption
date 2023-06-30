@@ -3,6 +3,7 @@ package tools.vitruv.change.encryption.tests.symmetric;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -27,6 +28,7 @@ import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.emf.ecore.xmi.impl.EcoreResourceFactoryImpl;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 
 import edu.kit.ipd.sdq.commons.util.java.Pair;
@@ -49,44 +51,57 @@ import tools.vitruv.change.composite.description.VitruviusChangeFactory;
 
 
 public class TestEncryptChangesSymmetricallyTogether extends TestChangeEncryption{
-	private final File fileWithEncryptedChanges = new File(new File("").getAbsolutePath() +"/encrypted_changes");
-	private final String csvFileName = new File("").getAbsolutePath() + File.separator + "SymmetricEncryptionTogether.csv";
 	
 	
+	@AfterAll
+	static void deleteGeneratedFiles() {
+		TestChangeEncryption.deleteFiles();
+		}
 	
-	private void testChangesTogether(List<EChange> changes) throws IOException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
+	
+	private boolean checkCorrectness(List<EChange> changes) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, IOException, ClassNotFoundException {
+		try {
+			for (Map map: TestChangeEncryption.ENCRYPTIONUTIL.getAllEncryptionMapsSymmetric()) {
+				
+				
+				TestChangeEncryption.SYM_ENCRYPTIONSCHEME.encryptDeltaChangesTogether(map, changes, TestChangeEncryption.FILE);
+				TestChangeEncryption.SYM_ENCRYPTIONSCHEME.decryptDeltaChangesTogether(map, TestChangeEncryption.FILE);
+				
+			}
+		}catch(Exception e) {
+			TestChangeEncryption.LOGGER.severe("Correctness check failed");
+			return false;
+		}
+		return true;
+		
+		
+		
+	}
+	private void collectData(List<EChange> changes) throws IOException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, ClassNotFoundException {
 		Map<String,Pair<String,long[]>> mainMap = new HashMap<String,Pair<String,long[]>>();
 		long[][] timeArray = new long[10][3];
 		int[] amounts = {1,10,100,1000,10000};
 
 		for (Map map : TestChangeEncryption.ENCRYPTIONUTIL.getAllEncryptionMapsSymmetric()) {
 			for (int x=0;x<amounts.length;x++) {
+				File[] files = TestChangeEncryption.generateEncryptionFiles(amounts[x]);
+
 				for (int i=0;i<10;i++) {
 					
 	
 				    long startTime = System.currentTimeMillis();
 					//
-				    IntStream.range(0, amounts[x])
-				    .forEach(j -> {
-						try {
-							TestChangeEncryption.SYM_ENCRYPTIONSCHEME.encryptDeltaChangesTogether(map, changes, TestChangeEncryption.FILE);
-						} catch (InvalidKeyException | IllegalBlockSizeException | BadPaddingException
-								| NoSuchAlgorithmException | NoSuchPaddingException | IOException | InvalidAlgorithmParameterException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-					});
-				    long betweenTime = System.currentTimeMillis();
-				    IntStream.range(0, amounts[x])
-				    .forEach(j -> {
-						try {
-							TestChangeEncryption.SYM_ENCRYPTIONSCHEME.decryptDeltaChangesTogether(map, TestChangeEncryption.FILE);
-						} catch (InvalidKeyException | IllegalBlockSizeException | BadPaddingException
-								| NoSuchAlgorithmException | NoSuchPaddingException | IOException | ClassNotFoundException | InvalidAlgorithmParameterException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-					});
+					for (int iter = 0;iter<files.length;iter++) {
+						TestChangeEncryption.SYM_ENCRYPTIONSCHEME.encryptDeltaChangesTogether(map, changes, files[iter]);
+						
+
+					}
+					long betweenTime = System.currentTimeMillis();
+					for (int iterdec = 0;iterdec<files.length;iterdec++) {
+						TestChangeEncryption.SYM_ENCRYPTIONSCHEME.decryptDeltaChangesTogether(map, files[iterdec]);
+						
+
+					}
 					//
 					long endTime = System.currentTimeMillis();
 					
@@ -95,6 +110,7 @@ public class TestEncryptChangesSymmetricallyTogether extends TestChangeEncryptio
 					long encryptionTime = betweenTime - startTime;
 					timeArray[i]= new long[] {encryptionTime,decryptionTime,totalTime};
 					//assertTrue(new EcoreUtil.EqualityHelper().equals(changes,decryptedChanges)); 
+					IntStream.range(0,files.length).forEach(l -> files[l].delete());
 				}
 			
 			long[] mean=new long[3];
@@ -127,21 +143,14 @@ public class TestEncryptChangesSymmetricallyTogether extends TestChangeEncryptio
 	@Test 
 	public void testSaveAndLoadCreateReplaceSingleAttributeChange() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, IOException, ClassNotFoundException {
 		
-		
-
+	
 		List<EChange> changes = new ArrayList<>();
 		ResourceSet set = new ResourceSetImpl();
 		TestChangeEncryption.CREATIONUTIL.createReplaceSingleAttributeChange(changes, set);
 
-		try {
-			this.testChangesTogether(changes);
-		}catch(Exception e) {
-			System.out.println(e+":\t"+e.getMessage());
-			assert false;
-		}
-		assert true;
-
 		
+		assertTrue(this.checkCorrectness(changes));
+		this.collectData(changes);
 	    
 	}
 	/**
@@ -158,16 +167,13 @@ public class TestEncryptChangesSymmetricallyTogether extends TestChangeEncryptio
 	@Test
 	public void testSaveAndLoadMemberCreation() throws NoSuchAlgorithmException, InvalidKeyException, ClassNotFoundException, IllegalBlockSizeException, BadPaddingException, NoSuchPaddingException, IOException, InvalidAlgorithmParameterException {
 			
-			List<EChange> changes = new ArrayList<>();
-			ResourceSet set = new ResourceSetImpl();
-			TestChangeEncryption.CREATIONUTIL.createCreateMemberChangeSequence(changes, set,1);
-			try {
-				this.testChangesTogether(changes);
-				}catch(Exception e) {
-				System.out.println(e+":\t"+e.getMessage());
-				assert false;
-			}
-			assert true;
+		List<EChange> changes = new ArrayList<>();
+		ResourceSet set = new ResourceSetImpl();
+		TestChangeEncryption.CREATIONUTIL.createCreateMemberChangeSequence(changes, set,1);
+		
+		
+		assertTrue(this.checkCorrectness(changes));
+		this.collectData(changes);
 	}
 	/**
 	 * Test the Encryption and Decryption of the DeleteEObject change; 
@@ -183,18 +189,13 @@ public class TestEncryptChangesSymmetricallyTogether extends TestChangeEncryptio
 	@Test 
 	public void testSaveAndLoadcreateDeleteEObjectChange() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, IOException, ClassNotFoundException {
 		
-		List<EChange> changes = new ArrayList<>();
-		ResourceSet set = new ResourceSetImpl();
-		TestChangeEncryption.CREATIONUTIL.createDeleteEObjectChange(changes, set);
-	    
-	     
-		try {
-			this.testChangesTogether(changes);
-			}catch(Exception e) {
-			System.out.println(e+":\t"+e.getMessage());
-			assert false;
-		}
-		assert true;
+	  List<EChange> changes = new ArrayList<>();
+	  ResourceSet set = new ResourceSetImpl();
+	  TestChangeEncryption.CREATIONUTIL.createDeleteEObjectChange(changes, set);
+	  
+	  
+	  assertTrue(this.checkCorrectness(changes));
+	  this.collectData(changes);
 	}
 	/**
 	 * Test the Encryption and Decryption of the RemoveEAttributeValue change;
@@ -214,13 +215,9 @@ public class TestEncryptChangesSymmetricallyTogether extends TestChangeEncryptio
 		ResourceSet set = new ResourceSetImpl();
 		TestChangeEncryption.CREATIONUTIL.createRemoveAttributeChange(changes, set);	    
 	     
-	    try {
-			this.testChangesTogether(changes);
-			}catch(Exception e) {
-			System.out.println(e+":\t"+e.getMessage());
-			assert false;
-		}
-		assert true;
+		
+		assertTrue(this.checkCorrectness(changes));
+		this.collectData(changes);
 	}
 	/**
 	 * Test the Encryption and Decryption of the DeleteRootEObject change;
@@ -236,17 +233,13 @@ public class TestEncryptChangesSymmetricallyTogether extends TestChangeEncryptio
 	@Test
 	public void testSaveAndLoadDeleteRootEObjectChange() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, IOException, ClassNotFoundException {
 		
-			List<EChange> changes = new ArrayList<>();
-			ResourceSet set = new ResourceSetImpl();
-			TestChangeEncryption.CREATIONUTIL.createDeleteRootEObjectChange(changes, set);
-			
-			try {
-				this.testChangesTogether(changes);
-				}catch(Exception e) {
-				System.out.println(e+":\t"+e.getMessage());
-				assert false;
-			}
-			assert true;
+		List<EChange> changes = new ArrayList<>();
+		ResourceSet set = new ResourceSetImpl();
+		TestChangeEncryption.CREATIONUTIL.createDeleteRootEObjectChange(changes, set);
+		
+		
+		assertTrue(this.checkCorrectness(changes));
+		this.collectData(changes);
 		     
 		
 	}
@@ -268,13 +261,10 @@ public class TestEncryptChangesSymmetricallyTogether extends TestChangeEncryptio
 		ResourceSet set = new ResourceSetImpl();
 		TestChangeEncryption.CREATIONUTIL.createInsertEAttributeValueChange(changes, set);
 		
-		try {
-			this.testChangesTogether(changes);
-			}catch(Exception e) {
-			System.out.println(e+":\t"+e.getMessage());
-			assert false;
-		}
-		assert true;
+		
+		assertTrue(this.checkCorrectness(changes));
+		this.collectData(changes);
+		
 	}
 	/**
 	 * 
@@ -294,13 +284,10 @@ public class TestEncryptChangesSymmetricallyTogether extends TestChangeEncryptio
 		ResourceSet set = new ResourceSetImpl();
 		TestChangeEncryption.CREATIONUTIL.createInsertReferenceChange(changes, set);
 	   
-		try {
-			this.testChangesTogether(changes);
-			}catch(Exception e) {
-			System.out.println(e+":\t"+e.getMessage());
-			assert false;
-		}
-		assert true;
+		
+		assertTrue(this.checkCorrectness(changes));
+		this.collectData(changes);
+		
 	}
 	
 
@@ -308,67 +295,6 @@ public class TestEncryptChangesSymmetricallyTogether extends TestChangeEncryptio
 	
 	
 	
-	@Test
-	public void testSaveAndLoadCreate10Members() throws NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, IOException, ClassNotFoundException {
-			
-		List<EChange> changes = new ArrayList<>();
-		ResourceSet set = new ResourceSetImpl();
-		TestChangeEncryption.CREATIONUTIL.createCreateMemberChangeSequence(changes, set,10);
-	    
-		try {
-			this.testChangesTogether(changes);
-			}catch(Exception e) {
-			System.out.println(e+":\t"+e.getMessage());
-			assert false;
-		}
-		assert true;
-	}
-	@Test
-	public void testSaveAndLoadCreate100Members() throws NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, IOException, ClassNotFoundException {
-		
-		List<EChange> changes = new ArrayList<>();
-		ResourceSet set = new ResourceSetImpl();
-		TestChangeEncryption.CREATIONUTIL.createCreateMemberChangeSequence(changes, set,100);
-	    
-		try {
-			this.testChangesTogether(changes);
-			}catch(Exception e) {
-			System.out.println(e+":\t"+e.getMessage());
-			assert false;
-		}
-		assert true;
-	}
-	@Test
-	public void testSaveAndLoadCreate1000Members() throws NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, IOException, ClassNotFoundException {
-		
-		List<EChange> changes = new ArrayList<>();
-		ResourceSet set = new ResourceSetImpl();
-		TestChangeEncryption.CREATIONUTIL.createCreateMemberChangeSequence(changes, set,1000);
-	    
-		try {
-			this.testChangesTogether(changes);
-			}catch(Exception e) {
-			System.out.println(e+":\t"+e.getMessage());
-			assert false;
-		}
-		assert true;
-	}
-	@Test
-	public void testSaveAndLoadCreate10000Members() throws NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, IOException, ClassNotFoundException {
-		
-			
-		List<EChange> changes = new ArrayList<>();
-		ResourceSet set = new ResourceSetImpl();
-		TestChangeEncryption.CREATIONUTIL.createCreateMemberChangeSequence(changes, set,10000);
-	    
-		try {
-			this.testChangesTogether(changes);
-			}catch(Exception e) {
-			System.out.println(e+":\t"+e.getMessage());
-			assert false;
-		}
-		assert true;
-	}
 	
 	
 	

@@ -54,7 +54,7 @@ public class EncryptionUtility {
 		SecretKey secretKey = keyGenerator.generateKey();
 		HashMap <String,Object> map = new HashMap<String, Object>();
 		map.put("secretKey", secretKey);
-		map.put("algorithm", "AES");
+		map.put("algorithm", "AES-128");
 		return map;
 	}
 	private HashMap<String,Object> getEncryptionDetailsMapAES192() throws NoSuchAlgorithmException{
@@ -65,7 +65,7 @@ public class EncryptionUtility {
 		SecretKey secretKey = keyGenerator.generateKey();
 		HashMap <String,Object> map = new HashMap<String, Object>();
 		map.put("secretKey", secretKey);
-		map.put("algorithm", "AES");
+		map.put("algorithm", "AES-192");
 		return map;
 	}
 	private HashMap<String,Object> getEncryptionDetailsMapAES256() throws NoSuchAlgorithmException{
@@ -76,7 +76,7 @@ public class EncryptionUtility {
 		SecretKey secretKey = keyGenerator.generateKey();
 		HashMap <String,Object> map = new HashMap<String, Object>();
 		map.put("secretKey", secretKey);
-		map.put("algorithm", "AES");
+		map.put("algorithm", "AES-256");
 		return map;
 	}
 	private HashMap<String,Object> getEncryptionDetailsMapDES() throws NoSuchAlgorithmException{
