@@ -8,6 +8,7 @@ import java.util.stream.IntStream;
 
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
@@ -19,12 +20,18 @@ import edu.kit.ipd.sdq.metamodels.families.Member;
 import tools.vitruv.change.atomic.EChange;
 import tools.vitruv.change.atomic.TypeInferringAtomicEChangeFactory;
 import tools.vitruv.change.atomic.eobject.DeleteEObject;
+import tools.vitruv.change.atomic.eobject.impl.CreateEObjectImpl;
 import tools.vitruv.change.atomic.feature.attribute.InsertEAttributeValue;
 import tools.vitruv.change.atomic.feature.attribute.RemoveEAttributeValue;
 import tools.vitruv.change.atomic.feature.attribute.ReplaceSingleValuedEAttribute;
+import tools.vitruv.change.atomic.feature.attribute.impl.ReplaceSingleValuedEAttributeImpl;
 import tools.vitruv.change.atomic.feature.reference.InsertEReference;
+import tools.vitruv.change.atomic.feature.reference.RemoveEReference;
+import tools.vitruv.change.atomic.feature.reference.ReplaceSingleValuedEReference;
 import tools.vitruv.change.atomic.root.RemoveRootEObject;
+import tools.vitruv.change.atomic.root.impl.InsertRootEObjectImpl;
 import tools.vitruv.change.changederivation.DefaultStateBasedChangeResolutionStrategy;
+import tools.vitruv.change.encryption.tests.TestChangeEncryption;
 /**
  * Manages the EChange creation, including the creation of valid resources, for the tests.
  */
@@ -218,9 +225,92 @@ public class EChangeCreationUtility {
 		return members;
 
 	}
+	// ----- Return single changes
 	
+	public CreateEObjectImpl<Member> getCreateEObjectChange() {
+		List<EChange> changes = new ArrayList<>();
+		ResourceSet set = new ResourceSetImpl();
+		TestChangeEncryption.CREATIONUTIL.createCreateMemberChangeSequence(changes, set,1);
+		CreateEObjectImpl<Member> change = (CreateEObjectImpl<Member>) changes.get(0);
+		return change;
+		
+	}
+	public InsertRootEObjectImpl<Member> getInsertRootEObjectChange(){
+		List<EChange> changes = new ArrayList<>();
+		ResourceSet set = new ResourceSetImpl();
+		TestChangeEncryption.CREATIONUTIL.createCreateMemberChangeSequence(changes, set,1);
+		InsertRootEObjectImpl<Member> change = (InsertRootEObjectImpl<Member>) changes.get(1);
+		return change;
+	}
+	public ReplaceSingleValuedEAttributeImpl<Member,String> getReplaceSingleValuedEAttributeChange(){
+		List<EChange> changes = new ArrayList<>();
+		ResourceSet set = new ResourceSetImpl();
+		TestChangeEncryption.CREATIONUTIL.createCreateMemberChangeSequence(changes, set,1);
+		
+		ReplaceSingleValuedEAttributeImpl<Member,String> change = (ReplaceSingleValuedEAttributeImpl<Member,String>) changes.get(2);
+		return change;
+	}
+	public DeleteEObject<Member> getDeleteEObjectChange(){
+		
+		Resource memberResource = TestChangeEncryption.CREATIONUTIL.createCompleteMember();
+		Member member = (Member) memberResource.getContents().get(0);
+		
+		DeleteEObject<Member> change = TypeInferringAtomicEChangeFactory.getInstance().createDeleteEObjectChange(member);
+		return change;
+	}
+	public RemoveRootEObject<Member> getRemoveRootEObjectChange(){
+		Resource memberResource = TestChangeEncryption.CREATIONUTIL.createCompleteMember();
+		Member member = (Member) memberResource.getContents().get(0);
 	
-	
+		RemoveRootEObject<Member> change = TypeInferringAtomicEChangeFactory.getInstance().createRemoveRootChange(member,member.eResource(),0);
+		change.setResource(null);
+		return change;
+	}
+	public InsertEAttributeValue<Member, String> getInsertEAttributeValue(){
+		Resource memberResource = TestChangeEncryption.CREATIONUTIL.createCompleteMember();
+		Member member = (Member) memberResource.getContents().get(0);
+		
+
+	    InsertEAttributeValue<Member, String> change = TypeInferringAtomicEChangeFactory.getInstance().createInsertAttributeChange(member, member.eClass().getEAllAttributes().get(0), 0, "test");
+		return change;
+	}
+	public InsertEReference<Family,EObject> getInsertEReferenceChange(){
+		Resource memberResource = TestChangeEncryption.CREATIONUTIL.createCompleteMember();
+		Member member = (Member) memberResource.getContents().get(0);
+
+		Resource family = TestChangeEncryption.CREATIONUTIL.createFamily();
+		Family familyImpl = (Family) family.getContents().get(0);
+		
+
+		InsertEReference<Family,EObject> change =TypeInferringAtomicEChangeFactory.getInstance()
+				.createInsertReferenceChange(familyImpl,familyImpl.eClass().getEAllReferences().get(3),member,0);
+		return change;
+	}
+	public RemoveEReference<EObject, EObject> getRemoveEReferenceChange() {
+		Resource family = TestChangeEncryption.CREATIONUTIL.createFamily();
+		Family familyImpl = (Family) family.getContents().get(0);
+		
+		Member daughter1Impl = (Member) family.getContents().get(2);
+		
+		RemoveEReference<EObject, EObject> change =TypeInferringAtomicEChangeFactory.getInstance()
+				.createRemoveReferenceChange(familyImpl, familyImpl.eClass().getEAllReferences().get(1), daughter1Impl, 0);
+		return change;
+	}
+	public ReplaceSingleValuedEReference<Family, Member> getReplaceSingleValuedReferenceChange(){
+		Resource memberResource = TestChangeEncryption.CREATIONUTIL.createCompleteMember();
+		Member member = (Member) memberResource.getContents().get(0);
+		
+		Resource family = TestChangeEncryption.CREATIONUTIL.createFamily();
+		Family familyImpl = (Family) family.getContents().get(0);
+		Member motherImpl = (Member) family.getContents().get(1);
+		EReference mothersreference = familyImpl.eClass().getEAllReferences().get(3);
+		ReplaceSingleValuedEReference<Family, Member>  change = TypeInferringAtomicEChangeFactory.getInstance()
+				.createReplaceSingleReferenceChange(familyImpl, mothersreference, motherImpl, member);
+		change.setAffectedEObject(null);
+		return change;
+		
+		
+	}
 	
 	
 	

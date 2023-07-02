@@ -58,13 +58,19 @@ public class TestEncryptChangesAsymmetricallyAlone extends TestChangeEncryption{
 	public static void deleteCreatedFiles() {
 		TestChangeEncryption.deleteFiles();
 	}
-	private void checkCorrectness(EChange change) throws InvalidKeyException, NoSuchAlgorithmException, InvalidAlgorithmParameterException, SignatureException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException {
-		for (Map map: TestChangeEncryption.ENCRYPTIONUTIL.getAllEncryptionMapsAsymmetric()) {
-			
-			TestChangeEncryption.ASYM_ENCRYPTIONSCHEME.encryptDeltaChangeAloneAsymmetrically(map, change, TestChangeEncryption.FILE);
-			EChange decryptedChange = TestChangeEncryption.ASYM_ENCRYPTIONSCHEME.decryptDeltaChangeAloneAsymmetrically(map, TestChangeEncryption.FILE);
-			//assertTrue(new EcoreUtil.EqualityHelper().equals(change,decryptedChange));
+	private boolean checkCorrectness(EChange change) throws InvalidKeyException, NoSuchAlgorithmException, InvalidAlgorithmParameterException, SignatureException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException {
+		try {
+			for (Map map: TestChangeEncryption.ENCRYPTIONUTIL.getAllEncryptionMapsAsymmetric()) {
+				
+				TestChangeEncryption.ASYM_ENCRYPTIONSCHEME.encryptDeltaChangeAloneAsymmetrically(map, change, TestChangeEncryption.FILE);
+				EChange decryptedChange = TestChangeEncryption.ASYM_ENCRYPTIONSCHEME.decryptDeltaChangeAloneAsymmetrically(map, TestChangeEncryption.FILE);
+				//assertTrue(new EcoreUtil.EqualityHelper().equals(change,decryptedChange));
+			}
+		}catch (Exception e) {
+			TestChangeEncryption.LOGGER.severe(e.getMessage());
+			return false;
 		}
+		return true;
 	}
 		
 	private void collectData(EChange change) throws IOException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, SignatureException {
@@ -156,19 +162,16 @@ public class TestEncryptChangesAsymmetricallyAlone extends TestChangeEncryption{
 }
 	@Test
 	public void testCreateEObjectChangeEncryption() throws NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException {
-		List<EChange> changes = new ArrayList<>();
-		ResourceSet set = new ResourceSetImpl();
-		TestChangeEncryption.CREATIONUTIL.createCreateMemberChangeSequence(changes, set,1);
-		CreateEObjectImpl<Member> change = (CreateEObjectImpl<Member>) changes.get(0);
+		EChange change = TestChangeEncryption.CREATIONUTIL.getCreateEObjectChange();
 		
 		try {
-			this.checkCorrectness(change);
+			assertTrue(this.checkCorrectness(change));
 			this.collectData(change);
 		}catch(Exception e) {
-			System.out.println(e+":\t"+e.getMessage());
+			TestChangeEncryption.LOGGER.severe(e+":\t"+e.getMessage());
 			assert false;
 		}
-		assert true;
+		
 		// implement this later
 		//this.checkAsymmetricFunctionality();
 		
@@ -176,87 +179,67 @@ public class TestEncryptChangesAsymmetricallyAlone extends TestChangeEncryption{
 	}
 	@Test 
 	public void testCreateRootEObjectChangeEncryption() throws NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException {
-		List<EChange> changes = new ArrayList<>();
-		ResourceSet set = new ResourceSetImpl();
-		TestChangeEncryption.CREATIONUTIL.createCreateMemberChangeSequence(changes, set,1);
-		InsertRootEObjectImpl<Member> change = (InsertRootEObjectImpl<Member>) changes.get(1);
-		List<String> times = new ArrayList<>();
+		EChange change = TestChangeEncryption.CREATIONUTIL.getInsertRootEObjectChange();
 		try {
-			this.checkCorrectness(change);
-
+			assertTrue(this.checkCorrectness(change));
 			this.collectData(change);
 		}catch(Exception e) {
-			System.out.println(e+":\t"+e.getMessage());
+			TestChangeEncryption.LOGGER.severe(e+":\t"+e.getMessage());
 			assert false;
 		}
-		assert true;
+		
 		
 	}
 	@Test
 	public void testReplaceSingleValuedEAttributeChangeEncryption() throws NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException {
-		List<EChange> changes = new ArrayList<>();
-		ResourceSet set = new ResourceSetImpl();
-		TestChangeEncryption.CREATIONUTIL.createCreateMemberChangeSequence(changes, set,1);
-		
-		ReplaceSingleValuedEAttributeImpl<Member,String> change = (ReplaceSingleValuedEAttributeImpl<Member,String>) changes.get(2);
+		EChange change = TestChangeEncryption.CREATIONUTIL.getReplaceSingleValuedEAttributeChange();
 		try {
-			this.checkCorrectness(change);
-
+			assertTrue(this.checkCorrectness(change));
 			this.collectData(change);
 		}catch(Exception e) {
-			System.out.println(e+":\t"+e.getMessage());
+			TestChangeEncryption.LOGGER.severe(e+":\t"+e.getMessage());
 			assert false;
 		}
-		assert true;
+		
 		
 	}
 	
 	@Test 
 	public void testEObjecteDeletedChangeEncryption() throws NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException {
-		Resource memberResource = TestChangeEncryption.CREATIONUTIL.createCompleteMember();
-		Member member = (Member) memberResource.getContents().get(0);
-		
-		DeleteEObject<Member> change = TypeInferringAtomicEChangeFactory.getInstance().createDeleteEObjectChange(member);
+		EChange change = TestChangeEncryption.CREATIONUTIL.getDeleteEObjectChange();
 		try {
-			this.checkCorrectness(change);
+			assertTrue(this.checkCorrectness(change));
 			this.collectData(change);
 		}catch(Exception e) {
-			System.out.println(e+":\t"+e.getMessage());
+			TestChangeEncryption.LOGGER.severe(e+":\t"+e.getMessage());
 			assert false;
 		}
-		assert true;
 		
 		
 	}
 	@Test
 	public void testRootEObjectDeletedChangeEncryption() throws NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException, InvalidAlgorithmParameterException, SignatureException {
-		Resource memberResource = TestChangeEncryption.CREATIONUTIL.createCompleteMember();
-		Member member = (Member) memberResource.getContents().get(0);
-	
-		RemoveRootEObject<Member> change = TypeInferringAtomicEChangeFactory.getInstance().createRemoveRootChange(member,member.eResource(),0);
-		change.setResource(null);
-	
-		this.checkCorrectness(change);
-		this.collectData(change);
-	
+		EChange change = TestChangeEncryption.CREATIONUTIL.getRemoveRootEObjectChange();
+		try {
+			assertTrue(this.checkCorrectness(change));
+			this.collectData(change);
+		}catch(Exception e) {
+			TestChangeEncryption.LOGGER.severe(e+":\t"+e.getMessage());
+			assert false;
+		}
 		
 		
 	}
 	@Test
 	public void testInsertEAttributeValueChangeEncryption() throws NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException {
-		Resource memberResource = TestChangeEncryption.CREATIONUTIL.createCompleteMember();
-		Member member = (Member) memberResource.getContents().get(0);
-		
-
-	    InsertEAttributeValue<Member, String> change = TypeInferringAtomicEChangeFactory.getInstance().createInsertAttributeChange(member, member.eClass().getEAllAttributes().get(0), 0, "test");
+		EChange change = TestChangeEncryption.CREATIONUTIL.getInsertEAttributeValue();
 	    try {
-	    	this.checkCorrectness(change);
+			assertTrue(this.checkCorrectness(change));
 			this.collectData(change);
 		}catch(Exception e) {
-			System.out.println(e+":\t"+e.getMessage());
+			TestChangeEncryption.LOGGER.severe(e+":\t"+e.getMessage());
 			assert false;
 		}
-		assert true;
 	}
 		
 		
@@ -264,67 +247,40 @@ public class TestEncryptChangesAsymmetricallyAlone extends TestChangeEncryption{
 	
 	@Test
 	public void testInsertEReferenceChangeEncryption() throws NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException {
-		Resource memberResource = TestChangeEncryption.CREATIONUTIL.createCompleteMember();
-		Member member = (Member) memberResource.getContents().get(0);
-
-		Resource family = TestChangeEncryption.CREATIONUTIL.createFamily();
-		Family familyImpl = (Family) family.getContents().get(0);
-		
-
-		InsertEReference<Family,EObject> change =TypeInferringAtomicEChangeFactory.getInstance()
-				.createInsertReferenceChange(familyImpl,familyImpl.eClass().getEAllReferences().get(3),member,0);
+		EChange change = TestChangeEncryption.CREATIONUTIL.getInsertEReferenceChange();
 		try {
-			this.checkCorrectness(change);
+			assertTrue(this.checkCorrectness(change));
 			this.collectData(change);
 		}catch(Exception e) {
-			System.out.println(e+":\t"+e.getMessage());
+			TestChangeEncryption.LOGGER.severe(e+":\t"+e.getMessage());
 			assert false;
 		}
-		assert true;
 		
 		
 	}
 	@Test
 	public void testcreateRemoveReferenceChangeEncryption() throws NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException {
-		Resource family = TestChangeEncryption.CREATIONUTIL.createFamily();
-		Family familyImpl = (Family) family.getContents().get(0);
-		
-		Member daughter1Impl = (Member) family.getContents().get(2);
-		
-		RemoveEReference<EObject, EObject> change =TypeInferringAtomicEChangeFactory.getInstance()
-				.createRemoveReferenceChange(familyImpl, familyImpl.eClass().getEAllReferences().get(1), daughter1Impl, 0);
+		EChange change = TestChangeEncryption.CREATIONUTIL.getRemoveEReferenceChange();
 		try {
-			this.checkCorrectness(change);
+			assertTrue(this.checkCorrectness(change));
 			this.collectData(change);
 		}catch(Exception e) {
-			System.out.println(e+":\t"+e.getMessage());
+			TestChangeEncryption.LOGGER.severe(e+":\t"+e.getMessage());
 			assert false;
 		}
-		assert true;
-
-		}
+	}
 		
 		
 	@Test
 	public void testcreateReplaceSingleReferenceChangeEncryption() throws NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException {
-		Resource memberResource = TestChangeEncryption.CREATIONUTIL.createCompleteMember();
-		Member member = (Member) memberResource.getContents().get(0);
-		
-		Resource family = TestChangeEncryption.CREATIONUTIL.createFamily();
-		Family familyImpl = (Family) family.getContents().get(0);
-		Member motherImpl = (Member) family.getContents().get(1);
-		EReference mothersreference = familyImpl.eClass().getEAllReferences().get(3);
-		ReplaceSingleValuedEReference<Family, Member>  change = TypeInferringAtomicEChangeFactory.getInstance()
-				.createReplaceSingleReferenceChange(familyImpl, mothersreference, motherImpl, member);
-		change.setAffectedEObject(null);
+		EChange change = TestChangeEncryption.CREATIONUTIL.getReplaceSingleValuedReferenceChange();
 		try {
-			this.checkCorrectness(change);
+			assertTrue(this.checkCorrectness(change));
 			this.collectData(change);
 		}catch(Exception e) {
-			System.out.println(e+":\t"+e.getMessage());
+			TestChangeEncryption.LOGGER.severe(e+":\t"+e.getMessage());
 			assert false;
 		}
-		assert true;
 		
 		
 	}
