@@ -1,15 +1,14 @@
-package java.nl.sudohenk.kpabe;
+package nl.sudohenk.kpabe;
 
 import it.unisa.dia.gas.jpbc.Element;
-
-import java.nl.sudohenk.kpabe.gpswabe.SerializeUtils;
-import java.nl.sudohenk.kpabe.gpswabe.gpswabe;
-import java.nl.sudohenk.kpabe.gpswabe.gpswabeCph;
-import java.nl.sudohenk.kpabe.gpswabe.gpswabeCphKey;
-import java.nl.sudohenk.kpabe.gpswabe.gpswabeMsk;
-import java.nl.sudohenk.kpabe.gpswabe.gpswabePolicy;
-import java.nl.sudohenk.kpabe.gpswabe.gpswabePrv;
-import java.nl.sudohenk.kpabe.gpswabe.gpswabePub;
+import nl.sudohenk.kpabe.gpswabe.SerializeUtils;
+import nl.sudohenk.kpabe.gpswabe.gpswabe;
+import nl.sudohenk.kpabe.gpswabe.gpswabeCph;
+import nl.sudohenk.kpabe.gpswabe.gpswabeCphKey;
+import nl.sudohenk.kpabe.gpswabe.gpswabeMsk;
+import nl.sudohenk.kpabe.gpswabe.gpswabePolicy;
+import nl.sudohenk.kpabe.gpswabe.gpswabePrv;
+import nl.sudohenk.kpabe.gpswabe.gpswabePub;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -80,7 +79,7 @@ public class KeyPolicyAttributeBasedEncryption{
 
 		if (cph == null) {
 			System.out.println("Error happed in enc");
-			System.exit(0);
+			throw new Exception("failed");
 		}
 
 		cphBuf = SerializeUtils.gpswabeCphSerialize(cph);
@@ -123,9 +122,8 @@ public class KeyPolicyAttributeBasedEncryption{
 			//Common.spitFile(decfile, plt);
 			return plt;
 		} else {
-			System.exit(0);
+			throw new Exception("failed");
 		}
-        return null;
 	}
 	
 	

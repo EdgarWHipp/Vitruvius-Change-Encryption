@@ -1,4 +1,4 @@
-package java.nl.sudohenk.kpabe;
+package nl.sudohenk.kpabe;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

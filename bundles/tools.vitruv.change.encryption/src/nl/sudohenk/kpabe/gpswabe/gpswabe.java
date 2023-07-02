@@ -1,11 +1,10 @@
-package java.nl.sudohenk.kpabe.gpswabe;
+package nl.sudohenk.kpabe.gpswabe;
 
 import it.unisa.dia.gas.jpbc.PairingParametersGenerator;
 
 import it.unisa.dia.gas.jpbc.PairingParameters;
 import it.unisa.dia.gas.plaf.jpbc.pairing.a.TypeACurveGenerator;
-import it.unisa.dia.gas.plaf.jpbc.pbc.curve.PBCTypeACurveGenerator;
-import java.nl.sudohenk.kpabe.Example;
+import nl.sudohenk.kpabe.Example;
 import it.unisa.dia.gas.jpbc.Element;
 import it.unisa.dia.gas.jpbc.Pairing;
 import it.unisa.dia.gas.plaf.jpbc.pairing.PairingFactory;
@@ -13,7 +12,6 @@ import it.unisa.dia.gas.plaf.jpbc.pairing.PairingFactory;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
-
 
 
 import java.util.ArrayList;
@@ -82,7 +80,6 @@ public class gpswabe {
 		gpswabePrv prv=new gpswabePrv();
 		prv.p=policy;
 		if(prv.p==null){
-			logger.error("Policy cannot be found!");
 			return null;
 		}
 		else {
@@ -121,7 +118,7 @@ public class gpswabe {
 	 * @return				None
 	 */
 	private static void fillPolicy(gpswabePolicy p, gpswabePub pub, gpswabeMsk msk, Element e)
-			throws NoSuchAlgorithmException {
+			throws Exception {
 		int i;
 		Element r, t, a;
 		Pairing pairing = pub.p;
@@ -145,7 +142,7 @@ public class gpswabe {
 				else{
 					if(i==msk.comps.size()-1){
 						System.err.println("Check your attribute universe. Certain attribute not included!");
-						System.exit(0);
+						throw new Exception("failed");
 					}
 				}
 			}
@@ -259,8 +256,7 @@ public class gpswabe {
 				}
 				else{
 					if(j==(pub.comps.size()-1)){
-					    logger.error("Check your attribute universe. Certain attribute is not included.");
-						System.exit(0);
+						throw new Exception("failed");
 					}
 				}
 			}
@@ -304,7 +300,6 @@ public class gpswabe {
 				}
 				else{
 					if(j==(pub.comps.size()-1)){
-					    logger.error("Check your attribute universe. Certain attribute is not included.");
 					}
 				}
 			}
@@ -350,7 +345,6 @@ public class gpswabe {
 				}
 				else{
 					if(i==pub.comps.size()-1){
-					    logger.error("Check your attribute universe. Certain attribute is not included!");
 						break;
 					}
 				}
@@ -507,7 +501,6 @@ public class gpswabe {
 		Ys=pairing.getGT().newElement();
 		checkSatisfy(prv.p, cph, pub);
 		if(!prv.p.satisfiable){
-		    logger.error("Cannot decrypt.");
 			return null;
 		}
 		pickSatisfyMinLeaves(prv.p);

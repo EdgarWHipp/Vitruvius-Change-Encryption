@@ -1,21 +1,15 @@
-package java.nl.sudohenk.kpabe;
+package nl.sudohenk.kpabe;
 
-import java.nl.sudohenk.kpabe.KeyPolicyAttributeBasedEncryption;
-import java.nl.sudohenk.kpabe.gpswabe.gpswabePolicy;
+import java.io.File;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.text.MessageFormat;
-
-
+import nl.sudohenk.kpabe.gpswabe.gpswabePolicy;
 
 public class Example {
 
     
     public static void main(String[] args) throws Exception {
-       
         
-        String test_folder = "C://Users/Sander/git/kpabe/example/";
+    	String test_folder = new File("").getAbsolutePath() +"/example/";
         String curveparamsFileLocation = test_folder + "curveparams";
         
         KeyPolicyAttributeBasedEncryption kpabe = new KeyPolicyAttributeBasedEncryption();
@@ -23,7 +17,6 @@ public class Example {
         String mskfile = test_folder + "mastersecretkey";
         String[] attrs_univ = {"application1", "module1", "solution1"};
         kpabe.setup(pubfile, mskfile, attrs_univ, curveparamsFileLocation);
-        
         String prvfile = test_folder + "policy";
         // Build up an access tree:
         // Example of what we want to achieve:
@@ -36,7 +29,7 @@ public class Example {
         // This access tree can also be written as:
         //      solution1 1of1 application1 module1 1of2 2of2
         // Which can be simplified to:
-        //      (solution1 AND (application1 OR module1))
+        //      (solution1 AND (application1 OR module1))ß
         
         // "solution1" (leaf)
         gpswabePolicy sub1_policy = new gpswabePolicy("solution1", 1, null);
@@ -54,13 +47,9 @@ public class Example {
         
         try {
             byte[] plaintext = "Hello!".getBytes();
-            logger.info(MessageFormat.format("Plaintext is: {0}", new String(plaintext)));
             byte[] ciphertext = kpabe.enc(pubfile, plaintext, attrs_univ);
-            logger.info(MessageFormat.format("Ciphertext is: {0}", new String(ciphertext)));
             byte[] result = kpabe.dec(pubfile, prvfile, ciphertext);
-            logger.info(MessageFormat.format("Decrypted text is: {0}", new String(result)));
         } catch(Exception e) {
-            logger.error("Encryption/Decryption failed failed");
         }
     }
 }

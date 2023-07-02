@@ -32,13 +32,7 @@ import tools.vitruv.change.encryption.impl.attributebased.CpabeAdapterImpl;
 import tools.vitruv.change.encryption.tests.TestChangeEncryption;
 
 public class TestEncryptChangesAsymmetricallyWithCPABE extends TestChangeEncryption{
-	private final String publicKeyPath = new File("").getAbsolutePath() +"/public_key";
-	private final String masterKeyPath = new File("").getAbsolutePath() +"/master_key";
-	private final String privateKeyPath = new File("").getAbsolutePath() +"/private_key";
 	
-	private final String inputFile = new File("").getAbsolutePath() +"/input.pdf";
-	private final String encryptedFilePath = new File("").getAbsolutePath() +"/encrypted.pdf";
-	private final String decryptedFilePath = new File("").getAbsolutePath() +"/decrypted.pdf";
 	
 	@AfterAll
 	public static void deleteAllFiles() {

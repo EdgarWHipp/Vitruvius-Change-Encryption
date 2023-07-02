@@ -1,11 +1,11 @@
-package java.nl.sudohenk.kpabe.gpswabe;
+package nl.sudohenk.kpabe.gpswabe;
 import it.unisa.dia.gas.jpbc.Element;
 
 import it.unisa.dia.gas.jpbc.Pairing;
 import it.unisa.dia.gas.plaf.jpbc.pairing.PairingFactory;
 
+import java.io.File;
 import java.util.ArrayList;
-
 
 
 public class SerializeUtils {
@@ -97,7 +97,8 @@ public class SerializeUtils {
 		offset = unserializeString(b, offset, sb);
 		pub.pairingDesc = sb.substring(0);
 		
-		pub.p=PairingFactory.getPairing("C://abeproject/curveparams.txt");
+        String curveparamsFileLocation = "/Users/edgarhipp/git/Vitruvius-Change-Encryption/bundles/tools.vitruv.change.encryption/src/tools/vitruv/change/encryption/impl/attributebased/curveparams";
+		pub.p=PairingFactory.getPairing(curveparamsFileLocation);
 		Pairing pairing=pub.p;
 
 		pub.g = pairing.getG1().newElement();
