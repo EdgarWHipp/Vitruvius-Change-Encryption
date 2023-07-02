@@ -21,6 +21,7 @@ Export-Package:
  junwei.cpabe.junwei.cpabe,
  tools.vitruv.change.encryption.impl.asymmetric,
  tools.vitruv.change.encryption.impl.attributebased,
+ tools.vitruv.change.encryption.impl.differentkeys,
  tools.vitruv.change.encryption.impl.symmetric
 Bundle-Vendor: vitruv.tools
 

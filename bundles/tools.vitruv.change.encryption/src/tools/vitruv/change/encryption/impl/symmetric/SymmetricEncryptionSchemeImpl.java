@@ -10,8 +10,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-
-
+import java.io.ObjectOutputStream;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -19,6 +18,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -31,6 +31,7 @@ import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.emf.ecore.xmi.impl.EcoreResourceFactoryImpl;
 import tools.vitruv.change.atomic.EChange;
+import tools.vitruv.change.encryption.impl.differentkeys.ChangeAndKey;
 import tools.vitruv.change.encryption.utils.EncryptionUtils;
 
 /**
@@ -55,7 +56,28 @@ public class SymmetricEncryptionSchemeImpl{
 		return this.csvFileNameTogether;
 	}
 	
-	
+	public void encryptDeltaChangesDifferently(File file, List<ChangeAndKey> changes) {
+		List<EChange> toBeEncryptedChanges = changes.stream()
+		        .map(x -> x.getChange())
+		        .collect(Collectors.toList());
+		List<SecretKey> keys = changes.stream()
+		        .map(x -> x.getKey())
+		        .collect(Collectors.toList());
+		
+		try (FileOutputStream fileOutputStream = new FileOutputStream(file);
+	             ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream)) {
+	            // Serialize and save each encrypted object
+	            for (EObject encryptedObject : encryptedObjects) {
+	                objectOutputStream.writeObject(encryptedObject);
+	            }
+	        } catch (IOException e) {
+	            e.printStackTrace();
+	        }
+		
+		
+		
+		
+	}
 	/** Encrypts a single EChange and saved it to the encryptedChangesFile.
 	 * @throws IOException 
 	 * @throws NoSuchPaddingException 
